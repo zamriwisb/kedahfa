@@ -64,7 +64,13 @@ function cellClass(isClub: boolean, extra: string): string {
       <caption class="sr-only">League standings</caption>
       <thead>
         <tr class="text-left text-xs tracking-widest text-(--color-text-muted)">
-          <th scope="col" class="border-b border-(--color-line) py-2 pr-2">#</th>
+          <!--
+            pl-3 matches the body's first cell so the column stays aligned.
+            The body needs it because the club row's red band starts at that
+            cell's edge — without the inset the position number sits flush
+            against the rounded corner.
+          -->
+          <th scope="col" class="border-b border-(--color-line) py-2 pl-3 pr-2">#</th>
           <th scope="col" class="border-b border-(--color-line) py-2 pr-2">Team</th>
           <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">P</th>
           {
@@ -94,7 +100,7 @@ function cellClass(isClub: boolean, extra: string): string {
                 <td
                   class={cellClass(
                     isClub,
-                    `py-3 pr-2 ${isClub ? '' : 'text-(--color-text-muted)'}`,
+                    `py-3 pl-3 pr-2 ${isClub ? '' : 'text-(--color-text-muted)'}`,
                   )}
                 >
                   {entry.position}
