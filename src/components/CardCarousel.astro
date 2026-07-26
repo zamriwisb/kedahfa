@@ -152,8 +152,18 @@ const buttonClass =
     // Autoplay that was never asked for, or is suppressed by reduced motion,
     // starts life already stopped so nothing below can start it.
     let stopped = reduceMotion || !wantsAutoplay;
-    let atStart = true;
-    let atEnd = false;
+
+    // Derived from scroll geometry rather than intersection ratio. An
+    // IntersectionObserver at threshold: 0.99 requires a card to occupy 99%
+    // of the track's box before it counts as "visible" — but when a card is
+    // WIDER than the track (e.g. w-72 cards at 288px against a ~280px track
+    // box at a 320px viewport, the exact width WCAG 1.4.10 Reflow specifies),
+    // no card can ever reach 99%, so atStart/atEnd stuck at false forever.
+    // That left "Previous" enabled-but-inert at rest, and would freeze an
+    // autoplaying consumer on its last card forever, since start()'s wrap is
+    // gated on atEnd. Scroll position has no such blind spot.
+    const atStart = () => track.scrollLeft <= 1;
+    const atEnd = () => track.scrollLeft >= track.scrollWidth - track.clientWidth - 1;
 
     // The +1 absorbs sub-pixel rounding: a track whose content matches its box
     // to within a fraction of a pixel is not scrollable in practice, and
@@ -172,14 +182,15 @@ const buttonClass =
 
     // Calls start(), which is declared further below. Safe because
     // syncControls is never invoked until the bottom of the script, after
-    // every declaration in this scope — both the IntersectionObserver and the
-    // ResizeObserver deliver their callbacks asynchronously, never
-    // synchronously during .observe(). Do not "fix" this into a hoist.
+    // every declaration in this scope — the ResizeObserver and the track's
+    // own scroll listener both deliver their callbacks asynchronously, never
+    // synchronously during .observe()/.addEventListener(). Do not "fix" this
+    // into a hoist.
     const syncControls = () => {
       const scrollable = overflows();
       controls.hidden = !scrollable;
-      prev.disabled = !scrollable || atStart;
-      next.disabled = !scrollable || atEnd;
+      prev.disabled = !scrollable || atStart();
+      next.disabled = !scrollable || atEnd();
       // Symmetric on purpose. A track that cannot scroll must not keep a
       // timer running against it, and one that becomes scrollable again must
       // get it back — otherwise a resize round-trip (rotating a tablet,
@@ -214,7 +225,7 @@ const buttonClass =
       if (stopped || timer !== null || !overflows()) return;
       timer = setInterval(() => {
         // Wrap rather than stall once the last card is in view.
-        if (atEnd) track.scrollTo({ left: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+        if (atEnd()) track.scrollTo({ left: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
         else page(1);
       }, AUTOPLAY_MS);
       // Only unhidden once the timer actually exists: without this script, or
@@ -230,23 +241,6 @@ const buttonClass =
       setStopped(true);
       pause();
     };
-
-    // Which end the track sits at, observed rather than computed from scroll
-    // events: a scroll listener fires for this script's own scrollBy() as
-    // well as the visitor's gesture, so it cannot tell them apart — the
-    // distinction stop-on-interaction depends on (see HeroSlider:327).
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.target === cards[0]) atStart = entry.isIntersecting;
-          if (entry.target === cards[cards.length - 1]) atEnd = entry.isIntersecting;
-        }
-        syncControls();
-      },
-      { root: track, threshold: 0.99 },
-    );
-    observer.observe(cards[0]);
-    observer.observe(cards[cards.length - 1]);
 
     prev.addEventListener('click', () => {
       stop();
@@ -281,6 +275,16 @@ const buttonClass =
       },
       { passive: true },
     );
+
+    // A plain scroll listener is safe HERE, unlike the one HeroSlider:327
+    // warns against — that warning is about *detecting interaction*, which a
+    // scroll event genuinely cannot do (it cannot tell this script's own
+    // scrollBy()/scrollTo() apart from a visitor's gesture). Stop-on-
+    // interaction is already handled independently above via
+    // pointerdown/touchstart/wheel. This listener feeds edge state
+    // (atStart/atEnd, via syncControls) only, and never calls stop() or
+    // touches the stopped flag, so it cannot be confused for the same fix.
+    track.addEventListener('scroll', syncControls, { passive: true });
 
     root.addEventListener('pointerenter', pause);
     root.addEventListener('pointerleave', start);

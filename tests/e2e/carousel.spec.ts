@@ -48,21 +48,20 @@ test('controls track a resize round-trip instead of sticking', async ({ page }) 
   // every width from 320px to 2400px+ (4 cards at up to 320px each vs. a
   // 1112px-max page-shell), so `controls.hidden` never flips here — that
   // part of the resize round-trip has to be covered where it CAN flip (the
-  // squad carousel, per the code comment above the ResizeObserver). What
-  // genuinely does flip on a resize, on this carousel, is `prev`'s disabled
-  // state: below the sm breakpoint cards render at w-72 (288px), which is
-  // wider than the ~280px track box at a 320px viewport, so the first card
-  // no longer clears the observer's 0.99 intersection threshold and
-  // `atStart` — hence `prev.disabled` — flips.
+  // squad carousel, per the code comment above the ResizeObserver).
   //
-  // Be precise about what this does and does not guard. The flip is driven by
-  // the IntersectionObserver re-evaluating against its root as the track's box
-  // changes — NOT by the ResizeObserver, and not by the start()/pause()
-  // symmetry in syncControls. Both of those were deleted in turn while this
-  // test still passed, so it is not the regression test for either. It covers
-  // one thing: that observer-driven prev/next state follows a real resize
-  // instead of going stale. Autoplay restarting after a resize is only
-  // observable once a consumer sets `autoplay`, which is the squad carousel.
+  // `prev`'s disabled state is what this test guards, and it is a regression
+  // test for a real defect: below the sm breakpoint cards render at w-72
+  // (288px), which is wider than the ~280px track box at a 320px viewport —
+  // exactly the width WCAG 1.4.10 Reflow specifies. atStart/atEnd used to
+  // come from an IntersectionObserver at threshold: 0.99, and a card wider
+  // than its track can never reach 99% visibility, so the first card never
+  // registered as intersecting and `prev` stayed wrongly ENABLED-but-inert at
+  // 320px. Edge state is now derived from scroll geometry (`track.scrollLeft`)
+  // instead, which has no such blind spot: the track is at rest (scrollLeft 0)
+  // at every width in this round-trip, so `prev` must stay disabled
+  // throughout. Revert atStart to intersection-based detection and the
+  // assertion at the 320px step below fails again.
   const controls = page.locator(`${FIXTURES} .card-carousel__controls`);
   const prevButton = page.getByRole('button', { name: 'Previous fixtures' });
 
@@ -72,10 +71,10 @@ test('controls track a resize round-trip instead of sticking', async ({ page }) 
 
   await page.setViewportSize({ width: 320, height: 800 });
   await expect(controls).toBeVisible();
-  await expect(prevButton).toBeEnabled();
+  await expect(prevButton).toBeDisabled();
 
-  // Round-trip back: the state must return with it, not stay stranded from
-  // the narrow step.
+  // Round-trip back: the state must stay correct, not flip from the narrow
+  // step.
   await page.setViewportSize({ width: 1200, height: 800 });
   await expect(controls).toBeVisible();
   await expect(prevButton).toBeDisabled();
