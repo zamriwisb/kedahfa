@@ -85,3 +85,34 @@ test('autoplay stops once the visitor takes control', async ({ page }) => {
     'true',
   );
 });
+
+test('the pause control is visible and named for what it does', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByRole('button', { name: 'Pause slideshow' })).toBeVisible();
+});
+
+test('pressing the pause control stops autoplay', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Pause slideshow' }).click();
+  await expect(page.getByRole('button', { name: 'Play slideshow' })).toBeVisible();
+
+  // Move the pointer away so the transient hover-pause is not what's being
+  // measured — the button's durable stopped state must hold on its own.
+  await page.mouse.move(0, 0);
+
+  await page.waitForTimeout(9000);
+  await expect(page.getByRole('button', { name: 'Go to slide 1' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+});
+
+test('taking control another way flips the pause control too', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Go to slide 2' }).click();
+
+  await expect(page.getByRole('button', { name: 'Play slideshow' })).toBeVisible();
+});

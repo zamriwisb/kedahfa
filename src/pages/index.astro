@@ -30,6 +30,18 @@ const latestArticles = articles.slice(0, 5);
   title="Home"
   description={`Official website of ${club.name}: news, fixtures, results, squad and standings.`}
 >
+  {
+    /*
+     * The slider's own headings are h2s (see HeroSlider.astro): three slides
+     * sit in the DOM at once, editors reorder them freely via `order:`, and
+     * an empty slides.yaml is a valid, if bare, homepage. None of those are
+     * fit states for the document's one required h1, so this hidden heading
+     * is the stable one — present regardless of what the slider is doing,
+     * visually superseded by the slider immediately below it.
+     */
+  }
+  <h1 class="sr-only">{club.name}</h1>
+
   <HeroSlider slides={slides} />
 
   <FixturesStrip matches={matches} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} now={now} />

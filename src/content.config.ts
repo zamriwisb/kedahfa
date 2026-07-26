@@ -250,7 +250,24 @@ const slides = defineCollection({
       imageAlt: z.string().min(1),
       eyebrow: z.string().optional(),
       title: z.string().min(1),
-      href: z.string().startsWith('/').optional(),
+      // A slide's href is either site-relative or an explicit https:// URL —
+      // club promotions legitimately point at ticketing partners. The two
+      // rejected forms both leave the site while passing a naive
+      // startsWith('/') check: "//example.com" is protocol-relative, and a
+      // browser normalises the backslash in "/\example.com" into the
+      // authority position.
+      href: z
+        .string()
+        .refine(
+          (value) =>
+            (value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\')) ||
+            value.startsWith('https://'),
+          {
+            message:
+              'A slide href must be a site-relative path like "/news/slug" or an absolute https:// URL.',
+          },
+        )
+        .optional(),
       cta: z.string().optional(),
       order: z.number().int().optional(),
     })

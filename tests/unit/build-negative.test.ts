@@ -195,6 +195,22 @@ describe('the real build rejects bad content', () => {
   );
 
   it(
+    'fails a slide href that is protocol-relative rather than site-relative or https',
+    () => {
+      withMutatedFile(
+        'src/data/slides.yaml',
+        (text) => text.replace('href: /news/academy-trials-open', 'href: //evil.com'),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(/A slide href must be a site-relative path like "\/news\/slug" or an absolute https:\/\/ URL\./);
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
+
+  it(
     'fails a slide that has a cta label but nothing to link it to',
     () => {
       withMutatedFile(

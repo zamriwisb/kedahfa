@@ -34,20 +34,13 @@ const total = slides.length;
     >
       <div
         class="hero-slider__track overflow-x-auto overscroll-x-contain snap-x snap-mandatory"
-        tabindex="0"
+        tabindex={total > 1 ? 0 : undefined}
         role="region"
         aria-label="Featured slides"
       >
         <ul class="flex">
           {slides.map((slide, index) => {
-            // Every other page's primary heading is an h1 (see
-            // SectionHeading's `level` prop); the homepage's used to come
-            // from HeroPanel's h1. All three slides sit in the DOM at once
-            // (this is a scroll-snap track, not a JS-swapped single frame),
-            // so only the first slide's title may be an h1 — giving every
-            // slide one would leave the page with three, which is exactly
-            // as wrong as having none.
-            const Heading = index === 0 ? 'h1' : 'h2';
+            const externalRel = slide.href?.startsWith('https://') ? 'noopener' : undefined;
 
             return (
               <li
@@ -63,9 +56,26 @@ const total = slides.length;
                   loading={index === 0 ? 'eager' : 'lazy'}
                   class="absolute inset-0 -z-10 h-full w-full object-cover"
                 />
+                {
+                  /*
+                   * Two stacked layers, not one gradient: the ramp alone (as
+                   * before) left the headline sitting where the scrim was
+                   * only ~76% opaque, measuring ~3.2:1 for white text against
+                   * a bright daytime stadium photo — a WCAG 1.4.3 failure.
+                   * The flat 40%-opacity layer puts a floor of darkening
+                   * across the whole photo regardless of what is bright in
+                   * it, and the steeper ramp on top of that floor is what
+                   * keeps the text AA-legible. axe cannot verify this: it
+                   * resolves a text node's effective background from the
+                   * nearest ancestor's CSS background-color, never from an
+                   * absolutely-positioned photo or gradient, so this pair has
+                   * to be checked by eye against real photography.
+                   */
+                }
+                <div aria-hidden="true" class="absolute inset-0 -z-10 bg-(--color-brand-ink)/40" />
                 <div
                   aria-hidden="true"
-                  class="absolute inset-0 -z-10 bg-gradient-to-t from-(--color-brand-ink) via-(--color-brand-ink)/60 to-transparent"
+                  class="absolute inset-0 -z-10 bg-gradient-to-t from-(--color-brand-ink) via-(--color-brand-ink)/80 to-transparent"
                 />
 
                 <div class="relative mx-auto w-full max-w-6xl px-(--spacing-gutter) pb-20 pt-24">
@@ -75,10 +85,11 @@ const total = slides.length;
                     </p>
                   )}
 
-                  <Heading class="mt-2 max-w-3xl text-4xl leading-[0.95] text-(--color-text-invert) sm:text-6xl lg:text-7xl">
+                  <h2 class="mt-2 max-w-3xl text-4xl leading-[0.95] text-(--color-text-invert) sm:text-6xl lg:text-7xl">
                     {slide.href ? (
                       <a
                         href={slide.href}
+                        rel={externalRel}
                         class="text-(--color-text-invert) transition-colors hover:text-(--color-accent)"
                       >
                         {slide.title}
@@ -86,11 +97,12 @@ const total = slides.length;
                     ) : (
                       slide.title
                     )}
-                  </Heading>
+                  </h2>
 
                   {slide.cta && slide.href && (
                     <a
                       href={slide.href}
+                      rel={externalRel}
                       class="clip-corner mt-6 inline-flex bg-(--color-action) px-6 text-sm tracking-widest text-(--color-text-invert) transition-colors font-display hover:bg-(--color-action-deep)"
                     >
                       {slide.cta}
@@ -106,18 +118,50 @@ const total = slides.length;
       {total > 1 && (
         <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10">
           <div class="mx-auto flex max-w-6xl justify-end px-(--spacing-gutter) pb-4">
-            <div class="pointer-events-auto flex gap-2" role="group" aria-label="Choose a slide">
-              {slides.map((_, index) => (
-                <button
-                  type="button"
-                  class="hero-slider__dot justify-center px-1"
-                  data-slide-to={index}
-                  aria-label={`Go to slide ${index + 1}`}
-                  aria-current={index === 0 ? 'true' : undefined}
+            <div class="pointer-events-auto flex items-center gap-4" role="group" aria-label="Choose a slide">
+              {
+                /*
+                 * Rendered hidden: without the script, or under
+                 * prefers-reduced-motion, autoplay never starts, so a visible
+                 * pause control would claim a mechanism that does not exist.
+                 * The script removes `hidden` only once it actually starts
+                 * the timer.
+                 */
+              }
+              <button type="button" class="hero-slider__toggle" aria-label="Pause slideshow" hidden>
+                <svg
+                  class="hero-slider__toggle-icon-pause h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  focusable="false"
                 >
-                  <span aria-hidden="true" />
-                </button>
-              ))}
+                  <rect x="4" y="3" width="4" height="14" />
+                  <rect x="12" y="3" width="4" height="14" />
+                </svg>
+                <svg
+                  class="hero-slider__toggle-icon-play hidden h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M5 3l12 7-12 7V3Z" />
+                </svg>
+              </button>
+              <div class="flex gap-2">
+                {slides.map((_, index) => (
+                  <button
+                    type="button"
+                    class="hero-slider__dot justify-center px-1"
+                    data-slide-to={index}
+                    aria-label={`Go to slide ${index + 1}`}
+                    aria-current={index === 0 ? 'true' : undefined}
+                  >
+                    <span aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -152,6 +196,20 @@ const total = slides.length;
   .hero-slider__dot[aria-current='true'] span {
     background-color: var(--color-accent);
   }
+
+  /* Same colour and visual weight as an unselected dash (45% opacity of
+     --color-text-invert), brightening to full opacity on hover/focus so the
+     control stays discoverable without introducing a new colour. */
+  .hero-slider__toggle {
+    color: var(--color-text-invert);
+    opacity: 45%;
+    transition: opacity 150ms ease;
+  }
+
+  .hero-slider__toggle:hover,
+  .hero-slider__toggle:focus-visible {
+    opacity: 100%;
+  }
 </style>
 
 <script>
@@ -161,6 +219,11 @@ const total = slides.length;
     const track = root.querySelector<HTMLElement>('.hero-slider__track');
     const slides = [...root.querySelectorAll<HTMLElement>('.hero-slider__slide')];
     const dots = [...root.querySelectorAll<HTMLButtonElement>('.hero-slider__dot')];
+    const toggle = root.querySelector<HTMLButtonElement>('.hero-slider__toggle');
+    const toggleIcons = toggle && {
+      pause: toggle.querySelector<SVGElement>('.hero-slider__toggle-icon-pause'),
+      play: toggle.querySelector<SVGElement>('.hero-slider__toggle-icon-play'),
+    };
 
     // One slide needs no timer, no observer and no listeners.
     if (!track || slides.length < 2) continue;
@@ -189,18 +252,42 @@ const total = slides.length;
       timer = null;
     };
 
+    // The one place that owns both the `stopped` flag and the toggle
+    // button's presentation, so every call site that ends or resumes
+    // autoplay updates the button the same way instead of duplicating it.
+    const setStopped = (value: boolean) => {
+      stopped = value;
+      if (!toggle || !toggleIcons) return;
+      toggle.setAttribute('aria-label', value ? 'Play slideshow' : 'Pause slideshow');
+      toggleIcons.pause?.classList.toggle('hidden', value);
+      toggleIcons.play?.classList.toggle('hidden', !value);
+    };
+
     const start = () => {
       if (stopped || timer !== null) return;
       timer = setInterval(() => goTo(current + 1), AUTOPLAY_MS);
+      // Only unhidden once autoplay actually starts: without this script, or
+      // under prefers-reduced-motion, this line never runs, so the control
+      // never appears for a slider that does not move.
+      if (toggle) toggle.hidden = false;
     };
 
     // Deliberate interaction ends autoplay for this page view. Pausing would
     // not be enough: a slide must never be yanked away from someone who
     // chose it and is reading it.
     const stop = () => {
-      stopped = true;
+      setStopped(true);
       pause();
     };
+
+    toggle?.addEventListener('click', () => {
+      if (stopped) {
+        setStopped(false);
+        start();
+      } else {
+        stop();
+      }
+    });
 
     // Observing the result rather than the cause: whatever moved the track —
     // autoplay, a swipe, the keyboard, the scrollbar — the dashes follow.
@@ -222,10 +309,10 @@ const total = slides.length;
     );
     for (const slide of slides) observer.observe(slide);
 
-    for (const [index, dot] of dots.entries()) {
+    for (const dot of dots) {
       dot.addEventListener('click', () => {
         stop();
-        goTo(index);
+        goTo(Number(dot.dataset.slideTo));
       });
     }
 
