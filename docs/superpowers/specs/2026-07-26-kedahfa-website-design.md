@@ -96,7 +96,7 @@ Results" is a single page — they are the same entity.
 # src/data/fixtures.yaml
 - id: 2026-08-02-jdt-h
   competition: Super League
-  matchweek: 12
+  matchweek: 12                  # optional
   date: 2026-08-02T20:45:00+08:00
   venue: Darul Aman Stadium
   home: kedah                    # slug into teams.yaml
@@ -111,6 +111,11 @@ Schema refinements:
 - `status: finished` **requires** `score`; any other status **forbids** it.
 - `home` and `away` must exist in `teams.yaml` and must differ.
 - `report`, when present, must match an existing news article slug.
+
+A `postponed` fixture keeps its original date for ordering but renders the label
+"Postponed" in place of the kickoff time, and is excluded from both the next-match
+card and the recent-results strip. When a new date is confirmed, the record is
+edited back to `scheduled` with the new date rather than duplicated.
 
 ### 2. Standings store observations; the rest is derived
 
@@ -156,9 +161,20 @@ the table.
   photo: /images/squad/firdaus-rahman.jpg
   joined: 2024
   bio: Optional short prose.
+  stats:                      # optional, hand-maintained
+    appearances: 14
+    goals: 7
+    assists: 3
 ```
 
 Squad numbers must be unique. `photo` must resolve to a file in `public/`.
+
+Player statistics are entered by hand in this file. Fixtures carry no lineup or
+scorer data, so per-player appearances cannot be derived from match records —
+recording them would mean a lineup model that the v1 file-editing workflow cannot
+realistically be kept current. The player profile page therefore renders the
+photo, personal details, bio, and these optional stats, and nothing that would
+require appearance data.
 
 ### 4. News
 
@@ -203,14 +219,27 @@ correctness issue, not a display preference.
 | `/news` | Paginated index, 12 per page, category filter |
 | `/news/[slug]` | Article |
 | `/squad` | Players grouped by position |
-| `/squad/[slug]` | Player profile and their matches this season |
+| `/squad/[slug]` | Player profile: photo, details, bio, optional stats |
 | `/fixtures` | Upcoming and past, grouped by month, competition filter |
 | `/standings` | Full table, Kedah's row highlighted |
 | `/club` | About, honours, stadium, sponsors |
-| `/contact` | Contact details, map, enquiry routing |
+| `/contact` | Contact details, embedded map, department email links |
 | `/404` | Styled not-found |
 
 Also generated: `sitemap.xml`, `rss.xml` for news, `robots.txt`.
+
+**No contact form in v1.** The site is fully static with no backend, and a form
+would require a third-party service to receive submissions. `/contact` lists
+department email addresses as `mailto:` links and the club's social accounts,
+drawn from `club.yaml`. Adding a form is a v2 decision that comes with choosing
+a form service and a spam strategy.
+
+**Filters are client-side over pre-rendered content.** All articles for a page
+and all fixtures are present in the HTML; the filter islands show and hide them.
+Pagination on `/news` applies to the full article list and is unaffected by the
+active category filter, so filtering narrows the current page rather than
+re-paginating. Filters are additive to a fully working no-JavaScript baseline:
+with scripting disabled, every article and fixture is still visible and readable.
 
 ### Homepage sections
 
@@ -235,8 +264,9 @@ countdown, the mobile navigation, and the fixture/news filters.
 
 All brand decisions live in `src/styles/tokens.css` as CSS custom properties, so
 replacing placeholder branding with real Kedah assets is a single-file edit.
-Placeholder palette uses the club's traditional red and gold over a near-black
-base.
+The placeholder palette pairs red and gold over a near-black base. These are
+stand-in values, not verified club colours — official colour codes, the crest,
+and the founding year all need confirming before launch.
 
 - **Typography** — condensed uppercase for display (scores, squad numbers,
   section headers), a neutral sans for body copy. Fonts are self-hosted WOFF2
@@ -288,6 +318,18 @@ named error, so a broken commit never reaches the live site:
 Cloudflare Pages, building from `main`. Pull requests get preview deployments.
 Build output is a plain static bundle with no host-specific features, so the
 site can move to another static host without code changes.
+
+## Needed from the club before launch
+
+The build proceeds with placeholders; none of these block implementation, but all
+block going live:
+
+- crest in SVG, plus official colour codes
+- founding year, full club name, stadium name and capacity
+- squad list with photos, numbers, positions and nationalities
+- current season fixture list and league table
+- sponsor logos and tiers
+- contact email addresses and social account handles
 
 ## Out of scope for v1
 
