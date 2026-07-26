@@ -14,6 +14,52 @@
  */
 @source not "../../docs";
 
+/*
+ * Fontsource ships `font-display: swap`, so first paint uses a fallback and
+ * swaps when the real font arrives. Unadjusted, that swap reflows the page:
+ * Arial is ~7% narrower than Inter and ~21% wider than the condensed display
+ * face, so every heading and paragraph changes width mid-load.
+ *
+ * These faces re-serve local Arial under an adjusted em square so the fallback
+ * occupies nearly the same space as the real font and the swap becomes almost
+ * invisible. Overrides are computed from the shipped woff2 files against
+ * Arial's own metrics (frequency-weighted mean advance width over English
+ * text, the Fontaine/capsize method) — recompute them if either family is
+ * upgraded or the fallback target changes.
+ *
+ * Arial covers macOS and Windows, and Linux resolves it to the metric-identical
+ * Liberation Sans. Where it is absent (most Android), the face fails to load
+ * and the browser falls through to the unadjusted generics below it.
+ */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  ascent-override: 90.32%;
+  descent-override: 22.49%;
+  line-gap-override: 0%;
+  size-adjust: 107.25%;
+}
+
+@font-face {
+  font-family: 'Barlow Condensed Fallback';
+  font-weight: 600;
+  src: local('Arial');
+  ascent-override: 123.98%;
+  descent-override: 24.8%;
+  line-gap-override: 0%;
+  size-adjust: 80.66%;
+}
+
+@font-face {
+  font-family: 'Barlow Condensed Fallback';
+  font-weight: 700;
+  src: local('Arial');
+  ascent-override: 121.18%;
+  descent-override: 24.24%;
+  line-gap-override: 0%;
+  size-adjust: 82.52%;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -74,6 +120,19 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/*
+ * The single content column, shared by the header, the footer and every page
+ * body. Page widths drifted apart while each template spelled its own
+ * `mx-auto max-w-*` out by hand, so the crest no longer lined up with the copy
+ * beneath it. One utility means one width to change.
+ */
+@utility page-shell {
+  width: 100%;
+  max-width: var(--container-6xl);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
 }
 
 /* The angular corner used on cards and the hero. */

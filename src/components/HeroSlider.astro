@@ -78,7 +78,7 @@ const total = slides.length;
                   class="absolute inset-0 -z-10 bg-gradient-to-t from-(--color-brand-ink) via-(--color-brand-ink)/80 to-transparent"
                 />
 
-                <div class="relative mx-auto w-full max-w-6xl px-(--spacing-gutter) pb-20 pt-24">
+                <div class="page-shell relative pb-20 pt-24">
                   {slide.eyebrow && (
                     <p class="text-sm tracking-widest text-(--color-text-invert) font-display">
                       {slide.eyebrow}
@@ -117,7 +117,7 @@ const total = slides.length;
 
       {total > 1 && (
         <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10">
-          <div class="mx-auto flex max-w-6xl justify-end px-(--spacing-gutter) pb-4">
+          <div class="page-shell flex justify-end pb-4">
             <div class="pointer-events-auto flex items-center gap-4" role="group" aria-label="Slideshow controls">
               {
                 /*

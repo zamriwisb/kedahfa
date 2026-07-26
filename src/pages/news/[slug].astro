@@ -48,8 +48,13 @@ const { Content } = await render(article);
       class="clip-corner mt-8 aspect-video w-full object-cover"
     />
 
+    {/*
+      The page surface is light, so the typography plugin's own greys are bound
+      to the text tokens rather than left at their defaults — one source of
+      truth for body copy here and everywhere else.
+    */}
     <div
-      class="prose prose-invert mt-8 max-w-none prose-headings:font-display prose-headings:uppercase prose-a:text-(--color-brand)"
+      class="prose mt-8 max-w-none [--tw-prose-body:var(--color-text)] [--tw-prose-headings:var(--color-text)] [--tw-prose-bold:var(--color-text)] [--tw-prose-bullets:var(--color-text-muted)] [--tw-prose-counters:var(--color-text-muted)] [--tw-prose-quotes:var(--color-text)] [--tw-prose-quote-borders:var(--color-brand)] [--tw-prose-captions:var(--color-text-muted)] [--tw-prose-hr:var(--color-line)] prose-headings:font-display prose-headings:uppercase prose-a:text-(--color-brand)"
     >
       <Content />
     </div>

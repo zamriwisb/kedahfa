@@ -1,5 +1,17 @@
 ---
 import '../styles/global.css';
+/*
+ * The @font-face rules live inside global.css, so the browser only discovers
+ * these woff2 URLs after downloading and parsing that stylesheet — a second
+ * serialized round trip before any real text can paint. Importing them with
+ * ?url yields the hashed build path, which the preloads below hand to the
+ * browser in the initial HTML instead. Only the latin subsets used above the
+ * fold are preloaded (Inter for body copy, Barlow Condensed 700 for the
+ * masthead and headings); the other subsets stay behind their unicode-range
+ * and the 600 weight is footer-only.
+ */
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import barlowLatin700 from '@fontsource/barlow-condensed/files/barlow-condensed-latin-700-normal.woff2?url';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { loadSiteData } from '../lib/content';
@@ -24,6 +36,10 @@ const socialImage = image ? new URL(image, Astro.site) : undefined;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* crossorigin is required even same-origin: fonts are fetched in CORS
+        mode, and without it the browser discards the preload and refetches. */}
+    <link rel="preload" as="font" type="font/woff2" href={interLatin} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={barlowLatin700} crossorigin />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />

@@ -54,9 +54,14 @@
   --color-draw: #55555e; /* white on it 6.71:1 */
   --color-loss: #b81419; /* white on it 6.66:1 */
 
-  /* --- Type --- */
-  --font-display: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  /* --- Type ---
+   * The *-Fallback entries are metric-matched Arial faces defined in
+   * global.css; they must sit directly behind the real font so the browser
+   * reaches them before the unadjusted generics.
+   */
+  --font-display: 'Barlow Condensed', 'Barlow Condensed Fallback', ui-sans-serif, system-ui,
+    sans-serif;
+  --font-body: 'Inter Variable', 'Inter Fallback', ui-sans-serif, system-ui, sans-serif;
 
   /* --- Layout --- */
   --spacing-gutter: 1.25rem;

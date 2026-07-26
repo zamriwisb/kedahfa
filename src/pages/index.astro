@@ -47,7 +47,7 @@ const latestArticles = articles.slice(0, 5);
   <FixturesStrip matches={matches} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} now={now} />
 
   <section class="chevron-texture bg-(--color-brand-panel) py-16 sm:py-20">
-    <div class="mx-auto max-w-6xl px-(--spacing-gutter)">
+    <div class="page-shell">
       <SectionHeading eyebrow="What's New" title="Latest News" href="/news" on="green" />
 
       {
@@ -82,7 +82,7 @@ const latestArticles = articles.slice(0, 5);
   </section>
 
   <section class="bg-(--color-page) py-16 sm:py-20">
-    <div class="mx-auto max-w-4xl px-(--spacing-gutter)">
+    <div class="page-shell">
       <SectionHeading
         eyebrow="Latest Classification"
         title="League Table"
@@ -109,7 +109,7 @@ const latestArticles = articles.slice(0, 5);
   </section>
 
   <section class="chevron-texture bg-(--color-brand-panel) py-16 sm:py-20">
-    <div class="mx-auto max-w-6xl px-(--spacing-gutter)">
+    <div class="page-shell">
       <SectionHeading eyebrow="Meet The Team" title="First Team Squad" on="green" />
 
       {
@@ -141,7 +141,7 @@ const latestArticles = articles.slice(0, 5);
   {
     sponsors.length > 0 && (
       <section class="bg-(--color-page) py-16">
-        <div class="mx-auto max-w-6xl px-(--spacing-gutter)">
+        <div class="page-shell">
           <SectionHeading eyebrow="Thank You" title="Partners" />
           <SponsorGrid sponsors={sponsors} />
         </div>

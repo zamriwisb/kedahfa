@@ -6,7 +6,7 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="mt-20 bg-(--color-brand-deep) text-(--color-text-invert)">
-  <div class="mx-auto grid max-w-6xl gap-10 px-(--spacing-gutter) py-14 sm:grid-cols-3">
+  <div class="page-shell grid gap-10 py-14 sm:grid-cols-3">
     <div>
       <a href="/" class="flex items-center gap-3" aria-label={`${club.name} home`}>
         <img src="/images/teams/kedah.png" alt={`${club.name} crest`} width="793" height="853" class="h-14 w-auto" />
@@ -57,7 +57,7 @@ const year = new Date().getFullYear();
   </div>
 
   <div class="bg-(--color-brand-ink)">
-    <p class="mx-auto max-w-6xl px-(--spacing-gutter) py-4 text-center text-xs text-(--color-text-invert-muted)">
+    <p class="page-shell py-4 text-center text-xs text-(--color-text-invert-muted)">
       &copy; {year} {club.name}. All rights reserved.
     </p>
   </div>
