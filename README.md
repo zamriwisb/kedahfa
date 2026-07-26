@@ -1,43 +1,53 @@
-# Astro Starter Kit: Minimal
+# Kedah FA Website
 
-```sh
-npm create astro@latest -- --template minimal
+Official club website. Static site built with Astro, deployed to Cloudflare Pages.
+
+## Requirements
+
+Node 22.12 or later.
+
+## Commands
+
+```bash
+npm install       # install dependencies
+npm run dev       # local dev server at http://localhost:4321
+npm run build     # type check and build to dist/
+npm run preview   # serve the built site
+npm test          # unit tests
+npm run test:e2e  # end-to-end and accessibility tests
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Updating content
 
-## 🚀 Project Structure
+All content lives in the repository. Edit, commit, push — Cloudflare rebuilds
+and deploys automatically.
 
-Inside of your Astro project, you'll see the following folders and files:
+| To update | Edit |
+|---|---|
+| A match result | `src/data/fixtures.yaml` — set `status: finished` and add `score` |
+| The league table | `src/data/standings.yaml` — only W/D/L and goals; points are calculated |
+| The squad | `src/data/squad.yaml` |
+| Sponsors | `src/data/sponsors.yaml` |
+| Club details | `src/data/club.yaml` |
+| A news article | Add a Markdown file to `src/content/news/` |
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+The build validates everything. If a fixture is missing a score, a team slug is
+misspelled, or an image path does not exist, the build fails with a named error
+and the live site is left untouched.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Rebranding
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+All colours and fonts live in `src/styles/tokens.css`. The current palette is a
+placeholder, not official club branding.
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Deployment
 
-## 🧞 Commands
+Cloudflare Pages, building from `main`:
 
-All commands are run from the root of the project, from a terminal:
+- Build command: `npm run build`
+- Output directory: `dist`
+- Node version: `22`
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Because the site is static, "next match" is fixed at build time. A daily
+scheduled deploy is configured so the homepage advances past a played fixture
+even if nobody commits.
