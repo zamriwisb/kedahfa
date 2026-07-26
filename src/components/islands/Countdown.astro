@@ -19,19 +19,27 @@ const units = [
 ---
 
 <div
-  class="countdown flex gap-3"
+  class:list={['countdown flex gap-3', !initial && 'font-display text-2xl']}
   data-target={target.toISOString()}
   role="timer"
   aria-label={label}
 >
   {
-    units.map((unit) => (
+    /*
+     * A past target renders "Kick-off" server-side rather than 00 00 00 00.
+     * Without this the no-JavaScript view of a stale build shows a countdown
+     * of all zeros, which reads as broken rather than as "already started".
+     */
+    !initial && 'Kick-off'
+  }
+  {
+    initial && units.map((unit) => (
       <div class="text-center">
         <span
           class="block text-3xl leading-none tabular-nums font-display"
           data-unit={unit.key}
         >
-          {String(initial?.[unit.key] ?? 0).padStart(2, '0')}
+          {String(initial[unit.key]).padStart(2, '0')}
         </span>
         <span class="text-[0.65rem] tracking-widest text-[--color-text-muted]">
           {unit.label}
