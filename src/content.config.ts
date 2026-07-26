@@ -1,6 +1,34 @@
 import { defineCollection, reference } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+// js-yaml@5 ships only named ESM exports (no default export) — a default
+// import resolves to undefined under Vite/Astro's native ESM handling.
+import { load } from 'js-yaml';
+
+// Astro's file() loader parses YAML with js-yaml's default schema, which
+// implicitly resolves bare timestamps (e.g. "2026-08-02T20:45:00") to Date
+// objects — treating a missing offset as UTC — before this schema ever runs.
+// That silently discards the distinction between "written with +08:00" and
+// "written with no offset at all", so z.coerce.date() can never reject the
+// latter. This custom parser keeps fixtures.yaml's scalars as plain strings
+// (js-yaml's default `load()` — no schema option — does not auto-convert
+// timestamps, verified against the installed js-yaml@5.2.2), so the `date`
+// field below can enforce an explicit offset itself.
+function parseFixturesYaml(text: string): Record<string, unknown>[] {
+  const data = load(text);
+  if (!Array.isArray(data)) {
+    throw new Error('src/data/fixtures.yaml must contain a YAML array of fixture entries.');
+  }
+  return data as Record<string, unknown>[];
+}
+
+// A date-time with no explicit offset builds clean and renders the wrong
+// time and day (see the comment on parseFixturesYaml above). Require "Z" or
+// a numeric offset so a missing one fails the build instead of the page.
+const FIXTURE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+const FIXTURE_DATE_MESSAGE =
+  'Fixture date must include an explicit UTC offset or "Z", e.g. "2026-08-02T20:45:00+08:00". ' +
+  'A bare local time like "2026-08-02T20:45:00" builds successfully but renders the wrong time and day.';
 
 const club = defineCollection({
   loader: file('src/data/club.yaml'),
@@ -38,13 +66,13 @@ const teams = defineCollection({
 });
 
 const fixtures = defineCollection({
-  loader: file('src/data/fixtures.yaml'),
+  loader: file('src/data/fixtures.yaml', { parser: parseFixturesYaml }),
   schema: z
     .object({
       id: z.string(),
       competition: z.string(),
       matchweek: z.number().int().positive().optional(),
-      date: z.coerce.date(),
+      date: z.string().regex(FIXTURE_DATE_PATTERN, FIXTURE_DATE_MESSAGE).pipe(z.coerce.date()),
       venue: z.string(),
       home: reference('teams'),
       away: reference('teams'),
