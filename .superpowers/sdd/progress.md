@@ -72,3 +72,10 @@ Task 14: complete (commits 105e5e6..0274f1a, review clean after 1 fix — CI art
   I4 past scheduled match vanished from site -> Awaiting Result  FIXED de7e2e5
   I5 countdown maths duplicated in island -> imports tested fn  FIXED 2f4313d
   Verified by me: both criticals now exit 1. 89 unit + 59 e2e green.
+  RE-REVIEW round 2 found round 1 INCOMPLETE:
+   - dup-id check covered 5 of 7 files; club.yaml + season.yaml uncovered
+     (duplicate id rendered "WRONG CLUB NAME" sitewide, exit 0)
+   - offset guard was fixtures-only; news/squad/season dates same hazard
+   - TDZ ReferenceError in countdown island (clearInterval before init)
+  FIXED fc3e26a (list now DERIVED from readdirSync src/data), 4439984, 05e889f
+  Verified by me: all 3 now exit 1. 90 unit + 59 e2e green, tree clean.
