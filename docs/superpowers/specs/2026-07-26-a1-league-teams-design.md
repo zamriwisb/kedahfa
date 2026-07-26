@@ -20,8 +20,8 @@ Replace the league data with the real twelve-club A1 Semi-Pro 2026/27 field,
 zeroed for a season that has not started, using monogram placeholder crests
 until the club supplies real logos.
 
-Scope is `src/data/` and `public/images/teams/` only. No component, layout or
-schema changes.
+Scope is `src/data/` and `public/images/teams/`, plus the two test files
+coupled to the demo match data. No component, layout or schema changes.
 
 ## Data
 
@@ -98,9 +98,14 @@ kicked.
 
 The A1 2026/27 schedule has not been published. The file is reduced to
 comments documenting the entry shape (including the finished-match score rule)
-so adding real fixtures later is copy-paste.
+so adding real fixtures later is copy-paste, followed by an explicit `[]`.
 
-An empty fixtures list is already handled: both `FixturesStrip.astro:75` and
+That `[]` is required, not decorative. A comments-only file parses to `null`,
+and both `parseFixturesYaml` (`src/content.config.ts:19`) and
+`assertNoDuplicateIds` (`src/lib/validate.ts:54`) throw on a non-array — the
+build fails with "must contain a YAML array of fixture entries".
+
+A genuinely empty list is already handled: both `FixturesStrip.astro:75` and
 `fixtures.astro:56` render `EmptyState` with "No fixtures are currently
 scheduled."
 
@@ -132,6 +137,35 @@ can introduce:
 
 `npm test` runs the unit suite, including `deriveTable`'s ordering.
 
+A new `tests/unit/league-data.test.ts` locks the invariant nothing else
+covers: `assertReferencesResolve` proves every standings row points at a real
+club, but nothing proves every club *has* a row, so a team could silently
+vanish from the table. It asserts the roster count, the teams↔standings
+correspondence, the all-zero pre-season state and the crest files' existence.
+
+### Tests coupled to the demo data
+
+Emptying the fixture list breaks nine tests that assert against the demo
+matches rather than building their own. They are fixed as part of this change.
+
+`tests/unit/build-negative.test.ts` — four cases mutate a real data file and
+assert the build fails. They depend on the literal string
+`away: jdt\n  status: scheduled` and on `jdt` being present in
+`standings.yaml`. Each is rewritten to supply the fixture it needs (swapping
+the `[]` marker for a valid entry, then corrupting that), and the
+duplicate-id case duplicates `kedah` instead of `jdt`. This decouples them
+from whatever the real schedule happens to contain.
+
+`tests/e2e/content.spec.ts` — five cases need fixtures to exist. The homepage
+countdown, the fixtures-page section headings and the derived-points
+assertions become pre-season assertions: the empty state, twelve rowheaders,
+and Kedah on zero points. The kickoff-time and match-report cases are deleted
+outright; the behaviour they covered lives in `tests/unit/dates.test.ts` and
+the news-filter case.
+
+The unit tests for the logic itself — `fixtures.test.ts`, `standings.test.ts`,
+`dates.test.ts` — construct their own data and are unaffected.
+
 Manual check: the standings page lists twelve clubs, every row reads
 `P 0 · W 0 · D 0 · L 0 · GD 0 · Pts 0`, each crest shows its monogram, and the
 fixtures page and homepage strip show the empty state.
@@ -143,3 +177,7 @@ files into `public/images/teams/` and update the `crest:` extension in
 `teams.yaml`. The `shortName` codes are inferred from club names, not taken
 from an official league list — worth confirming against A1 team-sheet
 abbreviations before launch.
+
+When the A1 schedule is published, the fixtures go in and the two deleted
+e2e cases — kickoff rendered in Malaysian time, and the report link from a
+fixture row to its article — should be restored against a real match.
