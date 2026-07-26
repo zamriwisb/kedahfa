@@ -115,6 +115,33 @@ describe('the real build rejects bad content', () => {
   );
 
   it(
+    'fails a squad dateOfBirth written in ambiguous US date-slash format',
+    () => {
+      // "11/03/1995" is a UK-format date an editor could easily type,
+      // meaning 11 March — but js-yaml never recognises it as a YAML
+      // timestamp (it isn't ISO-shaped), so it reaches Zod as a bare string
+      // and native `new Date("11/03/1995")` parses it as US month/day/year
+      // (3 November). Worse, under TZ=UTC the parsed instant lands on exact
+      // UTC midnight, so the old post-coercion "is this UTC midnight" guard
+      // passed it clean — the guard was silently absent on exactly the
+      // timezone this build runs under (see the TZ=UTC env in runBuild()
+      // above, matching Cloudflare/CI). This must fail here, under UTC, or
+      // the regression is invisible to this suite.
+      withMutatedFile(
+        'src/data/squad.yaml',
+        (text) => text.replace('dateOfBirth: 1995-03-11', 'dateOfBirth: 11/03/1995'),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(/must be a plain date with no time component/);
+          expect(output).toMatch(/dateOfBirth/);
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
+
+  it(
     'fails a news article date with a time component',
     () => {
       withMutatedFile(

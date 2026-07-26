@@ -32,60 +32,119 @@ const FIXTURE_DATE_MESSAGE =
 
 // Calendar dates — a news article's publish day, a player's birth day, the
 // day standings were last updated — name a day, not an instant, so a value
-// carrying a time-of-day is a content error rather than a legitimate value.
-// z.coerce.date() parses a plain "2026-07-19" as exactly UTC midnight and
-// any value with an actual time component (bare local time, or an explicit
-// non-zero offset) as something else, so validating the parsed Date's UTC
-// clock fields is equivalent to requiring a date-only source string — the
-// same hazard the fixture `date` field above guards against with a regex on
-// the raw string, but these fields lose that raw string to js-yaml/Zod
-// coercion before this schema runs, so the check has to live after coercion.
-function dateOnly(fieldLabel: string) {
-  return z.coerce.date().refine(
-    (d) =>
-      d.getUTCHours() === 0 &&
-      d.getUTCMinutes() === 0 &&
-      d.getUTCSeconds() === 0 &&
-      d.getUTCMilliseconds() === 0,
-    {
-      message: `${fieldLabel} must be a plain date with no time component, e.g. "2026-07-19".`,
-    },
+// carrying a time-of-day, or an ambiguous format, is a content error rather
+// than a legitimate value.
+//
+// These fields are parsed by Astro's own YAML/frontmatter parsing (the
+// file() loader for squad.yaml/season.yaml, @astrojs/internal-helpers'
+// frontmatter parser for news .md files) — both resolve on the js-yaml v4
+// nested under node_modules/astro, NOT the js-yaml v5 this project depends
+// on directly (see parseFixturesYaml above). js-yaml v4's default schema
+// auto-resolves a YAML-timestamp-shaped scalar to a `Date` before this
+// schema ever runs, but only recognises ISO-ish forms: a genuine
+// "2026-07-19" arrives as a `Date` at UTC midnight, while anything js-yaml
+// doesn't recognise as a timestamp — "11/03/1995", "March 11 1995" — is left
+// as a plain string. That string then used to reach z.coerce.date(), i.e.
+// `new Date(string)`, whose parsing of non-ISO formats is locale/engine
+// dependent and, critically, is NOT anchored to UTC the way ISO date-only
+// strings are — so under TZ=UTC, `new Date("11/03/1995")` lands on exactly
+// UTC midnight and slipped past the old post-coercion midnight check.
+// Verified empirically (see tests/unit/dates.test.ts and
+// tests/unit/build-negative.test.ts): "11/03/1995" builds clean and renders
+// "3 November 1995" under TZ=UTC, but is correctly rejected under
+// TZ=Asia/Kuala_Lumpur — the guard was silently absent on exactly the
+// timezone CI and Cloudflare build under.
+//
+// The fix validates the RAW value's shape instead of trusting whatever
+// z.coerce.date() makes of it:
+//   - a string must match ^\d{4}-\d{2}-\d{2}$ exactly (so it's unambiguous
+//     regardless of parsing engine or locale) and is then anchored to UTC
+//     midnight explicitly;
+//   - a Date (already resolved by js-yaml) must already be UTC midnight,
+//     exactly as before;
+//   - anything else — including a Date with a time component, e.g. from
+//     "2026-07-19T23:30:00" — is rejected.
+// One shared helper for all three fields (news `date`, squad
+// `dateOfBirth`, season `standingsUpdated`) so they cannot drift apart.
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function isUtcMidnight(d: Date): boolean {
+  return (
+    d.getUTCHours() === 0 &&
+    d.getUTCMinutes() === 0 &&
+    d.getUTCSeconds() === 0 &&
+    d.getUTCMilliseconds() === 0
   );
 }
 
+function dateOnly(fieldLabel: string) {
+  const message = `${fieldLabel} must be a plain date with no time component, e.g. "2026-07-19".`;
+  return z.any().transform((value, ctx) => {
+    if (typeof value === 'string') {
+      if (DATE_ONLY_PATTERN.test(value)) {
+        return new Date(`${value}T00:00:00.000Z`);
+      }
+      ctx.addIssue({ code: 'custom', message });
+      return z.NEVER;
+    }
+    if (value instanceof Date && isUtcMidnight(value)) {
+      return value;
+    }
+    ctx.addIssue({ code: 'custom', message });
+    return z.NEVER;
+  });
+}
+
+// Every collection here is file()- or glob()-loaded, and in both loaders the
+// object handed to the schema is exactly the raw parsed entry — Astro does
+// not merge in "id" or any other key of its own before schema.safeParseAsync
+// runs (verified against astro/dist/content/loaders/file.js's `parseData({
+// id, data: rawItem, filePath })` and astro/dist/content/content-layer.js's
+// `unvalidatedData: data`, both of which keep `id` a sibling argument, never
+// spliced into `data`). So .strict() is safe everywhere a schema already
+// lists every key the source file legitimately sets — it exists purely to
+// turn a mis-keyed field (e.g. "Draft: true" instead of "draft: true") into
+// a build failure instead of a silently-dropped, unfinished article
+// publishing.
 const club = defineCollection({
   loader: file('src/data/club.yaml'),
-  schema: z.object({
-    id: z.literal('club'),
-    name: z.string(),
-    shortName: z.string(),
-    founded: z.number().int(),
-    stadium: z.string(),
-    stadiumCapacity: z.number().int().positive(),
-    city: z.string(),
-    emails: z.array(z.object({ label: z.string(), address: z.email() })).min(1),
-    phone: z.string(),
-    socials: z.array(z.object({ platform: z.string(), url: z.url() })),
-  }),
+  schema: z
+    .object({
+      id: z.literal('club'),
+      name: z.string(),
+      shortName: z.string(),
+      founded: z.number().int(),
+      stadium: z.string(),
+      stadiumCapacity: z.number().int().positive(),
+      city: z.string(),
+      emails: z.array(z.object({ label: z.string(), address: z.email() })).min(1),
+      phone: z.string(),
+      socials: z.array(z.object({ platform: z.string(), url: z.url() })),
+    })
+    .strict(),
 });
 
 const season = defineCollection({
   loader: file('src/data/season.yaml'),
-  schema: z.object({
-    id: z.literal('current'),
-    competition: z.string(),
-    standingsUpdated: dateOnly('standingsUpdated'),
-  }),
+  schema: z
+    .object({
+      id: z.literal('current'),
+      competition: z.string(),
+      standingsUpdated: dateOnly('standingsUpdated'),
+    })
+    .strict(),
 });
 
 const teams = defineCollection({
   loader: file('src/data/teams.yaml'),
-  schema: z.object({
-    id: z.string(),
-    name: z.string(),
-    shortName: z.string().max(4),
-    crest: z.string().startsWith('/images/teams/'),
-  }),
+  schema: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      shortName: z.string().max(4),
+      crest: z.string().startsWith('/images/teams/'),
+    })
+    .strict(),
 });
 
 const fixtures = defineCollection({
@@ -108,6 +167,7 @@ const fixtures = defineCollection({
         .optional(),
       report: reference('news').optional(),
     })
+    .strict()
     .refine((m) => (m.status === 'finished' ? m.score !== undefined : m.score === undefined), {
       message: 'A finished match requires a score; a scheduled or postponed match must not have one.',
       path: ['score'],
@@ -130,6 +190,7 @@ const standings = defineCollection({
       goalsFor: z.number().int().min(0),
       goalsAgainst: z.number().int().min(0),
     })
+    .strict()
     .refine((row) => row.id === row.team.id, {
       message: 'A standings row id must equal its team slug.',
       path: ['id'],
@@ -138,51 +199,57 @@ const standings = defineCollection({
 
 const squad = defineCollection({
   loader: file('src/data/squad.yaml'),
-  schema: z.object({
-    id: z.string(),
-    name: z.string(),
-    number: z.number().int().min(1).max(99),
-    position: z.enum(['Goalkeeper', 'Defender', 'Midfielder', 'Forward']),
-    nationality: z.string().length(2),
-    dateOfBirth: dateOnly('dateOfBirth'),
-    heightCm: z.number().int().min(140).max(220),
-    photo: z.string().startsWith('/images/squad/'),
-    joined: z.number().int(),
-    bio: z.string().optional(),
-    stats: z
-      .object({
-        appearances: z.number().int().min(0),
-        goals: z.number().int().min(0),
-        assists: z.number().int().min(0),
-      })
-      .optional(),
-  }),
+  schema: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      number: z.number().int().min(1).max(99),
+      position: z.enum(['Goalkeeper', 'Defender', 'Midfielder', 'Forward']),
+      nationality: z.string().length(2),
+      dateOfBirth: dateOnly('dateOfBirth'),
+      heightCm: z.number().int().min(140).max(220),
+      photo: z.string().startsWith('/images/squad/'),
+      joined: z.number().int(),
+      bio: z.string().optional(),
+      stats: z
+        .object({
+          appearances: z.number().int().min(0),
+          goals: z.number().int().min(0),
+          assists: z.number().int().min(0),
+        })
+        .optional(),
+    })
+    .strict(),
 });
 
 const sponsors = defineCollection({
   loader: file('src/data/sponsors.yaml'),
-  schema: z.object({
-    id: z.string(),
-    name: z.string(),
-    tier: z.enum(['main', 'official', 'partner']),
-    logo: z.string().startsWith('/images/sponsors/'),
-    url: z.url(),
-  }),
+  schema: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      tier: z.enum(['main', 'official', 'partner']),
+      logo: z.string().startsWith('/images/sponsors/'),
+      url: z.url(),
+    })
+    .strict(),
 });
 
 const news = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
-  schema: z.object({
-    title: z.string(),
-    date: dateOnly('date'),
-    category: z.enum(['match-report', 'club', 'transfer', 'academy']),
-    excerpt: z.string().min(20).max(200),
-    image: z.string().startsWith('/images/news/'),
-    // Required, not optional: accessibility must not be droppable by omission.
-    imageAlt: z.string().min(1),
-    author: z.string(),
-    draft: z.boolean().default(false),
-  }),
+  schema: z
+    .object({
+      title: z.string(),
+      date: dateOnly('date'),
+      category: z.enum(['match-report', 'club', 'transfer', 'academy']),
+      excerpt: z.string().min(20).max(200),
+      image: z.string().startsWith('/images/news/'),
+      // Required, not optional: accessibility must not be droppable by omission.
+      imageAlt: z.string().min(1),
+      author: z.string(),
+      draft: z.boolean().default(false),
+    })
+    .strict(),
 });
 
 export const collections = { club, season, teams, fixtures, standings, squad, sponsors, news };
