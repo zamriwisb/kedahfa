@@ -2672,12 +2672,19 @@ interface Props {
   title: string;
   href?: string;
   linkLabel?: string;
+  /**
+   * 1 for a page's primary heading, 2 for sections within a page. Index pages
+   * use this component for their title, so without it every list route would
+   * render an h2 as its highest heading and no h1 at all.
+   */
+  level?: 1 | 2;
 }
-const { title, href, linkLabel = 'View all' } = Astro.props;
+const { title, href, linkLabel = 'View all', level = 2 } = Astro.props;
+const Heading = `h${level}` as 'h1' | 'h2';
 ---
 
 <div class="mb-6 flex items-end justify-between gap-4 border-b border-[--color-line] pb-3">
-  <h2 class="text-2xl sm:text-3xl">{title}</h2>
+  <Heading class="text-2xl sm:text-3xl">{title}</Heading>
   {
     href && (
       <a href={href} class="shrink-0 text-sm tracking-wider text-[--color-club-gold] font-display">
@@ -2906,7 +2913,12 @@ interface Props {
 const { table, teamsBySlug, clubSlug, compact = false } = Astro.props;
 ---
 
-<div class="overflow-x-auto">
+<!--
+  The wrapper scrolls horizontally on narrow viewports, so it needs to be
+  keyboard reachable — a scrollable region a mouse can pan but a keyboard
+  cannot fails WCAG 2.1.1 (axe rule: scrollable-region-focusable).
+-->
+<div class="overflow-x-auto" tabindex="0" role="region" aria-label="League standings">
   <table class="w-full min-w-[32rem] border-collapse text-sm">
     <caption class="sr-only">League standings</caption>
     <thead>
@@ -3666,7 +3678,7 @@ const nextUrl = currentPage < lastPage ? `/news/page/${currentPage + 1}` : null;
 ---
 
 <div class="mx-auto max-w-6xl px-[--spacing-gutter] py-12">
-  <SectionHeading title="News" />
+  <SectionHeading title="News" level={1} />
 
   {
     articles.length > 0 && (
@@ -3946,7 +3958,7 @@ const groups = groupByPosition(squad);
 
 <BaseLayout title="Squad" description={`The ${club.name} first-team squad.`}>
   <div class="mx-auto max-w-6xl space-y-12 px-[--spacing-gutter] py-12">
-    <SectionHeading title="First Team Squad" />
+    <SectionHeading title="First Team Squad" level={1} />
 
     {
       groups.length > 0 ? (
@@ -4128,7 +4140,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
   description={`Every ${club.shortName} fixture and result this season.`}
 >
   <div class="mx-auto max-w-4xl space-y-14 px-[--spacing-gutter] py-12">
-    <SectionHeading title="Fixtures & Results" />
+    <SectionHeading title="Fixtures & Results" level={1} />
 
     {
       competitions.length > 1 && (
@@ -4216,7 +4228,7 @@ const table = deriveTable(standings);
 
 <BaseLayout title="Standings" description={`${season.competition} league table.`}>
   <div class="mx-auto max-w-4xl px-[--spacing-gutter] py-12">
-    <SectionHeading title={season.competition} />
+    <SectionHeading title={season.competition} level={1} />
 
     {
       table.length > 0 ? (
@@ -4288,7 +4300,7 @@ const facts = [
 
 <BaseLayout title="The Club" description={`About ${club.name}.`}>
   <div class="mx-auto max-w-4xl space-y-12 px-[--spacing-gutter] py-12">
-    <SectionHeading title="The Club" />
+    <SectionHeading title="The Club" level={1} />
 
     <p class="text-lg text-[--color-text-muted]">
       {club.name} is based at {club.stadium} in {club.city} and has represented the
@@ -4336,7 +4348,7 @@ const mapQuery = encodeURIComponent(`${club.stadium}, ${club.city}, Malaysia`);
 
 <BaseLayout title="Contact" description={`Get in touch with ${club.name}.`}>
   <div class="mx-auto max-w-4xl space-y-10 px-[--spacing-gutter] py-12">
-    <SectionHeading title="Contact" />
+    <SectionHeading title="Contact" level={1} />
 
     <div class="grid gap-8 sm:grid-cols-2">
       <div>
