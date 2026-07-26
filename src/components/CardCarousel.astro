@@ -170,13 +170,24 @@ const buttonClass =
       timer = null;
     };
 
+    // Calls start(), which is declared further below. Safe because
+    // syncControls is never invoked until the bottom of the script, after
+    // every declaration in this scope — both the IntersectionObserver and the
+    // ResizeObserver deliver their callbacks asynchronously, never
+    // synchronously during .observe(). Do not "fix" this into a hoist.
     const syncControls = () => {
       const scrollable = overflows();
       controls.hidden = !scrollable;
       prev.disabled = !scrollable || atStart;
       next.disabled = !scrollable || atEnd;
-      // A track that cannot scroll must not keep a timer running against it.
-      if (!scrollable) pause();
+      // Symmetric on purpose. A track that cannot scroll must not keep a
+      // timer running against it, and one that becomes scrollable again must
+      // get it back — otherwise a resize round-trip (rotating a tablet,
+      // dragging a desktop window past the breakpoint) leaves autoplay dead
+      // with nothing the visitor can do about it. start() is a no-op when
+      // autoplay is stopped, already running, or was never wanted.
+      if (scrollable) start();
+      else pause();
     };
 
     const page = (direction: 1 | -1) => {
