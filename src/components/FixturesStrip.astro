@@ -1,0 +1,79 @@
+---
+import Countdown from './islands/Countdown.astro';
+import EmptyState from './EmptyState.astro';
+import MatchRow from './MatchRow.astro';
+import SectionHeading from './SectionHeading.astro';
+import type { Team } from '../lib/content';
+import { nextMatch, recentResults, upcomingMatches, type Match } from '../lib/fixtures';
+
+interface Props {
+  matches: Match[];
+  teamsBySlug: Map<string, Team>;
+  clubSlug: string;
+  now: Date;
+}
+
+const { matches, teamsBySlug, clubSlug, now } = Astro.props;
+
+const upcoming = upcomingMatches(matches, now);
+const past = recentResults(matches, 2);
+const next = nextMatch(matches, now);
+
+// Chronological left-to-right: the last couple of results, then the run of
+// upcoming fixtures, mirroring the reference's single scrolling strip rather
+// than two separate "results" / "fixtures" lists. The next kickoff is
+// highlighted within the same row.
+const strip: Match[] = [...past.slice().reverse(), ...upcoming.slice(0, 4)];
+---
+
+<section class="bg-(--color-page) py-16 sm:py-20">
+  <div class="mx-auto max-w-6xl px-(--spacing-gutter)">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div class="min-w-[260px] flex-1">
+        <SectionHeading
+          eyebrow="First Team Matches"
+          title="Fixtures"
+          href="/fixtures"
+          linkLabel="Full schedule"
+        />
+      </div>
+
+      {
+        next && (
+          <div class="mb-8 w-full sm:w-auto">
+            <p class="mb-2 text-center text-[0.65rem] tracking-[0.2em] text-(--color-text-muted) font-display sm:text-right">
+              Next match in:
+            </p>
+            <div class="flex justify-center sm:justify-end">
+              <Countdown
+                target={next.date}
+                label={`Time until ${teamsBySlug.get(next.home)?.name ?? next.home} versus ${teamsBySlug.get(next.away)?.name ?? next.away}`}
+              />
+            </div>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      strip.length > 0 ? (
+        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Match schedule">
+          <ul class="flex snap-x gap-4 pb-2">
+            {strip.map((match) => (
+              <li class="w-72 shrink-0 snap-start sm:w-80">
+                <MatchRow
+                  match={match}
+                  teamsBySlug={teamsBySlug}
+                  clubSlug={clubSlug}
+                  highlight={next?.id === match.id}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <EmptyState message="No fixtures are currently scheduled." />
+      )
+    }
+  </div>
+</section>

@@ -19,7 +19,7 @@ const units = [
 ---
 
 <div
-  class:list={['countdown flex gap-3', !initial && 'font-display text-2xl']}
+  class:list={['countdown flex gap-2', !initial && 'font-display text-2xl text-(--color-text)']}
   data-target={target.toISOString()}
   role="timer"
   aria-label={label}
@@ -34,14 +34,14 @@ const units = [
   }
   {
     initial && units.map((unit) => (
-      <div class="text-center">
+      <div class="flex w-14 flex-col items-center justify-center gap-0.5 rounded-(--radius-card) bg-(--color-surface) py-2 shadow-sm sm:w-16">
         <span
-          class="block text-3xl leading-none tabular-nums font-display"
+          class="block text-2xl leading-none tabular-nums text-(--color-brand) font-display"
           data-unit={unit.key}
         >
           {String(initial[unit.key]).padStart(2, '0')}
         </span>
-        <span class="text-[0.65rem] tracking-widest text-(--color-text-muted)">
+        <span class="text-[0.6rem] tracking-widest text-(--color-text-muted) font-display">
           {unit.label}
         </span>
       </div>
@@ -78,7 +78,7 @@ const units = [
         // Kickoff has passed. The static build still lists this as the next
         // match until the next deploy, so say so rather than counting down.
         root.textContent = 'Kick-off';
-        root.classList.add('font-display', 'text-2xl');
+        root.classList.add('font-display', 'text-2xl', 'text-(--color-text)');
         clearInterval(timer);
         return;
       }

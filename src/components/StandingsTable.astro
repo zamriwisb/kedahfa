@@ -10,80 +10,119 @@ interface Props {
 }
 
 const { table, teamsBySlug, clubSlug, compact = false } = Astro.props;
+
+/**
+ * Every cell in the club's own row shares the same solid-red, white-text,
+ * rounded-ends treatment, so it is built once here rather than repeated per
+ * column. `border-separate` (set on the table below) is required for the
+ * `first`/`last` rounding to render — with the default `border-collapse`,
+ * adjoining cells share border edges and a radius on one cell's edge has
+ * nothing to round against.
+ */
+function cellClass(isClub: boolean, extra: string): string {
+  return [
+    extra,
+    'border-b border-(--color-line)',
+    // Bold weight, not just the tint: WCAG 1.4.1 forbids conveying meaning
+    // by colour alone, so every cell in the club's row carries the same
+    // redundant visual cue (bold) that a colourblind or low-vision reader
+    // can perceive even without the red band. The sr-only marker below
+    // gives screen reader users the equivalent cue.
+    isClub &&
+      'border-transparent bg-(--color-action) font-semibold text-(--color-text-invert) first:rounded-l-(--radius-card) last:rounded-r-(--radius-card)',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
 ---
 
-<!--
-  The wrapper scrolls horizontally on narrow viewports, so it needs to be
-  keyboard reachable — a scrollable region a mouse can pan but a keyboard
-  cannot fails WCAG 2.1.1 (axe rule: scrollable-region-focusable).
--->
-<div class="overflow-x-auto" tabindex="0" role="region" aria-label="League standings">
-  <table class="w-full min-w-[32rem] border-collapse text-sm">
-    <caption class="sr-only">League standings</caption>
-    <thead>
-      <tr class="border-b border-(--color-line) text-left text-xs tracking-widest text-(--color-text-muted) font-display">
-        <th scope="col" class="py-2 pr-2">#</th>
-        <th scope="col" class="py-2 pr-2">Team</th>
-        <th scope="col" class="py-2 pr-2 text-center">P</th>
-        {
-          !compact && (
-            <>
-              <th scope="col" class="py-2 pr-2 text-center">W</th>
-              <th scope="col" class="py-2 pr-2 text-center">D</th>
-              <th scope="col" class="py-2 pr-2 text-center">L</th>
-              <th scope="col" class="py-2 pr-2 text-center">GF</th>
-              <th scope="col" class="py-2 pr-2 text-center">GA</th>
-            </>
-          )
-        }
-        <th scope="col" class="py-2 pr-2 text-center">GD</th>
-        <th scope="col" class="py-2 text-center">Pts</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {
-        table.map((entry) => (
-          <tr
-            class:list={[
-              'border-b border-(--color-line)',
-              // Bold weight, not just the tint: WCAG 1.4.1 forbids conveying
-              // meaning by colour alone, and the sr-only marker below gives
-              // screen reader users the same cue.
-              entry.team === clubSlug && 'bg-(--color-action)/20 font-semibold',
-            ]}
-          >
-            <td class="py-2 pr-2 text-(--color-text-muted)">{entry.position}</td>
-            <th
-              scope="row"
-              class:list={[
-                'py-2 pr-2 text-left',
-                entry.team === clubSlug ? 'font-semibold' : 'font-normal',
-              ]}
-            >
-              <span class="flex items-center gap-2">
-                <img src={teamsBySlug.get(entry.team)?.crest} alt="" width="20" height="20" aria-hidden="true" />
-                <span class="truncate">{entry.name}</span>
-                {entry.team === clubSlug && <span class="sr-only">(your club)</span>}
-              </span>
-            </th>
-            <td class="py-2 pr-2 text-center">{entry.played}</td>
-            {!compact && (
+<div class="overflow-hidden rounded-(--radius-card) bg-(--color-surface) shadow-sm">
+  <!--
+    The wrapper scrolls horizontally on narrow viewports, so it needs to be
+    keyboard reachable — a scrollable region a mouse can pan but a keyboard
+    cannot fails WCAG 2.1.1 (axe rule: scrollable-region-focusable).
+  -->
+  <div class="overflow-x-auto p-4 sm:p-6" tabindex="0" role="region" aria-label="League standings">
+    <table class="w-full min-w-[32rem] border-separate border-spacing-0 text-sm">
+      <caption class="sr-only">League standings</caption>
+      <thead>
+        <tr class="text-left text-xs tracking-widest text-(--color-text-muted) font-display">
+          <th scope="col" class="border-b border-(--color-line) py-2 pr-2">#</th>
+          <th scope="col" class="border-b border-(--color-line) py-2 pr-2">Team</th>
+          <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">P</th>
+          {
+            !compact && (
               <>
-                <td class="py-2 pr-2 text-center">{entry.won}</td>
-                <td class="py-2 pr-2 text-center">{entry.drawn}</td>
-                <td class="py-2 pr-2 text-center">{entry.lost}</td>
-                <td class="py-2 pr-2 text-center">{entry.goalsFor}</td>
-                <td class="py-2 pr-2 text-center">{entry.goalsAgainst}</td>
+                <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">W</th>
+                <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">D</th>
+                <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">L</th>
+                <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">GF</th>
+                <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">GA</th>
               </>
-            )}
-            <td class="py-2 pr-2 text-center">
-              {entry.goalDifference > 0 ? `+${entry.goalDifference}` : entry.goalDifference}
-            </td>
-            <td class="py-2 text-center font-display">{entry.points}</td>
-          </tr>
-        ))
-      }
-    </tbody>
-  </table>
+            )
+          }
+          <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">GD</th>
+          <th scope="col" class="border-b border-(--color-line) py-2 text-center text-(--color-brand)">
+            Pts
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {
+          table.map((entry) => {
+            const isClub = entry.team === clubSlug;
+            return (
+              <tr>
+                <td class={cellClass(isClub, 'py-3 pr-2 text-(--color-text-muted)')}>{entry.position}</td>
+                <th
+                  scope="row"
+                  class={cellClass(isClub, `py-3 pr-2 text-left ${isClub ? '' : 'font-normal'}`)}
+                >
+                  <span class="flex items-center gap-2">
+                    <img
+                      src={teamsBySlug.get(entry.team)?.crest}
+                      alt=""
+                      width="20"
+                      height="20"
+                      aria-hidden="true"
+                    />
+                    <span class="truncate font-display">{entry.name}</span>
+                    {/*
+                      The club's row is never distinguished by colour alone
+                      (WCAG 1.4.1): the bold weight above and this sr-only
+                      marker both carry the same meaning for anyone who
+                      cannot perceive the red band.
+                    */}
+                    {isClub && <span class="sr-only">(your club)</span>}
+                  </span>
+                </th>
+                <td class={cellClass(isClub, 'py-3 pr-2 text-center')}>{entry.played}</td>
+                {!compact && (
+                  <>
+                    <td class={cellClass(isClub, 'py-3 pr-2 text-center')}>{entry.won}</td>
+                    <td class={cellClass(isClub, 'py-3 pr-2 text-center')}>{entry.drawn}</td>
+                    <td class={cellClass(isClub, 'py-3 pr-2 text-center')}>{entry.lost}</td>
+                    <td class={cellClass(isClub, 'py-3 pr-2 text-center')}>{entry.goalsFor}</td>
+                    <td class={cellClass(isClub, 'py-3 pr-2 text-center')}>{entry.goalsAgainst}</td>
+                  </>
+                )}
+                <td class={cellClass(isClub, 'py-3 pr-2 text-center')}>
+                  {entry.goalDifference > 0 ? `+${entry.goalDifference}` : entry.goalDifference}
+                </td>
+                <td
+                  class={cellClass(
+                    isClub,
+                    `py-3 text-center font-display ${isClub ? '' : 'text-(--color-brand)'}`,
+                  )}
+                >
+                  {entry.points}
+                </td>
+              </tr>
+            );
+          })
+        }
+      </tbody>
+    </table>
+  </div>
 </div>

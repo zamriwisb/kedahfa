@@ -45,7 +45,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
           upcoming.map((group) => (
             <div class="mb-8">
               <h3 class="mb-3 text-lg text-(--color-text-muted)">{group.heading}</h3>
-              <div class="space-y-3">
+              <div class="grid gap-4 sm:grid-cols-2">
                 {group.matches.map((match) => (
                   <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
                 ))}
@@ -62,7 +62,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
       awaiting.length > 0 && (
         <section>
           <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">Awaiting Result</h2>
-          <div class="space-y-3">
+          <div class="grid gap-4 sm:grid-cols-2">
             {awaiting.map((match) => (
               <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
             ))}
@@ -75,7 +75,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
       postponed.length > 0 && (
         <section>
           <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">Postponed</h2>
-          <div class="space-y-3">
+          <div class="grid gap-4 sm:grid-cols-2">
             {postponed.map((match) => (
               <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
             ))}
@@ -91,7 +91,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
           results.map((group) => (
             <div class="mb-8">
               <h3 class="mb-3 text-lg text-(--color-text-muted)">{group.heading}</h3>
-              <div class="space-y-3">
+              <div class="grid gap-4 sm:grid-cols-2">
                 {group.matches.map((match) => (
                   <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
                 ))}

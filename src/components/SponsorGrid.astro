@@ -17,14 +17,14 @@ const tiers = (['main', 'official', 'partner'] as const)
   .filter((group) => group.items.length > 0);
 ---
 
-<div class="space-y-8">
+<div class="divide-y divide-(--color-line)">
   {
     tiers.map((group) => (
-      <div>
-        <h3 class="mb-4 text-center text-xs tracking-[0.3em] text-(--color-text-muted) font-display">
+      <div class="py-8 first:pt-0 last:pb-0">
+        <h3 class="mb-6 text-center text-xs tracking-[0.3em] text-(--color-text-muted) font-display">
           {TIER_LABELS[group.tier]}
         </h3>
-        <ul class="flex flex-wrap items-center justify-center gap-8">
+        <ul class="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
           {group.items.map((sponsor) => (
             <li>
               <a href={sponsor.url} rel="noopener sponsored" target="_blank">
@@ -34,7 +34,7 @@ const tiers = (['main', 'official', 'partner'] as const)
                   width="120"
                   height="60"
                   loading="lazy"
-                  class="h-12 w-auto opacity-60 grayscale transition hover:opacity-100 hover:grayscale-0"
+                  class="h-12 w-auto grayscale opacity-60 transition hover:opacity-100 hover:grayscale-0"
                 />
               </a>
             </li>

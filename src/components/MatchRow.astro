@@ -7,9 +7,11 @@ interface Props {
   match: Match;
   teamsBySlug: Map<string, Team>;
   clubSlug: string;
+  /** The next upcoming match is inverted to the brand green, per the reference. */
+  highlight?: boolean;
 }
 
-const { match, teamsBySlug, clubSlug } = Astro.props;
+const { match, teamsBySlug, clubSlug, highlight = false } = Astro.props;
 
 const home = teamsBySlug.get(match.home);
 const away = teamsBySlug.get(match.away);
@@ -25,48 +27,112 @@ const OUTCOME_LABELS: Record<string, string> = { W: 'Win', D: 'Draw', L: 'Loss' 
 ---
 
 <div
-  class="clip-corner flex items-center gap-4 bg-(--color-surface) p-4"
+  class:list={[
+    'flex h-full w-full flex-col overflow-hidden rounded-(--radius-card) shadow-sm',
+    highlight ? 'bg-(--color-brand-deep)' : 'bg-(--color-surface)',
+  ]}
   data-competition={match.competition}
 >
-  <div class="w-28 shrink-0 text-xs text-(--color-text-muted)">
-    <p>{formatMatchDate(match.date)}</p>
-    <p>
-      {match.status === 'postponed' ? 'Postponed' : formatKickoffTime(match.date)}
-    </p>
-  </div>
-
-  <div class="flex min-w-0 flex-1 items-center gap-3">
-    <img src={home?.crest} alt="" width="28" height="28" aria-hidden="true" />
-    <span class="truncate text-sm">{home?.name}</span>
-
-    <span class="mx-auto shrink-0 px-2 text-lg font-display">
-      {
-        match.score
-          ? `${match.score.home} - ${match.score.away}`
-          : match.status === 'postponed'
-            ? 'P-P'
-            : 'v'
-      }
+  <div
+    class:list={[
+      'flex items-center justify-between gap-2 px-4 py-2 text-xs font-display tracking-wide',
+      highlight
+        ? 'bg-(--color-brand) text-(--color-text-invert)'
+        : 'border-b border-(--color-line) text-(--color-text-muted)',
+    ]}
+  >
+    <span class:list={['font-semibold', !highlight && 'text-(--color-text)']}>
+      {formatMatchDate(match.date)}
+      {match.status !== 'postponed' && ` · ${formatKickoffTime(match.date)}`}
     </span>
-
-    <span class="truncate text-right text-sm">{away?.name}</span>
-    <img src={away?.crest} alt="" width="28" height="28" aria-hidden="true" />
+    <span class="truncate pl-2">{match.competition}</span>
   </div>
 
-  <div class="flex w-24 shrink-0 items-center justify-end gap-2">
-    {
-      outcome && (
-        <span
-          class:list={['h-6 w-6 items-center justify-center rounded-full text-xs flex', OUTCOME_STYLES[outcome]]}
-        >
-          <span class="sr-only">{OUTCOME_LABELS[outcome]}</span>
-          <span aria-hidden="true">{outcome}</span>
-        </span>
-      )
-    }
+  <div class="flex flex-1 items-center justify-between gap-2 px-3 py-5">
+    <div class="flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
+      <img src={home?.crest} alt="" width="40" height="40" aria-hidden="true" class="h-10 w-10 object-contain" />
+      <span
+        class:list={[
+          'w-full text-sm leading-tight font-display',
+          highlight ? 'text-(--color-text-invert)' : 'text-(--color-text)',
+        ]}
+      >
+        {home?.name}
+      </span>
+    </div>
+
+    <div class="flex shrink-0 flex-col items-center gap-1.5">
+      {
+        match.score ? (
+          <span class="rounded-(--radius-card) bg-(--color-brand) px-3 py-1 text-lg leading-none text-(--color-text-invert) font-display">
+            {match.score.home} : {match.score.away}
+          </span>
+        ) : match.status === 'postponed' ? (
+          <span
+            class:list={[
+              'text-lg font-display',
+              highlight ? 'text-(--color-text-invert-muted)' : 'text-(--color-text-muted)',
+            ]}
+          >
+            P-P
+          </span>
+        ) : (
+          <span
+            class:list={[
+              'text-2xl font-display',
+              highlight ? 'text-(--color-text-invert-muted)' : 'text-(--color-text-muted)',
+            ]}
+          >
+            VS
+          </span>
+        )
+      }
+      {
+        outcome && (
+          <span
+            class:list={[
+              'flex h-5 w-5 items-center justify-center rounded-full text-[0.6rem] text-white',
+              OUTCOME_STYLES[outcome],
+            ]}
+          >
+            <span class="sr-only">{OUTCOME_LABELS[outcome]}</span>
+            <span aria-hidden="true">{outcome}</span>
+          </span>
+        )
+      }
+    </div>
+
+    <div class="flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
+      <img src={away?.crest} alt="" width="40" height="40" aria-hidden="true" class="h-10 w-10 object-contain" />
+      <span
+        class:list={[
+          'w-full text-sm leading-tight font-display',
+          highlight ? 'text-(--color-text-invert)' : 'text-(--color-text)',
+        ]}
+      >
+        {away?.name}
+      </span>
+    </div>
+  </div>
+
+  <div
+    class:list={[
+      'flex items-center justify-between gap-2 px-4 py-2 text-xs',
+      highlight
+        ? 'bg-(--color-brand-ink) text-(--color-text-invert-muted)'
+        : 'bg-(--color-page) text-(--color-text-muted)',
+    ]}
+  >
+    <span class="truncate">{match.venue}</span>
     {
       match.report && (
-        <a href={`/news/${match.report}`} class="text-xs text-(--color-brand) underline">
+        <a
+          href={`/news/${match.report}`}
+          class:list={[
+            'shrink-0 underline',
+            highlight ? 'text-(--color-text-invert)' : 'text-(--color-brand)',
+          ]}
+        >
           Report
         </a>
       )

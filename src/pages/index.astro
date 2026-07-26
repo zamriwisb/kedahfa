@@ -1,16 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
+import CtaButton from '../components/CtaButton.astro';
 import EmptyState from '../components/EmptyState.astro';
+import FixturesStrip from '../components/FixturesStrip.astro';
 import HeroPanel from '../components/HeroPanel.astro';
-import MatchRow from '../components/MatchRow.astro';
-import NextMatchCard from '../components/NextMatchCard.astro';
 import PlayerCard from '../components/PlayerCard.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import SponsorGrid from '../components/SponsorGrid.astro';
 import StandingsTable from '../components/StandingsTable.astro';
 import { CLUB_SLUG, loadSiteData } from '../lib/content';
-import { nextMatch, recentResults, selectHero } from '../lib/fixtures';
+import { selectHero } from '../lib/fixtures';
 import { deriveTable, tableSnippet } from '../lib/standings';
 import { groupByPosition } from '../lib/squad';
 
@@ -21,11 +21,11 @@ const { club, teamsBySlug, matches, standings, squad, sponsors, articles } = awa
 const now = new Date();
 
 const hero = selectHero(matches, now);
-const upcoming = nextMatch(matches, now);
-const results = recentResults(matches, 3);
 const snippet = tableSnippet(deriveTable(standings), CLUB_SLUG, 5);
-const featuredPlayers = groupByPosition(squad).flatMap((group) => group.players).slice(0, 6);
-const latestArticles = articles.slice(0, 6);
+const featuredPlayers = groupByPosition(squad)
+  .flatMap((group) => group.players)
+  .slice(0, 6);
+const latestArticles = articles.slice(0, 5);
 ---
 
 <BaseLayout
@@ -34,79 +34,108 @@ const latestArticles = articles.slice(0, 6);
 >
   <HeroPanel hero={hero} teamsBySlug={teamsBySlug} />
 
-  <div class="mx-auto max-w-6xl space-y-16 px-(--spacing-gutter) py-16">
-    {upcoming && <NextMatchCard match={upcoming} teamsBySlug={teamsBySlug} />}
+  <FixturesStrip matches={matches} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} now={now} />
 
-    <section>
-      <SectionHeading title="Recent Results" href="/fixtures" />
-      {
-        results.length > 0 ? (
-          <div class="space-y-3">
-            {results.map((match) => (
-              <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState message="No matches have been played yet this season." />
-        )
-      }
-    </section>
+  <section class="chevron-texture bg-(--color-brand-panel) py-16 sm:py-20">
+    <div class="mx-auto max-w-6xl px-(--spacing-gutter)">
+      <SectionHeading eyebrow="What's New" title="Latest News" href="/news" on="green" />
 
-    <section>
-      <SectionHeading title="Standings" href="/standings" linkLabel="Full table" />
-      {
-        snippet.length > 0 ? (
-          <StandingsTable
-            table={snippet}
-            teamsBySlug={teamsBySlug}
-            clubSlug={CLUB_SLUG}
-            compact
-          />
-        ) : (
-          <EmptyState message="The league table will appear once the season is under way." />
-        )
-      }
-    </section>
-
-    <section>
-      <SectionHeading title="Latest News" href="/news" />
       {
         latestArticles.length > 0 ? (
-          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {latestArticles.map((article, index) => (
-              <ArticleCard article={article} featured={index === 0} />
-            ))}
+          <div class="space-y-4">
+            <div class="grid gap-4 sm:grid-cols-2">
+              {latestArticles.slice(0, 2).map((article) => (
+                <ArticleCard article={article} featured />
+              ))}
+            </div>
+            {latestArticles.length > 2 && (
+              <div class="grid gap-4 sm:grid-cols-3">
+                {latestArticles.slice(2, 5).map((article) => (
+                  <ArticleCard article={article} />
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <EmptyState message="There is no club news to show yet." />
         )
       }
-    </section>
 
-    <section>
-      <SectionHeading title="First Team" href="/squad" />
+      {
+        latestArticles.length > 0 && (
+          <div class="mt-10 flex justify-center">
+            <CtaButton href="/news" label="All News" />
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="bg-(--color-page) py-16 sm:py-20">
+    <div class="mx-auto max-w-4xl px-(--spacing-gutter)">
+      <SectionHeading
+        eyebrow="Latest Classification"
+        title="League Table"
+        href="/standings"
+        linkLabel="Full table"
+      />
+
+      {
+        snippet.length > 0 ? (
+          <StandingsTable table={snippet} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} compact />
+        ) : (
+          <EmptyState message="The league table will appear once the season is under way." />
+        )
+      }
+
+      {
+        snippet.length > 0 && (
+          <div class="mt-8 flex justify-center">
+            <CtaButton href="/standings" label="Full Table" />
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="chevron-texture bg-(--color-brand-panel) py-16 sm:py-20">
+    <div class="mx-auto max-w-6xl px-(--spacing-gutter)">
+      <SectionHeading eyebrow="Meet The Team" title="First Team Squad" on="green" />
+
       {
         featuredPlayers.length > 0 ? (
-          <ul class="-mx-(--spacing-gutter) flex snap-x gap-4 overflow-x-auto px-(--spacing-gutter) pb-2">
-            {featuredPlayers.map((player) => (
-              <li class="w-40 shrink-0 snap-start">
-                <PlayerCard player={player} />
-              </li>
-            ))}
-          </ul>
+          <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Featured squad players">
+            <ul class="flex snap-x gap-4 pb-2">
+              {featuredPlayers.map((player) => (
+                <li class="w-40 shrink-0 snap-start">
+                  <PlayerCard player={player} />
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : (
           <EmptyState message="The squad list will be published shortly." />
         )
       }
-    </section>
 
-    {
-      sponsors.length > 0 && (
-        <section>
-          <SectionHeading title="Partners" />
+      {
+        featuredPlayers.length > 0 && (
+          <div class="mt-10 flex justify-center">
+            <CtaButton href="/squad" label="Full Squad" />
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  {
+    sponsors.length > 0 && (
+      <section class="bg-(--color-page) py-16">
+        <div class="mx-auto max-w-6xl px-(--spacing-gutter)">
+          <SectionHeading eyebrow="Thank You" title="Partners" />
           <SponsorGrid sponsors={sponsors} />
-        </section>
-      )
-    }
-  </div>
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
