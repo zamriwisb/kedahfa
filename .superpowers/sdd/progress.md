@@ -79,3 +79,11 @@ Task 14: complete (commits 105e5e6..0274f1a, review clean after 1 fix — CI art
    - TDZ ReferenceError in countdown island (clearInterval before init)
   FIXED fc3e26a (list now DERIVED from readdirSync src/data), 4439984, 05e889f
   Verified by me: all 3 now exit 1. 90 unit + 59 e2e green, tree clean.
+  ROUND 3 review found 2 more of the same class:
+   - news ids from glob() collide via github-slugger ("Kedah Edge Selangor.md"
+     vs "kedah-edge-selangor.md") -> silent overwrite, exit 0, unstable winner
+   - dateOnly guard checked the COERCED Date, so under TZ=UTC (i.e. CI)
+     "11/03/1995" passed and rendered "3 November 1995"
+  FIXED 96979d2 (id collision, uses Astro's own github-slugger),
+        61ea4a1 (validate raw input pre-coercion; all 8 schemas .strict())
+  Verified by me: both now exit 1. 94 unit + 59 e2e green, tree clean.
