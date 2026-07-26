@@ -1,0 +1,51 @@
+---
+import { loadSiteData } from '../lib/content';
+
+const { club } = await loadSiteData();
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-20 border-t border-[--color-line] bg-[--color-ink-raised]">
+  <div class="mx-auto grid max-w-6xl gap-8 px-[--spacing-gutter] py-12 sm:grid-cols-3">
+    <div>
+      <h2 class="font-display text-base">{club.name}</h2>
+      <p class="mt-2 text-sm text-[--color-text-muted]">
+        {club.stadium}, {club.city}
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-base">Contact</h2>
+      <ul class="mt-2 space-y-1 text-sm">
+        {
+          club.emails.map((email) => (
+            <li>
+              <a href={`mailto:${email.address}`} class="text-[--color-text-muted] underline">
+                {email.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="font-display text-base">Follow</h2>
+      <ul class="mt-2 space-y-1 text-sm">
+        {
+          club.socials.map((social) => (
+            <li>
+              <a href={social.url} rel="me noopener" class="text-[--color-text-muted] underline">
+                {social.platform}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-[--color-line] px-[--spacing-gutter] py-4 text-center text-xs text-[--color-text-muted]">
+    &copy; {year} {club.name}. All rights reserved.
+  </div>
+</footer>

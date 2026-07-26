@@ -1,0 +1,35 @@
+/*
+ * PLACEHOLDER BRANDING.
+ * These are stand-in values, not verified Kedah FA colours. Replace the
+ * palette and crest before launch. Nothing outside this file should contain
+ * a raw hex colour.
+ */
+@theme {
+  /* Brand */
+  --color-club-red: #b3121b;
+  --color-club-red-bright: #e0242e;
+  --color-club-gold: #f2b705;
+
+  /* Surfaces, darkest to lightest */
+  --color-ink: #0b0b0d;
+  --color-ink-raised: #131317;
+  --color-ink-card: #1a1a20;
+  --color-line: #2a2a32;
+
+  /* Text — both meet WCAG AA on --color-ink */
+  --color-text: #f4f4f5;
+  --color-text-muted: #a8a8b3;
+
+  /* Result semantics */
+  --color-win: #2f9e5f;
+  --color-draw: #8a8a96;
+  --color-loss: #c2453c;
+
+  /* Type */
+  --font-display: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Layout */
+  --spacing-gutter: 1.25rem;
+  --radius-card: 2px;
+}

@@ -1,0 +1,50 @@
+---
+import MobileNav from './islands/MobileNav.astro';
+import { loadSiteData } from '../lib/content';
+
+const { club } = await loadSiteData();
+const currentPath = Astro.url.pathname;
+
+const links = [
+  { href: '/news', label: 'News' },
+  { href: '/squad', label: 'Squad' },
+  { href: '/fixtures', label: 'Fixtures' },
+  { href: '/standings', label: 'Standings' },
+  { href: '/club', label: 'Club' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const isCurrent = (href: string) => currentPath === href || currentPath.startsWith(`${href}/`);
+---
+
+<header class="relative border-b border-[--color-line] bg-[--color-ink-raised]">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-[--spacing-gutter] py-3">
+    <a href="/" class="flex items-center gap-3" aria-label={`${club.name} home`}>
+      <img src="/images/teams/kedah.svg" alt="" width="36" height="36" aria-hidden="true" />
+      <span class="font-display text-lg leading-none">{club.shortName}</span>
+    </a>
+
+    <nav aria-label="Main navigation" class="hidden md:block">
+      <ul class="flex items-center gap-1">
+        {
+          links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                aria-current={isCurrent(link.href) ? 'page' : undefined}
+                class:list={[
+                  'px-3 text-sm tracking-wider font-display',
+                  isCurrent(link.href) ? 'text-[--color-club-gold]' : 'text-[--color-text]',
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <MobileNav links={links} />
+  </div>
+</header>
