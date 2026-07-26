@@ -6,7 +6,9 @@ Pre-flight: fixed two plan self-inconsistencies (src/lib purity constraint vs
 content.ts; @plugin placement in global.css) in commit below.
 
 ## Minor findings deferred to final review
-(none yet)
+- validate.test.ts: assertUniqueSquadNumbers tests only use ADJACENT duplicate
+  numbers, so an adjacent-only implementation would pass. Origin: the plan's
+  test fixture, not the implementer. Add a non-adjacent duplicate case.
 
 ## Tasks
 Task 1: complete (commits 293d828..3c1224d, review clean — reviewer mutation-tested TZ handling)
@@ -27,3 +29,7 @@ Task 4: complete (commits 3e545f6..65614b8, review clean after 2 fixes)
     reverted, root cause fixed (Partial<Match> & {date:string} -> never)
   - review found groupByMonth UTC test asserted heading only, not key;
     strengthened + selectHero boundary tests added, both mutation-verified
+Task 5: complete (commits 50828a9..6f6369b, review clean)
+  assertReferencesResolve wired for fixture home/away/report + standings team.
+  NOTE: Steps 7 & 9 negative build tests did NOT fail, because no page calls
+  loadSiteData() yet. MUST be re-run at end of Task 8 as its verification.
