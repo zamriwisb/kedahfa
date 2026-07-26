@@ -30,3 +30,6 @@ pnpm-debug.log*
 
 # planning artifacts, not part of the shipped site
 .superpowers/
+
+# design reference export, not part of the site
+www.slaskwroclaw.pl*

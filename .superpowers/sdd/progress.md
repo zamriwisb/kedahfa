@@ -131,3 +131,45 @@ Task 4: complete (commit 503daec, README slides section verified by controller)
   inert without target=_blank; no test for reduced-motion / single-slide /
   wheel-direction paths; README doesn't say the flat layer darkens the WHOLE
   frame 40%; Number(dot.dataset.slideTo) unguarded -> NaN if attribute dropped.
+
+# A1 Semi-Pro league teams — SDD progress
+Plan: docs/superpowers/plans/2026-07-26-a1-league-teams.md
+Spec: docs/superpowers/specs/2026-07-26-a1-league-teams-design.md
+Branch: feat/a1-league-teams  Base: e9025e0
+Pre-flight: plan already corrected twice during authoring — fixtures.yaml needs
+an explicit [] (comments-only parses to null, which parseFixturesYaml and
+assertNoDuplicateIds both reject), and build-negative cases must swap that []
+marker rather than append after it (invalid YAML).
+OWNER-APPROVED, not implementer drift: Task 2 deletes two e2e cases (kickoff
+time, match report link) because no fixture exists to assert against. Owner
+chose this explicitly over seeding invented fixtures. If a reviewer flags the
+coverage loss, it is adjudicated, not a defect.
+Task 1: complete (commit e9025e0..b5e36ae, spec ✅, quality approved)
+  Data swap + 11 monogram crests + tests/unit/league-data.test.ts + the 4
+  build-negative cases decoupled from demo matches. 105 unit tests, build exit 0.
+  IMPLEMENTER DEVIATION, accepted by controller: added fileParallelism:false to
+  vitest.config.ts (not in brief). The race is real and pre-existing —
+  build-negative.test.ts mutates src/data/*.yaml in place for the duration of a
+  real astro build, and league-data.test.ts reads those files off disk. Fix is
+  well-commented and costs nothing today (build-negative already dominates
+  wall-time). MINOR deferred to final review: it serializes ALL test files
+  forever for a two-file conflict. Narrower fix = have withMutatedFile build
+  against a temp copy instead of the real working tree, or split
+  build-negative into its own serialized vitest project.
+  MINOR deferred: 3 of league-data.test.ts's 9 cases (shortName length, crest
+  exists, id===team) duplicate checks the build already fails on. Cheap and
+  harmless; the other 6 cover genuinely uncovered invariants.
+Task 2: complete (commits b5e36ae..557c23d, spec ✅, quality approved after 1 fix round)
+  3 e2e cases rewritten to pre-season assertions, 2 deleted (owner-approved).
+  Reviewer verified the rewrites bite: rowheader vs columnheader roles are
+  distinct so getByRole('rowheader') is exactly 12, and the non-compact table's
+  last cell genuinely is points.
+  FIX 557c23d: reviewer caught an overstated claim in the Task 2 commit message
+  — deleting the report-link case left ZERO coverage of /news/[slug]; the
+  news-filter case only counts cards on the listing. New case clicks through
+  [data-category] a to an article and asserts the h1 renders. Deliberate-failure
+  check confirmed it bites. Re-review: approved, no findings.
+  ENVIRONMENT NOTE: the Task 2 implementer ran `npx astro dev stop` to kill a
+  stray dev server on 4321 that was making Playwright reuse it (Astro Dev
+  Toolbar injects its own "Menu" button -> 11 spurious navigation.spec failures).
+  If the owner had that server running deliberately, it needs restarting.
