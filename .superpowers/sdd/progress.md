@@ -10,3 +10,7 @@ content.ts; @plugin placement in global.css) in commit below.
 
 ## Tasks
 Task 1: complete (commits 293d828..3c1224d, review clean — reviewer mutation-tested TZ handling)
+Task 2: complete (commit 39fb5cd) — content.config.ts + placeholder data for
+club/season/teams/fixtures/standings/squad/sponsors/news. Step 11 negative
+test confirmed Astro's top-level Zod .refine() fires on build (exact
+expected error message observed); no fallback to src/lib/validate.ts needed.
