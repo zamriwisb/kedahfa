@@ -227,3 +227,54 @@ Task 2: complete (commits 489eeb9..40d97a2, spec ✅, quality approved, no fix r
   clears 3:1 outright. FOR THE FINAL REVIEW TO ADJUDICATE.
   MINOR deferred: test.skip(project) guard repeated 5x in carousel.spec.ts;
   a skipUnless helper would DRY it if the file grows.
+
+## FINAL WHOLE-BRANCH REVIEW (opus) — "merge with fixes", 3 Important, 0 Critical
+  I1 CardCarousel edge state: IntersectionObserver threshold 0.99 can never be
+     met when a card is WIDER than the track, so atStart/atEnd stick at false.
+     At 320px (WCAG 1.4.10 reflow width, i.e. 400% zoom on 1280px) "Previous"
+     shows enabled at rest and does nothing; "Next" never disables. Worse for
+     reuse: any future autoplay consumer with cards wider than the track
+     freezes on the last card, because the wrap is gated on atEnd.
+     carousel.spec.ts:75 ASSERTED THE BROKEN STATE AS CORRECT. -> fix dispatched
+  I2 Autoplay resume was uncoordinated: pointerenter/pointerleave/focusin/
+     focusout/visibilitychange each called bare pause()/start(), last one wins.
+     Tabbing out of a card resumed the track UNDER A RESTING CURSOR (breaks the
+     owner's explicit pause-on-hover requirement), and pointerleave resumed it
+     while focus was still inside, scrolling the focused link off-screen
+     (WCAG 2.4.11). -> fix dispatched: reason flags + single resolver.
+     This SUBSUMES the earlier deferred focusin/focusout churn minor.
+  I3 news/kedah-edge-selangor.md is a match-report with a 3-2 score and
+     "seventh of the season" while the table shows 0 played, and names
+     Selangor FC which is no longer in the league.
+     OWNER DECISION: leave the news alone. ACCEPTED INCONSISTENCY, not a
+     missed defect — do not re-flag in future reviews.
+  M1 page-shell widened /club's intro to 1112px (~130 chars/line).
+     OWNER chose an inner prose column. FIXED 8f2b3cd — narrowed the paragraph
+     only, not the page; the fact and sponsor grids keep the width. Review
+     also named /contact, but it is a 2-col grid of short items (~550px
+     columns) with no running copy, so it needed nothing.
+  M2 fonts.spec.ts asserts only that overrides end in "%" — size-adjust: 1%
+     would pass. -> fix dispatched (measure real vs fallback widths).
+  M3 Barlow fallback overshoots 2.77% (Inter is 0.18%). Deferred.
+  M5 withFixtureEntry concatenation breaks without a trailing newline.
+     -> fix dispatched.
+  Border /40 = 2.79:1 vs WCAG 1.4.11's 3:1: reviewer ADJUDICATED NOT A
+     FAILURE (glyphs identify the control at 9.07:1 green / 5.33:1 light, and
+     1.4.11 exempts a boundary when other visual indication identifies it).
+     Bumping to /60 dispatched anyway to retire the argument.
+  fileParallelism: false — ACCEPTED. Race is real, cost is zero today
+     (build-negative's real astro builds dominate the 25.4s run). Narrower fix
+     (temp-copy build root, or a separate serialized vitest project) is tech
+     debt for when the suite grows.
+  ResizeObserver/fonts.ready — CONFIRMED HARMLESS and no interaction with the
+     font-loading strand: both consumers use fixed card width classes, so
+     scrollWidth is a function of card count and gap, not text metrics.
+     Constraint on future consumers: sizing a card to its text needs a
+     document.fonts.ready hook and an observer on the ul.
+  test.skip x5 — LEAVE. The five skip reasons are individually specific; a
+     helper would obscure them.
+  Cross-strand checks all clear, incl. the non-obvious one: --container-6xl is
+     still emitted into the built CSS even though no max-w-6xl class survives
+     in src/, because Tailwind v4 tracks theme vars referenced from @utility
+     bodies. Had it not been, page-shell's max-width would have resolved to
+     nothing and every page would be full-bleed.
