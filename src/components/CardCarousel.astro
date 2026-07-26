@@ -1,0 +1,291 @@
+---
+interface Props {
+  /** The scroll region's accessible name, e.g. "Match schedule". */
+  label: string;
+  /**
+   * Noun the control names are built from, e.g. "fixtures" gives
+   * "Previous fixtures". Separate from `label` because a single derived
+   * string produces names like "Previous Match schedule" — cb20236 was a fix
+   * for exactly that class of mislabelled control.
+   */
+  itemNoun: string;
+  /** Whether this carousel advances on its own. */
+  autoplay?: boolean;
+  /**
+   * Which surface the carousel sits on, following SectionHeading's
+   * convention. The controls must read against the light page AND the green
+   * band, and the two need different colours to do it.
+   */
+  on?: 'light' | 'green';
+  /** Stable hook for tests, e.g. "fixtures". */
+  name: string;
+}
+
+const { label, itemNoun, autoplay = false, on = 'light', name } = Astro.props;
+
+const buttonClass =
+  on === 'green'
+    ? 'border-(--color-text-invert)/40 text-(--color-text-invert) hover:bg-(--color-text-invert) hover:text-(--color-brand-panel)'
+    : 'border-(--color-line) text-(--color-action) hover:bg-(--color-action) hover:text-(--color-text-invert)';
+---
+
+<div
+  class="card-carousel"
+  data-carousel={name}
+  data-item-noun={itemNoun}
+  data-autoplay={autoplay ? 'true' : undefined}
+>
+  {
+    /*
+     * The region is focusable on purpose: a scrollable region a mouse can pan
+     * but a keyboard cannot reach fails WCAG 2.1.1 (axe:
+     * scrollable-region-focusable). The controls below are an addition to
+     * this, never a replacement for it.
+     */
+  }
+  <div class="card-carousel__track overflow-x-auto" tabindex="0" role="region" aria-label={label}>
+    <ul class="flex snap-x gap-4 pb-2">
+      <slot />
+    </ul>
+  </div>
+
+  {
+    /*
+     * Rendered hidden and revealed by the script only when the track actually
+     * overflows. Without JS the section stays the plain scroll strip it was,
+     * and a carousel whose cards already fit never shows controls that would
+     * scroll it by nothing.
+     */
+  }
+  <div
+    class="card-carousel__controls mt-6 flex items-center justify-end gap-3"
+    role="group"
+    aria-label={`${label} controls`}
+    hidden
+  >
+    {
+      autoplay && (
+        <button
+          type="button"
+          class={`card-carousel__toggle inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${buttonClass}`}
+          aria-label={`Pause ${itemNoun} carousel`}
+          hidden
+        >
+          <svg
+            class="card-carousel__toggle-icon-pause h-4 w-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <rect x="4" y="3" width="4" height="14" />
+            <rect x="12" y="3" width="4" height="14" />
+          </svg>
+          <svg
+            class="card-carousel__toggle-icon-play hidden h-4 w-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M5 3l12 7-12 7V3Z" />
+          </svg>
+        </button>
+      )
+    }
+
+    <button
+      type="button"
+      class={`card-carousel__prev inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors disabled:pointer-events-none disabled:opacity-40 ${buttonClass}`}
+      aria-label={`Previous ${itemNoun}`}
+      disabled
+    >
+      <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true" focusable="false">
+        <path d="M12.5 3.5 6 10l6.5 6.5 1.4-1.4L8.8 10l5.1-5.1z" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      class={`card-carousel__next inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors disabled:pointer-events-none disabled:opacity-40 ${buttonClass}`}
+      aria-label={`Next ${itemNoun}`}
+    >
+      <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true" focusable="false">
+        <path d="M7.5 3.5 6.1 4.9 11.2 10l-5.1 5.1 1.4 1.4L14 10z" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<style>
+  /* The controls are the affordance; the native bar would double up on it. */
+  .card-carousel__track {
+    scrollbar-width: none;
+  }
+
+  .card-carousel__track::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+
+<script>
+  const AUTOPLAY_MS = 6000;
+
+  for (const root of document.querySelectorAll<HTMLElement>('.card-carousel')) {
+    const track = root.querySelector<HTMLElement>('.card-carousel__track');
+    const controls = root.querySelector<HTMLElement>('.card-carousel__controls');
+    const prev = root.querySelector<HTMLButtonElement>('.card-carousel__prev');
+    const next = root.querySelector<HTMLButtonElement>('.card-carousel__next');
+    const cards = [...root.querySelectorAll<HTMLElement>('.card-carousel__track > ul > li')];
+    const toggle = root.querySelector<HTMLButtonElement>('.card-carousel__toggle');
+    const toggleIcons = toggle && {
+      pause: toggle.querySelector<SVGElement>('.card-carousel__toggle-icon-pause'),
+      play: toggle.querySelector<SVGElement>('.card-carousel__toggle-icon-play'),
+    };
+
+    if (!track || !controls || !prev || !next || cards.length === 0) continue;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wantsAutoplay = root.dataset.autoplay === 'true';
+
+    let timer: ReturnType<typeof setInterval> | null = null;
+    // Autoplay that was never asked for, or is suppressed by reduced motion,
+    // starts life already stopped so nothing below can start it.
+    let stopped = reduceMotion || !wantsAutoplay;
+    let atStart = true;
+    let atEnd = false;
+
+    // The +1 absorbs sub-pixel rounding: a track whose content matches its box
+    // to within a fraction of a pixel is not scrollable in practice, and
+    // without the slack it would show controls that move nothing.
+    const overflows = () => track.scrollWidth > track.clientWidth + 1;
+
+    // Declared before syncControls, which calls it. These are `const` arrow
+    // functions, so a call that runs before its definition is a TDZ
+    // ReferenceError, not a hoisted no-op — 05e889f was a fix for exactly
+    // that in the countdown island.
+    const pause = () => {
+      if (timer === null) return;
+      clearInterval(timer);
+      timer = null;
+    };
+
+    const syncControls = () => {
+      const scrollable = overflows();
+      controls.hidden = !scrollable;
+      prev.disabled = !scrollable || atStart;
+      next.disabled = !scrollable || atEnd;
+      // A track that cannot scroll must not keep a timer running against it.
+      if (!scrollable) pause();
+    };
+
+    const page = (direction: 1 | -1) => {
+      track.scrollBy({
+        left: direction * track.clientWidth,
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      });
+    };
+
+    // The single owner of both the stopped flag and the toggle's presentation,
+    // so every call site that ends or resumes autoplay updates the button the
+    // same way instead of duplicating it. The noun comes from the data
+    // attribute rather than by parsing the current label back apart.
+    const itemNoun = root.dataset.itemNoun ?? 'carousel';
+    const setStopped = (value: boolean) => {
+      stopped = value;
+      if (!toggle || !toggleIcons) return;
+      toggle.setAttribute('aria-label', `${value ? 'Play' : 'Pause'} ${itemNoun} carousel`);
+      toggleIcons.pause?.classList.toggle('hidden', value);
+      toggleIcons.play?.classList.toggle('hidden', !value);
+    };
+
+    const start = () => {
+      if (stopped || timer !== null || !overflows()) return;
+      timer = setInterval(() => {
+        // Wrap rather than stall once the last card is in view.
+        if (atEnd) track.scrollTo({ left: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+        else page(1);
+      }, AUTOPLAY_MS);
+      // Only unhidden once the timer actually exists: without this script, or
+      // under reduced motion, this line never runs, so the control never
+      // claims a pause mechanism for a carousel that does not move.
+      if (toggle) toggle.hidden = false;
+    };
+
+    // Deliberate interaction ends autoplay for this page view. Pausing would
+    // not be enough: a card must never be yanked away from someone who chose
+    // it and is reading it.
+    const stop = () => {
+      setStopped(true);
+      pause();
+    };
+
+    // Which end the track sits at, observed rather than computed from scroll
+    // events: a scroll listener fires for this script's own scrollBy() as
+    // well as the visitor's gesture, so it cannot tell them apart — the
+    // distinction stop-on-interaction depends on (see HeroSlider:327).
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.target === cards[0]) atStart = entry.isIntersecting;
+          if (entry.target === cards[cards.length - 1]) atEnd = entry.isIntersecting;
+        }
+        syncControls();
+      },
+      { root: track, threshold: 0.99 },
+    );
+    observer.observe(cards[0]);
+    observer.observe(cards[cards.length - 1]);
+
+    prev.addEventListener('click', () => {
+      stop();
+      page(-1);
+    });
+    next.addEventListener('click', () => {
+      stop();
+      page(1);
+    });
+
+    toggle?.addEventListener('click', () => {
+      if (stopped) {
+        setStopped(false);
+        start();
+      } else {
+        stop();
+      }
+    });
+
+    for (const eventName of ['pointerdown', 'touchstart'] as const) {
+      track.addEventListener(eventName, stop, { passive: true });
+    }
+
+    // A vertical wheel is the visitor scrolling the PAGE with the cursor
+    // resting over the carousel, not driving the track. Only a sideways
+    // gesture is an interaction with this component.
+    track.addEventListener(
+      'wheel',
+      (event) => {
+        if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+        stop();
+      },
+      { passive: true },
+    );
+
+    root.addEventListener('pointerenter', pause);
+    root.addEventListener('pointerleave', start);
+    root.addEventListener('focusin', pause);
+    root.addEventListener('focusout', start);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) pause();
+      else start();
+    });
+
+    // Whether the track overflows depends on the viewport, so the controls
+    // have to be re-evaluated when it changes — this is what makes the squad
+    // carousel show controls on a phone and hide them on a wide desktop.
+    new ResizeObserver(syncControls).observe(track);
+
+    syncControls();
+    start();
+  }
+</script>

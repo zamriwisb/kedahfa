@@ -3,6 +3,7 @@ import Countdown from './islands/Countdown.astro';
 import EmptyState from './EmptyState.astro';
 import MatchRow from './MatchRow.astro';
 import SectionHeading from './SectionHeading.astro';
+import CardCarousel from './CardCarousel.astro';
 import type { Team } from '../lib/content';
 import { nextMatch, recentResults, upcomingMatches, type Match } from '../lib/fixtures';
 
@@ -57,20 +58,18 @@ const strip: Match[] = [...past.slice().reverse(), ...upcoming.slice(0, 4)];
 
     {
       strip.length > 0 ? (
-        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Match schedule">
-          <ul class="flex snap-x gap-4 pb-2">
-            {strip.map((match) => (
-              <li class="w-72 shrink-0 snap-start sm:w-80">
-                <MatchRow
-                  match={match}
-                  teamsBySlug={teamsBySlug}
-                  clubSlug={clubSlug}
-                  highlight={next?.id === match.id}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
+        <CardCarousel name="fixtures" label="Match schedule" itemNoun="fixtures">
+          {strip.map((match) => (
+            <li class="w-72 shrink-0 snap-start sm:w-80">
+              <MatchRow
+                match={match}
+                teamsBySlug={teamsBySlug}
+                clubSlug={clubSlug}
+                highlight={next?.id === match.id}
+              />
+            </li>
+          ))}
+        </CardCarousel>
       ) : (
         <EmptyState message="No fixtures are currently scheduled." />
       )
