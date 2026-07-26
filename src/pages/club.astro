@@ -15,10 +15,10 @@ const facts = [
 ---
 
 <BaseLayout title="The Club" description={`About ${club.name}.`}>
-  <div class="mx-auto max-w-4xl space-y-12 px-[--spacing-gutter] py-12">
+  <div class="mx-auto max-w-4xl space-y-12 px-(--spacing-gutter) py-12">
     <SectionHeading title="The Club" level={1} />
 
-    <p class="text-lg text-[--color-text-muted]">
+    <p class="text-lg text-(--color-text-muted)">
       {club.name} is based at {club.stadium} in {club.city} and has represented the
       state since {club.founded}.
     </p>
@@ -26,8 +26,8 @@ const facts = [
     <dl class="grid grid-cols-2 gap-6 sm:grid-cols-4">
       {
         facts.map((fact) => (
-          <div class="clip-corner bg-[--color-ink-card] p-4">
-            <dt class="text-xs tracking-widest text-[--color-text-muted] font-display">
+          <div class="clip-corner bg-(--color-surface) p-4">
+            <dt class="text-xs tracking-widest text-(--color-text-muted) font-display">
               {fact.label}
             </dt>
             <dd class="mt-1 text-2xl font-display">{fact.value}</dd>

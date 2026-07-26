@@ -25,7 +25,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
   title="Fixtures & Results"
   description={`Every ${club.shortName} fixture and result this season.`}
 >
-  <div class="mx-auto max-w-4xl space-y-14 px-[--spacing-gutter] py-12">
+  <div class="mx-auto max-w-4xl space-y-14 px-(--spacing-gutter) py-12">
     <SectionHeading title="Fixtures & Results" level={1} />
 
     {
@@ -39,12 +39,12 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
     }
 
     <section>
-      <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">Upcoming</h2>
+      <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">Upcoming</h2>
       {
         upcoming.length > 0 ? (
           upcoming.map((group) => (
             <div class="mb-8">
-              <h3 class="mb-3 text-lg text-[--color-text-muted]">{group.heading}</h3>
+              <h3 class="mb-3 text-lg text-(--color-text-muted)">{group.heading}</h3>
               <div class="space-y-3">
                 {group.matches.map((match) => (
                   <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
@@ -61,7 +61,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
     {
       awaiting.length > 0 && (
         <section>
-          <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">Awaiting Result</h2>
+          <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">Awaiting Result</h2>
           <div class="space-y-3">
             {awaiting.map((match) => (
               <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
@@ -74,7 +74,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
     {
       postponed.length > 0 && (
         <section>
-          <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">Postponed</h2>
+          <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">Postponed</h2>
           <div class="space-y-3">
             {postponed.map((match) => (
               <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
@@ -85,12 +85,12 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
     }
 
     <section>
-      <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">Results</h2>
+      <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">Results</h2>
       {
         results.length > 0 ? (
           results.map((group) => (
             <div class="mb-8">
-              <h3 class="mb-3 text-lg text-[--color-text-muted]">{group.heading}</h3>
+              <h3 class="mb-3 text-lg text-(--color-text-muted)">{group.heading}</h3>
               <div class="space-y-3">
                 {group.matches.map((match) => (
                   <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />

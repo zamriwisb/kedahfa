@@ -11,14 +11,14 @@ const groups = groupByPosition(squad);
 ---
 
 <BaseLayout title="Squad" description={`The ${club.name} first-team squad.`}>
-  <div class="mx-auto max-w-6xl space-y-12 px-[--spacing-gutter] py-12">
+  <div class="mx-auto max-w-6xl space-y-12 px-(--spacing-gutter) py-12">
     <SectionHeading title="First Team Squad" level={1} />
 
     {
       groups.length > 0 ? (
         groups.map((group) => (
           <section>
-            <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">
+            <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">
               {group.position}s
             </h2>
             <ul class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

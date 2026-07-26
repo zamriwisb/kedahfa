@@ -16,19 +16,19 @@ const away = teamsBySlug.get(match.away);
 const outcome = outcomeFor(match, clubSlug);
 
 const OUTCOME_STYLES: Record<string, string> = {
-  W: 'bg-[--color-win]',
-  D: 'bg-[--color-draw]',
-  L: 'bg-[--color-loss]',
+  W: 'bg-(--color-win)',
+  D: 'bg-(--color-draw)',
+  L: 'bg-(--color-loss)',
 };
 
 const OUTCOME_LABELS: Record<string, string> = { W: 'Win', D: 'Draw', L: 'Loss' };
 ---
 
 <div
-  class="clip-corner flex items-center gap-4 bg-[--color-ink-card] p-4"
+  class="clip-corner flex items-center gap-4 bg-(--color-surface) p-4"
   data-competition={match.competition}
 >
-  <div class="w-28 shrink-0 text-xs text-[--color-text-muted]">
+  <div class="w-28 shrink-0 text-xs text-(--color-text-muted)">
     <p>{formatMatchDate(match.date)}</p>
     <p>
       {match.status === 'postponed' ? 'Postponed' : formatKickoffTime(match.date)}
@@ -66,7 +66,7 @@ const OUTCOME_LABELS: Record<string, string> = { W: 'Win', D: 'Draw', L: 'Loss' 
     }
     {
       match.report && (
-        <a href={`/news/${match.report}`} class="text-xs text-[--color-club-gold] underline">
+        <a href={`/news/${match.report}`} class="text-xs text-(--color-brand) underline">
           Report
         </a>
       )

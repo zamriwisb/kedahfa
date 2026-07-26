@@ -34,7 +34,7 @@ const latestArticles = articles.slice(0, 6);
 >
   <HeroPanel hero={hero} teamsBySlug={teamsBySlug} />
 
-  <div class="mx-auto max-w-6xl space-y-16 px-[--spacing-gutter] py-16">
+  <div class="mx-auto max-w-6xl space-y-16 px-(--spacing-gutter) py-16">
     {upcoming && <NextMatchCard match={upcoming} teamsBySlug={teamsBySlug} />}
 
     <section>
@@ -87,7 +87,7 @@ const latestArticles = articles.slice(0, 6);
       <SectionHeading title="First Team" href="/squad" />
       {
         featuredPlayers.length > 0 ? (
-          <ul class="-mx-[--spacing-gutter] flex snap-x gap-4 overflow-x-auto px-[--spacing-gutter] pb-2">
+          <ul class="-mx-(--spacing-gutter) flex snap-x gap-4 overflow-x-auto px-(--spacing-gutter) pb-2">
             {featuredPlayers.map((player) => (
               <li class="w-40 shrink-0 snap-start">
                 <PlayerCard player={player} />

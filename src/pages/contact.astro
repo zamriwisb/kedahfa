@@ -8,17 +8,17 @@ const mapQuery = encodeURIComponent(`${club.stadium}, ${club.city}, Malaysia`);
 ---
 
 <BaseLayout title="Contact" description={`Get in touch with ${club.name}.`}>
-  <div class="mx-auto max-w-4xl space-y-10 px-[--spacing-gutter] py-12">
+  <div class="mx-auto max-w-4xl space-y-10 px-(--spacing-gutter) py-12">
     <SectionHeading title="Contact" level={1} />
 
     <div class="grid gap-8 sm:grid-cols-2">
       <div>
-        <h2 class="text-sm tracking-[0.3em] text-[--color-club-gold]">Email</h2>
+        <h2 class="text-sm tracking-[0.3em] text-(--color-brand)">Email</h2>
         <ul class="mt-4 space-y-3">
           {
             club.emails.map((email) => (
               <li>
-                <p class="text-xs text-[--color-text-muted]">{email.label}</p>
+                <p class="text-xs text-(--color-text-muted)">{email.label}</p>
                 <a href={`mailto:${email.address}`} class="underline">
                   {email.address}
                 </a>
@@ -27,15 +27,15 @@ const mapQuery = encodeURIComponent(`${club.stadium}, ${club.city}, Malaysia`);
           }
         </ul>
 
-        <h2 class="mt-8 text-sm tracking-[0.3em] text-[--color-club-gold]">Phone</h2>
+        <h2 class="mt-8 text-sm tracking-[0.3em] text-(--color-brand)">Phone</h2>
         <p class="mt-3">
           <a href={`tel:${club.phone.replace(/\s/g, '')}`} class="underline">{club.phone}</a>
         </p>
       </div>
 
       <div>
-        <h2 class="text-sm tracking-[0.3em] text-[--color-club-gold]">Address</h2>
-        <address class="mt-4 not-italic text-[--color-text-muted]">
+        <h2 class="text-sm tracking-[0.3em] text-(--color-brand)">Address</h2>
+        <address class="mt-4 not-italic text-(--color-text-muted)">
           {club.stadium}<br />
           {club.city}<br />
           Malaysia
@@ -45,7 +45,7 @@ const mapQuery = encodeURIComponent(`${club.stadium}, ${club.city}, Malaysia`);
           href={`https://www.openstreetmap.org/search?query=${mapQuery}`}
           rel="noopener"
           target="_blank"
-          class="mt-4 text-sm text-[--color-club-gold] underline"
+          class="mt-4 text-sm text-(--color-brand) underline"
         >
           View on a map
         </a>

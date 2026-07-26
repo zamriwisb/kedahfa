@@ -19,7 +19,7 @@ const CATEGORY_LABELS: Record<Article['category'], string> = {
 
 <article
   class:list={[
-    'group clip-corner overflow-hidden bg-[--color-ink-card]',
+    'group clip-corner overflow-hidden bg-(--color-surface)',
     featured && 'sm:col-span-2 sm:row-span-2',
   ]}
   data-category={article.category}
@@ -36,14 +36,14 @@ const CATEGORY_LABELS: Record<Article['category'], string> = {
     />
 
     <div class="p-4">
-      <p class="text-xs tracking-widest text-[--color-club-gold] font-display">
+      <p class="text-xs tracking-widest text-(--color-brand) font-display">
         {CATEGORY_LABELS[article.category]}
       </p>
       <h3 class:list={['mt-2 leading-tight', featured ? 'text-2xl' : 'text-lg']}>
         {article.title}
       </h3>
-      <p class="mt-2 text-sm text-[--color-text-muted]">{article.excerpt}</p>
-      <p class="mt-3 text-xs text-[--color-text-muted]">
+      <p class="mt-2 text-sm text-(--color-text-muted)">{article.excerpt}</p>
+      <p class="mt-3 text-xs text-(--color-text-muted)">
         <time datetime={article.date.toISOString()}>{formatArticleDate(article.date)}</time>
       </p>
     </div>

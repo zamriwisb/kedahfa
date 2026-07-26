@@ -12,14 +12,14 @@ const table = deriveTable(standings);
 ---
 
 <BaseLayout title="Standings" description={`${season.competition} league table.`}>
-  <div class="mx-auto max-w-4xl px-[--spacing-gutter] py-12">
+  <div class="mx-auto max-w-4xl px-(--spacing-gutter) py-12">
     <SectionHeading title={season.competition} level={1} />
 
     {
       table.length > 0 ? (
         <>
           <StandingsTable table={table} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
-          <p class="mt-4 text-xs text-[--color-text-muted]">
+          <p class="mt-4 text-xs text-(--color-text-muted)">
             Last updated{' '}
             <time datetime={season.standingsUpdated.toISOString()}>
               {formatArticleDate(season.standingsUpdated)}

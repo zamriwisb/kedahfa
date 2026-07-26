@@ -14,8 +14,8 @@ const home = teamsBySlug.get(match.home);
 const away = teamsBySlug.get(match.away);
 ---
 
-<div class="clip-corner bg-[--color-ink-card] p-6 sm:p-8">
-  <p class="text-xs tracking-[0.3em] text-[--color-club-gold] font-display">Next Match</p>
+<div class="clip-corner bg-(--color-surface) p-6 sm:p-8">
+  <p class="text-xs tracking-[0.3em] text-(--color-brand) font-display">Next Match</p>
 
   <div class="mt-6 flex items-center justify-center gap-6 sm:gap-12">
     <div class="text-center">
@@ -23,7 +23,7 @@ const away = teamsBySlug.get(match.away);
       <p class="mt-2 text-sm font-display">{home?.name}</p>
     </div>
 
-    <span class="text-2xl text-[--color-text-muted] font-display">v</span>
+    <span class="text-2xl text-(--color-text-muted) font-display">v</span>
 
     <div class="text-center">
       <img src={away?.crest} alt="" width="64" height="64" aria-hidden="true" class="mx-auto" />
@@ -31,7 +31,7 @@ const away = teamsBySlug.get(match.away);
     </div>
   </div>
 
-  <p class="mt-6 text-center text-sm text-[--color-text-muted]">
+  <p class="mt-6 text-center text-sm text-(--color-text-muted)">
     {formatMatchDate(match.date)} &middot; {formatKickoffTime(match.date)} &middot; {match.venue}
   </p>
 

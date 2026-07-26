@@ -21,7 +21,7 @@ const tiers = (['main', 'official', 'partner'] as const)
   {
     tiers.map((group) => (
       <div>
-        <h3 class="mb-4 text-center text-xs tracking-[0.3em] text-[--color-text-muted] font-display">
+        <h3 class="mb-4 text-center text-xs tracking-[0.3em] text-(--color-text-muted) font-display">
           {TIER_LABELS[group.tier]}
         </h3>
         <ul class="flex flex-wrap items-center justify-center gap-8">

@@ -26,7 +26,7 @@ const previousUrl =
 const nextUrl = currentPage < lastPage ? `/news/page/${currentPage + 1}` : null;
 ---
 
-<div class="mx-auto max-w-6xl px-[--spacing-gutter] py-12">
+<div class="mx-auto max-w-6xl px-(--spacing-gutter) py-12">
   <SectionHeading title="News" level={1} />
 
   {
@@ -51,19 +51,19 @@ const nextUrl = currentPage < lastPage ? `/news/page/${currentPage + 1}` : null;
     lastPage > 1 && (
       <nav class="mt-10 flex items-center justify-between" aria-label="Pagination">
         {previousUrl ? (
-          <a href={previousUrl} class="text-sm text-[--color-club-gold] font-display">
+          <a href={previousUrl} class="text-sm text-(--color-brand) font-display">
             &larr; Newer
           </a>
         ) : (
           <span />
         )}
 
-        <p class="text-sm text-[--color-text-muted]">
+        <p class="text-sm text-(--color-text-muted)">
           Page {currentPage} of {lastPage}
         </p>
 
         {nextUrl ? (
-          <a href={nextUrl} class="text-sm text-[--color-club-gold] font-display">
+          <a href={nextUrl} class="text-sm text-(--color-brand) font-display">
             Older &rarr;
           </a>
         ) : (

@@ -21,7 +21,7 @@ const { table, teamsBySlug, clubSlug, compact = false } = Astro.props;
   <table class="w-full min-w-[32rem] border-collapse text-sm">
     <caption class="sr-only">League standings</caption>
     <thead>
-      <tr class="border-b border-[--color-line] text-left text-xs tracking-widest text-[--color-text-muted] font-display">
+      <tr class="border-b border-(--color-line) text-left text-xs tracking-widest text-(--color-text-muted) font-display">
         <th scope="col" class="py-2 pr-2">#</th>
         <th scope="col" class="py-2 pr-2">Team</th>
         <th scope="col" class="py-2 pr-2 text-center">P</th>
@@ -46,14 +46,14 @@ const { table, teamsBySlug, clubSlug, compact = false } = Astro.props;
         table.map((entry) => (
           <tr
             class:list={[
-              'border-b border-[--color-line]',
+              'border-b border-(--color-line)',
               // Bold weight, not just the tint: WCAG 1.4.1 forbids conveying
               // meaning by colour alone, and the sr-only marker below gives
               // screen reader users the same cue.
-              entry.team === clubSlug && 'bg-[--color-club-red]/20 font-semibold',
+              entry.team === clubSlug && 'bg-(--color-action)/20 font-semibold',
             ]}
           >
-            <td class="py-2 pr-2 text-[--color-text-muted]">{entry.position}</td>
+            <td class="py-2 pr-2 text-(--color-text-muted)">{entry.position}</td>
             <th
               scope="row"
               class:list={[
