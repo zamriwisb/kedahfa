@@ -2291,6 +2291,14 @@ Create `src/styles/global.css`:
 @import '@fontsource/barlow-condensed/700.css';
 @import './tokens.css';
 
+/*
+ * Tailwind 4 auto-detects content sources across the repo. docs/ holds this
+ * plan, whose code samples contain Tailwind classes for all 14 tasks — without
+ * this exclusion the shipped CSS carries dead utilities for pages that do not
+ * exist yet (measured: 75% larger). Exclude prose from the scan.
+ */
+@source not "../../docs";
+
 @layer base {
   html {
     scroll-behavior: smooth;
