@@ -15,7 +15,11 @@
   shortName: SEL2
   crest: /images/teams/selangor-ii.svg
 - id: kedah
-  name: Kedah Football Association
+  # "Kedah FA", not the full "Kedah Football Association": this name is what
+  # fixtures and the standings table render, where the long form crowds the
+  # row. src/data/club.yaml keeps the full name for the header, footer and
+  # page metadata.
+  name: Kedah FA
   shortName: KDH
   crest: /images/teams/kedah.png
 - id: negeri-sembilan-ii

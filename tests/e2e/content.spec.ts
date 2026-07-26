@@ -23,7 +23,10 @@ test('the standings table lists all twelve clubs, zeroed for the pre-season', as
   await expect(page.getByRole('rowheader')).toHaveCount(12);
 
   // Last cell of a row is its points total.
-  const kedah = page.getByRole('row').filter({ hasText: 'Kedah Football Association' });
+  // "Kedah FA" is the teams.yaml name, which is what the table renders.
+  // club.yaml's fuller "Kedah Football Association" drives the header and
+  // footer instead, so matching on it here would pass for the wrong reason.
+  const kedah = page.getByRole('row').filter({ hasText: 'Kedah FA' });
   await expect(kedah.getByRole('cell').last()).toHaveText('0');
 });
 
