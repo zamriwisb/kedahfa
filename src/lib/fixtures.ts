@@ -20,11 +20,6 @@ export interface Match {
   report?: string;
 }
 
-/** How recent a result must be to outrank the next fixture on the homepage. */
-export const HERO_RESULT_WINDOW_DAYS = 5;
-
-const MS_PER_DAY = 86_400_000;
-
 const byDateAscending = (a: Match, b: Match) => a.date.getTime() - b.date.getTime();
 const byDateDescending = (a: Match, b: Match) => b.date.getTime() - a.date.getTime();
 
@@ -84,28 +79,6 @@ export function outcomeFor(match: Match, clubSlug: string): 'W' | 'D' | 'L' | nu
   if (scored > conceded) return 'W';
   if (scored < conceded) return 'L';
   return 'D';
-}
-
-export type Hero = { kind: 'result' | 'fixture'; match: Match } | null;
-
-/**
- * The hero reflects the club's current state: a fresh result while it is still
- * news, otherwise what is coming next, otherwise the last thing that happened.
- */
-export function selectHero(all: Match[], now: Date): Hero {
-  const latestResult = finishedMatches(all)[0] ?? null;
-
-  if (latestResult) {
-    const ageDays = (now.getTime() - latestResult.date.getTime()) / MS_PER_DAY;
-    if (ageDays >= 0 && ageDays <= HERO_RESULT_WINDOW_DAYS) {
-      return { kind: 'result', match: latestResult };
-    }
-  }
-
-  const upcoming = nextMatch(all, now);
-  if (upcoming) return { kind: 'fixture', match: upcoming };
-  if (latestResult) return { kind: 'result', match: latestResult };
-  return null;
 }
 
 export interface MonthGroup {

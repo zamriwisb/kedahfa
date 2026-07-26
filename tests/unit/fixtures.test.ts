@@ -6,7 +6,6 @@ import {
   nextMatch,
   outcomeFor,
   recentResults,
-  selectHero,
   upcomingMatches,
   type Match,
 } from '../../src/lib/fixtures';
@@ -204,49 +203,6 @@ describe('outcomeFor', () => {
 
   it('returns null for a club that did not play in the match', () => {
     expect(outcomeFor(SELANGOR_HOME_WIN, 'jdt')).toBeNull();
-  });
-});
-
-describe('selectHero', () => {
-  it('shows the latest result when it is within the five-day window', () => {
-    const hero = selectHero(ALL, new Date('2026-07-21T09:00:00+08:00'));
-    expect(hero).toEqual({ kind: 'result', match: SELANGOR_HOME_WIN });
-  });
-
-  it('shows the next fixture once the latest result is older than five days', () => {
-    const hero = selectHero(ALL, new Date('2026-07-26T09:00:00+08:00'));
-    expect(hero).toEqual({ kind: 'fixture', match: JDT_HOME });
-  });
-
-  it('still shows the result at exactly the window boundary', () => {
-    // SELANGOR_HOME_WIN kicked off 2026-07-19T20:45+08:00, so this is 5.0 days
-    // later to the second. The comparison is <=, so the result still wins.
-    const exactlyFiveDays = new Date('2026-07-24T20:45:00+08:00');
-    expect(selectHero(ALL, exactlyFiveDays)).toEqual({
-      kind: 'result',
-      match: SELANGOR_HOME_WIN,
-    });
-  });
-
-  it('switches to the next fixture one minute past the boundary', () => {
-    // Pins the off-by-one: with `<` instead of `<=` the previous test fails,
-    // and with `<=` on a stale bound this one does.
-    const justPast = new Date('2026-07-24T20:46:00+08:00');
-    expect(selectHero(ALL, justPast)).toEqual({ kind: 'fixture', match: JDT_HOME });
-  });
-
-  it('falls back to the latest result when no fixtures remain', () => {
-    const hero = selectHero(ALL, new Date('2026-12-01T09:00:00+08:00'));
-    expect(hero).toEqual({ kind: 'result', match: SELANGOR_HOME_WIN });
-  });
-
-  it('returns null when there is no content at all', () => {
-    expect(selectHero([], new Date('2026-07-26T09:00:00+08:00'))).toBeNull();
-  });
-
-  it('shows the next fixture when nothing has been played yet', () => {
-    const hero = selectHero([JDT_HOME], new Date('2026-07-26T09:00:00+08:00'));
-    expect(hero).toEqual({ kind: 'fixture', match: JDT_HOME });
   });
 });
 

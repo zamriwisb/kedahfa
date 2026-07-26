@@ -1,0 +1,155 @@
+---
+import type { Slide } from '../lib/slides';
+
+interface Props {
+  slides: Slide[];
+}
+
+const { slides } = Astro.props;
+const total = slides.length;
+---
+
+{
+  /*
+   * The track is a scroll-snap container rather than a JS-swapped stack of
+   * absolutely positioned slides. Touch swipe, momentum and keyboard
+   * scrolling then come from the browser, and the script in this file only
+   * *adds* autoplay and indicator syncing on top. If that script fails to
+   * run, this is still a working gallery instead of a dead single frame.
+   *
+   * The section keeps its own solid --color-brand-ink background behind the
+   * photo, and every text node below sets an explicit invert colour. axe
+   * resolves a text node's effective background from the nearest ancestor's
+   * CSS background-color — never from an absolutely-positioned image or
+   * gradient — so a dark section with no explicit text colour reads as a
+   * contrast failure (measured 1.42:1 in the HeroPanel this replaces).
+   */
+}
+{
+  total > 0 && (
+    <section
+      class="hero-slider relative isolate bg-(--color-brand-ink)"
+      aria-roledescription="carousel"
+      aria-label="Featured"
+    >
+      <div
+        class="hero-slider__track overflow-x-auto overscroll-x-contain snap-x snap-mandatory"
+        tabindex="0"
+        role="region"
+        aria-label="Featured slides"
+      >
+        <ul class="flex">
+          {slides.map((slide, index) => {
+            // Every other page's primary heading is an h1 (see
+            // SectionHeading's `level` prop); the homepage's used to come
+            // from HeroPanel's h1. All three slides sit in the DOM at once
+            // (this is a scroll-snap track, not a JS-swapped single frame),
+            // so only the first slide's title may be an h1 — giving every
+            // slide one would leave the page with three, which is exactly
+            // as wrong as having none.
+            const Heading = index === 0 ? 'h1' : 'h2';
+
+            return (
+              <li
+                class="hero-slider__slide relative flex min-h-[420px] w-full shrink-0 snap-start flex-col justify-end overflow-hidden sm:min-h-[540px] lg:min-h-[620px]"
+                aria-roledescription="slide"
+                aria-label={`${index + 1} of ${total}`}
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.imageAlt}
+                  width="1600"
+                  height="900"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  class="absolute inset-0 -z-10 h-full w-full object-cover"
+                />
+                <div
+                  aria-hidden="true"
+                  class="absolute inset-0 -z-10 bg-gradient-to-t from-(--color-brand-ink) via-(--color-brand-ink)/60 to-transparent"
+                />
+
+                <div class="relative mx-auto w-full max-w-6xl px-(--spacing-gutter) pb-20 pt-24">
+                  {slide.eyebrow && (
+                    <p class="text-sm tracking-widest text-(--color-text-invert) font-display">
+                      {slide.eyebrow}
+                    </p>
+                  )}
+
+                  <Heading class="mt-2 max-w-3xl text-4xl leading-[0.95] text-(--color-text-invert) sm:text-6xl lg:text-7xl">
+                    {slide.href ? (
+                      <a
+                        href={slide.href}
+                        class="text-(--color-text-invert) transition-colors hover:text-(--color-accent)"
+                      >
+                        {slide.title}
+                      </a>
+                    ) : (
+                      slide.title
+                    )}
+                  </Heading>
+
+                  {slide.cta && slide.href && (
+                    <a
+                      href={slide.href}
+                      class="clip-corner mt-6 inline-flex bg-(--color-action) px-6 text-sm tracking-widest text-(--color-text-invert) transition-colors font-display hover:bg-(--color-action-deep)"
+                    >
+                      {slide.cta}
+                    </a>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {total > 1 && (
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10">
+          <div class="mx-auto flex max-w-6xl justify-end px-(--spacing-gutter) pb-4">
+            <div class="pointer-events-auto flex gap-2" role="group" aria-label="Choose a slide">
+              {slides.map((slide, index) => (
+                <button
+                  type="button"
+                  class="hero-slider__dot justify-center px-1"
+                  data-slide-to={index}
+                  aria-label={`Go to slide ${index + 1}`}
+                  aria-current={index === 0 ? 'true' : undefined}
+                >
+                  <span aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+<style>
+  /*
+   * Two things Tailwind utilities cannot express cleanly, kept together here:
+   * hiding the track's scrollbar (the dashes are the affordance) and styling
+   * the dash from its own aria-current, so the DOM attribute the script sets
+   * is the single source of truth for which dash is active.
+   */
+  .hero-slider__track {
+    scrollbar-width: none;
+  }
+
+  .hero-slider__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero-slider__dot span {
+    display: block;
+    height: 3px;
+    width: 2rem;
+    background-color: rgb(255 255 255 / 45%);
+    transition: background-color 150ms ease;
+  }
+
+  .hero-slider__dot[aria-current='true'] span {
+    background-color: var(--color-accent);
+  }
+</style>
