@@ -4,9 +4,9 @@ import type { Match } from './fixtures';
 import type { StandingsInput } from './standings';
 import type { Player, Position } from './squad';
 import {
+  assertNoDuplicateIds,
   assertPublicAssetsExist,
   assertReferencesResolve,
-  assertUniqueIds,
   assertUniqueSquadNumbers,
 } from './validate';
 
@@ -79,7 +79,22 @@ export function loadSiteData(): Promise<SiteData> {
   return cached;
 }
 
+const DATA_FILES_WITH_IDS = [
+  'src/data/teams.yaml',
+  'src/data/fixtures.yaml',
+  'src/data/standings.yaml',
+  'src/data/squad.yaml',
+  'src/data/sponsors.yaml',
+];
+
 async function build(): Promise<SiteData> {
+  // Runs before anything touches getCollection(): Astro's file() loader
+  // dedupes by id in its own store before getCollection() returns, so this
+  // check must see the raw YAML or it can never catch a duplicate.
+  for (const dataFile of DATA_FILES_WITH_IDS) {
+    assertNoDuplicateIds(dataFile);
+  }
+
   const clubEntry = await getEntry('club', 'club');
   const seasonEntry = await getEntry('season', 'current');
   if (!clubEntry) throw new Error('src/data/club.yaml is missing its "club" entry.');
@@ -163,8 +178,6 @@ async function build(): Promise<SiteData> {
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 
   assertUniqueSquadNumbers(squad);
-  assertUniqueIds(standingEntries, 'standings');
-  assertUniqueIds(teamEntries, 'teams');
 
   // Astro's reference() does not check existence, so do it here — this is the
   // only place that holds every collection at once.

@@ -3,9 +3,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  assertNoDuplicateIds,
   assertPublicAssetsExist,
   assertReferencesResolve,
-  assertUniqueIds,
   assertUniqueSquadNumbers,
 } from '../../src/lib/validate';
 
@@ -33,15 +33,71 @@ describe('assertUniqueSquadNumbers', () => {
   });
 });
 
-describe('assertUniqueIds', () => {
-  it('accepts distinct ids', () => {
-    expect(() => assertUniqueIds([{ id: 'jdt' }, { id: 'kedah' }], 'standings')).not.toThrow();
+describe('assertNoDuplicateIds', () => {
+  function yamlFixtureDir(): string {
+    return mkdtempSync(join(tmpdir(), 'kedah-dup-ids-'));
+  }
+
+  function writeYaml(dir: string, name: string, content: string): string {
+    const path = join(dir, name);
+    writeFileSync(path, content);
+    return path;
+  }
+
+  it('accepts a file with distinct ids', () => {
+    const dir = yamlFixtureDir();
+    const path = writeYaml(
+      dir,
+      'clean.yaml',
+      '- id: jdt\n  team: jdt\n- id: kedah\n  team: kedah\n',
+    );
+    expect(() => assertNoDuplicateIds(path)).not.toThrow();
   });
 
-  it('throws naming the collection and the repeated id', () => {
-    expect(() => assertUniqueIds([{ id: 'jdt' }, { id: 'jdt' }], 'standings')).toThrow(
-      /standings.*jdt/s,
+  it('throws naming the file, the repeated id, and how many times it occurs', () => {
+    const dir = yamlFixtureDir();
+    const path = writeYaml(
+      dir,
+      'standings.yaml',
+      '- id: jdt\n  team: jdt\n- id: kedah\n  team: kedah\n- id: jdt\n  team: jdt\n',
     );
+    expect(() => assertNoDuplicateIds(path)).toThrow(
+      new RegExp(`${path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*jdt.*2 times`, 's'),
+    );
+  });
+
+  it('names every offending id when several ids are duplicated, not just the first', () => {
+    const dir = yamlFixtureDir();
+    const path = writeYaml(
+      dir,
+      'many-dupes.yaml',
+      [
+        '- id: a',
+        '- id: b',
+        '- id: a',
+        '- id: c',
+        '- id: b',
+        '- id: b',
+      ].join('\n') + '\n',
+    );
+    expect(() => assertNoDuplicateIds(path)).toThrow(
+      /"a" appears 2 times[\s\S]*"b" appears 3 times/,
+    );
+
+    // "c" is not duplicated and must not be reported.
+    let message = '';
+    try {
+      assertNoDuplicateIds(path);
+    } catch (error) {
+      message = (error as Error).message;
+    }
+    expect(message).not.toMatch(/"c"/);
+  });
+
+  it('accepts an empty array', () => {
+    const dir = yamlFixtureDir();
+    const path = writeYaml(dir, 'empty.yaml', '[]\n');
+    expect(() => assertNoDuplicateIds(path)).not.toThrow();
   });
 });
 

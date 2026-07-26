@@ -1,10 +1,16 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+// js-yaml@5 ships only named ESM exports (no default export) — a default
+// import resolves to undefined under Vite/Vitest's native ESM handling.
+import { load } from 'js-yaml';
 
 /**
  * Invariants that span multiple entries. Zod validates one record at a time,
  * so uniqueness and asset existence cannot live in the collection schemas.
  * Every function throws — called from loadSiteData(), a throw fails the build.
+ *
+ * No astro:content or .astro imports here: this module is unit-tested with
+ * plain Vitest, outside Astro's content pipeline.
  */
 
 export function assertUniqueSquadNumbers(players: { id: string; number: number }[]): void {
@@ -22,17 +28,36 @@ export function assertUniqueSquadNumbers(players: { id: string; number: number }
   throw new Error(`Duplicate squad numbers in src/data/squad.yaml:\n${detail}`);
 }
 
-export function assertUniqueIds(items: { id: string }[], label: string): void {
-  const seen = new Set<string>();
-  const duplicates = new Set<string>();
-
-  for (const item of items) {
-    if (seen.has(item.id)) duplicates.add(item.id);
-    seen.add(item.id);
+/**
+ * Astro's file() loader dedupes entries by id in its own store BEFORE
+ * getCollection() ever returns (it logs a warning and lets the later entry
+ * silently overwrite the earlier one — see astro/dist/content/loaders/file.js).
+ * A check that runs on the loaded collection can therefore never observe a
+ * duplicate. This reads and parses the YAML file directly — ahead of that
+ * dedup — so a repeated id actually fails the build instead of silently
+ * dropping or overwriting an entry.
+ */
+export function assertNoDuplicateIds(filePath: string): void {
+  const raw = readFileSync(filePath, 'utf-8');
+  const data = load(raw);
+  if (!Array.isArray(data)) {
+    throw new Error(`${filePath} must contain a YAML array of entries with an "id" field.`);
   }
 
-  if (duplicates.size === 0) return;
-  throw new Error(`Duplicate ${label} entries: ${[...duplicates].join(', ')}`);
+  const counts = new Map<string, number>();
+  for (const entry of data) {
+    const id = (entry as { id?: unknown } | null)?.id;
+    if (typeof id !== 'string') continue;
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+
+  const duplicates = [...counts.entries()].filter(([, count]) => count > 1);
+  if (duplicates.length === 0) return;
+
+  const detail = duplicates
+    .map(([id, count]) => `  "${id}" appears ${count} times`)
+    .join('\n');
+  throw new Error(`Duplicate ids in ${filePath}:\n${detail}`);
 }
 
 export function assertPublicAssetsExist(paths: string[], publicDir: string): void {
