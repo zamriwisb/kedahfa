@@ -30,10 +30,21 @@ and deploys automatically.
 | Sponsors | `src/data/sponsors.yaml` |
 | Club details | `src/data/club.yaml` |
 | A news article | Add a Markdown file to `src/content/news/` |
+| Homepage slider | `src/data/slides.yaml` |
 
 The build validates everything. If a fixture is missing a score, a team slug is
 misspelled, or an image path does not exist, the build fails with a named error
 and the live site is left untouched.
+
+### Homepage slider
+
+`src/data/slides.yaml` drives the full-width slider at the top of the homepage.
+Each entry needs `id`, `image`, `imageAlt` and `title`; `eyebrow`, `href`, `cta`
+and `order` are optional. `cta` only works together with `href`.
+
+Slides run in `order` ascending, and any slide without an `order` falls after
+those that have one. Put photography in `public/images/slides/` — the build
+fails if `image` points at a file that is not there, so a typo cannot ship.
 
 ## Rebranding
 
