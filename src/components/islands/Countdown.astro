@@ -50,6 +50,8 @@ const units = [
 </div>
 
 <script>
+  import { countdown } from '../../lib/dates';
+
   for (const root of document.querySelectorAll<HTMLElement>('.countdown')) {
     const target = new Date(root.dataset.target ?? '');
     if (Number.isNaN(target.getTime())) continue;
@@ -62,9 +64,9 @@ const units = [
     };
 
     const tick = () => {
-      const remaining = target.getTime() - Date.now();
+      const remaining = countdown(new Date(), target);
 
-      if (remaining <= 0) {
+      if (!remaining) {
         // Kickoff has passed. The static build still lists this as the next
         // match until the next deploy, so say so rather than counting down.
         root.textContent = 'Kick-off';
@@ -73,17 +75,9 @@ const units = [
         return;
       }
 
-      const total = Math.floor(remaining / 1000);
-      const values = {
-        days: Math.floor(total / 86400),
-        hours: Math.floor((total % 86400) / 3600),
-        minutes: Math.floor((total % 3600) / 60),
-        seconds: total % 60,
-      };
-
       for (const [key, element] of Object.entries(fields)) {
         if (element) {
-          element.textContent = String(values[key as keyof typeof values]).padStart(2, '0');
+          element.textContent = String(remaining[key as keyof typeof remaining]).padStart(2, '0');
         }
       }
     };
