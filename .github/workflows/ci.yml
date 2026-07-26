@@ -38,5 +38,12 @@ jobs:
         if: failure()
         with:
           name: playwright-report
-          path: playwright-report/
+          # test-results/ carries traces and screenshots; playwright-report/ is
+          # the browsable HTML. Both are needed to debug a failed run.
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 7
+          # Fail loudly rather than uploading an empty artifact — a silent
+          # no-op here means a red CI run with nothing to inspect.
+          if-no-files-found: error

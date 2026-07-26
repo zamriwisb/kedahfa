@@ -5,7 +5,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  // On CI, 'github' alone REPLACES the default html reporter, so
+  // playwright-report/ is never written and the workflow's upload-artifact
+  // step silently uploads nothing. Ask for both: inline annotations plus a
+  // report to download when a run fails.
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }]]
+    : 'list',
   use: {
     baseURL: 'http://localhost:4321',
     trace: 'on-first-retry',
