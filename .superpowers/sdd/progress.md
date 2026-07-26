@@ -33,3 +33,8 @@ Task 5: complete (commits 50828a9..6f6369b, review clean)
   assertReferencesResolve wired for fixture home/away/report + standings team.
   NOTE: Steps 7 & 9 negative build tests did NOT fail, because no page calls
   loadSiteData() yet. MUST be re-run at end of Task 8 as its verification.
+Task 6: complete (commits 5d63fca..856905b, review clean after 1 fix)
+  MILESTONE: negative tests now BITE. Duplicate squad number -> exit 1;
+  dangling team ref -> exit 1. Task 2's Critical finding verified closed.
+  Also fixed latent Task 5 bug (PUBLIC_DIR via import.meta.url broke once
+  Astro bundled the module) and Tailwind scanning docs/ (26KB -> 13.7KB CSS).
