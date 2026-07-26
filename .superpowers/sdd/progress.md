@@ -9,6 +9,12 @@ content.ts; @plugin placement in global.css) in commit below.
 - validate.test.ts: assertUniqueSquadNumbers tests only use ADJACENT duplicate
   numbers, so an adjacent-only implementation would pass. Origin: the plan's
   test fixture, not the implementer. Add a non-adjacent duplicate case.
+- HeroPanel.astro hardcodes /images/news/placeholder.svg for every hero. The
+  Match model has no image field, so a real match photo cannot be sourced.
+  Needs a schema field + wiring before real content lands. Origin: the plan.
+- index.astro hides the Partners section entirely when sponsors is empty,
+  rather than rendering empty-state copy like the other four sections.
+  Inconsistent with the stated constraint. Origin: the plan.
 
 ## Tasks
 Task 1: complete (commits 293d828..3c1224d, review clean — reviewer mutation-tested TZ handling)
@@ -39,3 +45,4 @@ Task 6: complete (commits 5d63fca..856905b, review clean after 1 fix)
   Also fixed latent Task 5 bug (PUBLIC_DIR via import.meta.url broke once
   Astro bundled the module) and Tailwind scanning docs/ (26KB -> 13.7KB CSS).
 Task 7: complete (commits f91b68c..4bc3d37, review clean after 1 fix — WCAG 1.4.1 colour-only club row + no-JS countdown state)
+Task 8: complete (commits a18b6fe..e8110f5, review clean, 2 minor deferred)
