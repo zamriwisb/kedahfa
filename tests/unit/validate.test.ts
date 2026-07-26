@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   assertNoDuplicateIds,
+  assertNoDuplicateNewsIds,
   assertPublicAssetsExist,
   assertReferencesResolve,
   assertUniqueSquadNumbers,
@@ -175,5 +176,43 @@ describe('assertReferencesResolve', () => {
 
   it('accepts an empty reference list', () => {
     expect(() => assertReferencesResolve([], teams, 'teams')).not.toThrow();
+  });
+});
+
+describe('assertNoDuplicateNewsIds', () => {
+  function newsFixtureDir(): string {
+    return mkdtempSync(join(tmpdir(), 'kedah-news-ids-'));
+  }
+
+  function writeArticle(dir: string, filename: string): string {
+    const path = join(dir, filename);
+    writeFileSync(path, '---\ntitle: test\n---\nBody.\n');
+    return path;
+  }
+
+  it('accepts a directory with no colliding ids', () => {
+    const dir = newsFixtureDir();
+    writeArticle(dir, 'kedah-edge-selangor.md');
+    writeArticle(dir, 'new-signing-announced.md');
+    writeArticle(dir, 'academy-trials-open.md');
+    expect(() => assertNoDuplicateNewsIds(dir)).not.toThrow();
+  });
+
+  it('throws when two filenames collide only by case', () => {
+    const dir = newsFixtureDir();
+    writeArticle(dir, 'Kedah Edge Selangor.md');
+    writeArticle(dir, 'kedah-edge-selangor.md');
+    expect(() => assertNoDuplicateNewsIds(dir)).toThrow(
+      /"kedah-edge-selangor".*Kedah Edge Selangor\.md.*kedah-edge-selangor\.md/s,
+    );
+  });
+
+  it('accepts a clean multi-file directory with varied names', () => {
+    const dir = newsFixtureDir();
+    writeArticle(dir, 'first-team-wins-derby.md');
+    writeArticle(dir, 'youth-academy-update.md');
+    writeArticle(dir, 'transfer-window-closes.md');
+    writeArticle(dir, 'stadium-redevelopment.md');
+    expect(() => assertNoDuplicateNewsIds(dir)).not.toThrow();
   });
 });

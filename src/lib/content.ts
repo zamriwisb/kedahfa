@@ -6,6 +6,7 @@ import type { StandingsInput } from './standings';
 import type { Player, Position } from './squad';
 import {
   assertNoDuplicateIds,
+  assertNoDuplicateNewsIds,
   assertPublicAssetsExist,
   assertReferencesResolve,
   assertUniqueSquadNumbers,
@@ -107,6 +108,10 @@ async function build(): Promise<SiteData> {
   for (const dataFile of dataFilesWithIds()) {
     assertNoDuplicateIds(dataFile);
   }
+  // Same reasoning, different loader: glob() (news) dedupes by slugged
+  // filename in its own store before getCollection() returns, so this must
+  // also run ahead of getCollection('news') to ever see the collision.
+  assertNoDuplicateNewsIds(join(process.cwd(), 'src/content/news'));
 
   const clubEntry = await getEntry('club', 'club');
   const seasonEntry = await getEntry('season', 'current');
