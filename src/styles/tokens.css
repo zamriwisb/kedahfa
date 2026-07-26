@@ -1,51 +1,64 @@
 /*
- * PLACEHOLDER BRANDING.
+ * KEDAH FA BRAND COLOURS — supplied by the club.
  *
- * The palette below is modelled on the slaskwroclaw.pl reference design the
- * client supplied: a green-dominant system on a light grey page, with gold
- * accents and red calls to action. It is NOT verified Kedah FA branding —
- * Kedah's own identity is red and gold, so this must be reviewed before launch.
+ *   green  #0f6c36      yellow #fcd704      red #e61f26
+ *
+ * The three official colours are held verbatim below as --color-brand,
+ * --color-accent and --color-brand-red. Everything else in this file is a
+ * derived shade of those three, chosen so that every foreground/background
+ * pair the UI actually uses clears WCAG AA (4.5:1). Measured ratios are noted
+ * so a future edit can see its headroom.
+ *
+ * TWO TRAPS, both from the official colours themselves:
+ *
+ *   1. White on the yellow is 1.41:1. Yellow is a LIGHT colour — it takes
+ *      near-black text, never white. Yellow on white is also 1.41:1, so the
+ *      yellow only ever appears on a green surface.
+ *   2. White on the official red is 4.58:1 — over the line, but with no
+ *      headroom at all. Buttons and the standings club row therefore use
+ *      --color-action (#b81419), a darkened red at 6.66:1. The official red
+ *      is reserved for large display glyphs on dark, where it can be itself.
+ *
  * Nothing outside this file should contain a raw hex colour.
- *
- * Every foreground/background pair used in the UI was measured against WCAG AA
- * (4.5:1). Ratios are noted so a future edit can tell what headroom it has.
- * The one trap: --color-gold on white is 2.49:1. Gold is for dark-green
- * surfaces only — labels, rules, and small caps. Never gold text on white.
  */
 @theme {
-  /* Brand greens */
-  --color-brand: #006643; /* header top bar, highlight cards; white on it 7.04:1 */
-  --color-brand-deep: #003e29; /* nav bar, footer; white on it 12.20:1 */
-  --color-brand-panel: #014129; /* full-bleed section bands; white 11.74:1 */
-  --color-brand-ink: #011a11; /* footer base, deepest green */
+  /* --- The three official colours, unmodified --- */
+  --color-brand: #0f6c36; /* official green; white on it 6.52:1 */
+  --color-accent: #fcd704; /* official yellow; ON GREEN ONLY. black on it 13.36:1 */
+  --color-brand-red: #e61f26; /* official red; large display text on dark only */
 
-  /* Accents */
-  --color-gold: #c0a062; /* eyebrow labels + section rules on green: 4.72:1 */
-  --color-action: #c30101; /* CTA buttons; white on it 6.32:1 */
-  --color-action-deep: #9a0101; /* CTA hover; white on it 8.83:1 */
+  /* --- Derived green ramp, brightest to deepest --- */
+  --color-brand-panel: #0b5429; /* section bands; white 9.07:1, yellow 6.42:1 */
+  --color-brand-deep: #073a1c; /* nav bar, footer; white 12.88:1, yellow 9.11:1 */
+  --color-brand-ink: #041f0f; /* footer base strip; white 17.38:1 */
 
-  /* Surfaces — the page is LIGHT, sections alternate onto green */
-  --color-page: #e7e7e7; /* page background */
-  --color-surface: #ffffff; /* cards on the light page */
+  /* --- Action red, darkened for white-text headroom --- */
+  --color-action: #b81419; /* CTA + club row; white on it 6.66:1, and 6.66:1 as text on white */
+  --color-action-deep: #8f0f13; /* hover; white on it 9.32:1 */
+
+  /* --- Surfaces: the page is LIGHT, feature sections band onto green --- */
+  --color-page: #e7e7e7;
+  --color-surface: #ffffff;
   --color-line: #d5d5d5; /* hairlines on light */
-  --color-line-dark: #0b4c33; /* hairlines on green */
+  --color-line-dark: #12492a; /* hairlines on green */
 
-  /* Text */
-  --color-text: #1a1a1a; /* on light: 14.07:1 */
-  --color-text-muted: #5a5a5a; /* on light: 5.58:1 */
-  --color-text-invert: #ffffff; /* on any brand green */
-  --color-text-invert-muted: #b9cec4; /* on brand-deep: 8.4:1 */
+  /* --- Text --- */
+  --color-text: #1a1a1a; /* on page grey 14.07:1 */
+  --color-text-muted: #5a5a5a; /* on page grey 5.58:1 */
+  --color-text-invert: #ffffff; /* on any green above */
+  --color-text-invert-muted: #bcd5c5; /* on brand-deep 8.9:1 */
+  --color-text-on-accent: #111111; /* the only text colour allowed on yellow */
 
-  /* Result semantics — measured against white text */
-  --color-win: #1b6b3f; /* 5.93:1 */
-  --color-draw: #55555e; /* 6.71:1 */
-  --color-loss: #b03a32; /* 5.46:1 */
+  /* --- Result semantics, aligned to the brand --- */
+  --color-win: #0f6c36; /* white on it 6.52:1 */
+  --color-draw: #55555e; /* white on it 6.71:1 */
+  --color-loss: #b81419; /* white on it 6.66:1 */
 
-  /* Type */
+  /* --- Type --- */
   --font-display: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 
-  /* Layout */
+  /* --- Layout --- */
   --spacing-gutter: 1.25rem;
   --radius-card: 6px;
   --radius-pill: 999px;

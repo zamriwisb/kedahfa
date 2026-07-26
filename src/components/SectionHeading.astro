@@ -11,9 +11,9 @@ interface Props {
    */
   level?: 1 | 2;
   /**
-   * Which surface this heading sits on. Gold text is only ever AA-compliant
-   * on the brand greens, so the eyebrow (and the link, if any) switch to a
-   * muted grey when the surrounding section is the light page.
+   * Which surface this heading sits on. The brand yellow is a LIGHT colour —
+   * it reads only against the brand greens (yellow on white is 1.41:1), so the
+   * eyebrow, link and rule all switch to darker brand colours on the light page.
    */
   on?: 'light' | 'green';
 }
@@ -21,12 +21,16 @@ const { title, eyebrow, href, linkLabel = 'View all', level = 2, on = 'light' } 
 const Heading = `h${level}` as 'h1' | 'h2';
 
 const eyebrowClass =
-  on === 'green' ? 'text-(--color-gold)' : 'text-(--color-text-muted)';
+  on === 'green' ? 'text-(--color-accent)' : 'text-(--color-text-muted)';
 const headingClass = on === 'green' ? 'text-(--color-text-invert)' : 'text-(--color-text)';
 const linkClass =
   on === 'green'
     ? 'text-(--color-text-invert-muted) hover:text-(--color-text-invert)'
     : 'text-(--color-action) hover:text-(--color-action-deep)';
+
+// The rule is decorative, but a yellow bar on the light grey page is all but
+// invisible (1.41:1). Green carries the same brand signal and actually reads.
+const ruleClass = on === 'green' ? 'bg-(--color-accent)' : 'bg-(--color-brand)';
 ---
 
 <div class="mb-8">
@@ -45,5 +49,5 @@ const linkClass =
       )
     }
   </div>
-  <div class="mt-4 h-1 w-16 bg-(--color-gold)"></div>
+  <div class={`mt-4 h-1 w-16 ${ruleClass}`}></div>
 </div>
