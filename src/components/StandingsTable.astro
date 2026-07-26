@@ -50,10 +50,20 @@ function cellClass(isClub: boolean, extra: string): string {
     cannot fails WCAG 2.1.1 (axe rule: scrollable-region-focusable).
   -->
   <div class="overflow-x-auto p-4 sm:p-6" tabindex="0" role="region" aria-label="League standings">
-    <table class="w-full min-w-[32rem] border-separate border-spacing-0 text-sm">
+    <!--
+      font-display is set once here rather than per cell: the table previously
+      carried it on the header row, the team name and the Pts column only, so
+      the position number and every other numeric column fell back to the body
+      face and the table mixed Barlow Condensed with Inter. tabular-nums keeps
+      the numeric columns from shifting width between values once real results
+      replace the pre-season zeros.
+    -->
+    <table
+      class="w-full min-w-[32rem] border-separate border-spacing-0 text-sm font-display tabular-nums"
+    >
       <caption class="sr-only">League standings</caption>
       <thead>
-        <tr class="text-left text-xs tracking-widest text-(--color-text-muted) font-display">
+        <tr class="text-left text-xs tracking-widest text-(--color-text-muted)">
           <th scope="col" class="border-b border-(--color-line) py-2 pr-2">#</th>
           <th scope="col" class="border-b border-(--color-line) py-2 pr-2">Team</th>
           <th scope="col" class="border-b border-(--color-line) py-2 pr-2 text-center">P</th>
@@ -102,7 +112,7 @@ function cellClass(isClub: boolean, extra: string): string {
                       aria-hidden="true"
                       class="h-5 w-5 object-contain"
                     />
-                    <span class="truncate font-display">{entry.name}</span>
+                    <span class="truncate">{entry.name}</span>
                     {/*
                       The club's row is never distinguished by colour alone
                       (WCAG 1.4.1): the bold weight above and this sr-only
@@ -128,7 +138,7 @@ function cellClass(isClub: boolean, extra: string): string {
                 <td
                   class={cellClass(
                     isClub,
-                    `py-3 text-center font-display ${isClub ? '' : 'text-(--color-brand)'}`,
+                    `py-3 text-center ${isClub ? '' : 'text-(--color-brand)'}`,
                   )}
                 >
                   {entry.points}
