@@ -59,6 +59,17 @@ adds controls around existing structure rather than replacing it.
 | `label` | `string` | The scroll region's accessible name — "Match schedule", "Featured squad players" |
 | `itemNoun` | `string` | Used in control names — "Previous fixtures", "Next players" |
 | `autoplay` | `boolean` (default `false`) | Whether the carousel advances on its own |
+| `on` | `'light' \| 'green'` (default `'light'`) | Which surface it sits on |
+| `name` | `string` | Stable test hook, emitted as `data-carousel` |
+
+`on` exists because the two consumers sit on different surfaces: the fixtures
+strip on `--color-page` light grey, the squad band on `--color-brand-panel`
+green. One control treatment cannot read against both — `--color-action` red
+on green is not legible, and white-on-light is worse. This mirrors
+`SectionHeading.astro:18`, which carries the same prop for the same reason.
+
+`name` gives the e2e suite a selector that does not depend on a visible
+string, so renaming a label does not silently break a test.
 
 Two label props rather than one derived string. Commit `cb20236` was a fix
 for precisely this: a control group whose accessible name did not describe
@@ -95,11 +106,22 @@ end of the track.
 
 This is not only progressive enhancement, though it is that too — without JS
 the section stays exactly the scroll strip it is today. It is also a real
-layout case: **the squad section holds 7 cards at `w-40`**, about 1230px of
-track inside a shell of roughly 1200px. On a wide desktop it barely overflows.
-Controls that scroll by a handful of pixels, and autoplay looping over almost
-nothing, would read as broken. On mobile the same 7 cards overflow properly
-and the controls appear.
+layout case, and the arithmetic decides the test in both directions:
+
+The shell is `--container-6xl` (72rem = 1152px) less two 1.25rem gutters, so
+content is 1112px wide once the viewport reaches that.
+
+- **Squad: 6 cards** (`featuredPlayers` is `.slice(0, 6)`) at `w-40` = 160px
+  with `gap-4` = 16px → 6×160 + 5×16 = **1040px**. That fits 1112px, so on
+  Desktop Chrome the track does not overflow and its controls stay hidden.
+  On Pixel 5 (~353px of content) the same cards overflow and the controls
+  appear.
+- **Fixtures: 4 cards** currently (two recent results, of which there are
+  none yet, plus up to four upcoming) at `sm:w-80` = 320px → 4×320 + 3×16 =
+  **1328px**, which overflows 1112px. Its controls show on both viewports.
+
+Controls that scrolled by a handful of pixels, and autoplay looping over
+almost nothing, would read as broken.
 
 Which end the track sits at is watched with an `IntersectionObserver` on the
 first and last card rather than a `scroll` listener. `HeroSlider:327` records
@@ -163,11 +185,12 @@ Neither consumer changes what it renders, only what wraps it.
 - Next scrolls the fixtures track right, previous returns it. Asserted on
   `scrollLeft`, since that is the observable effect.
 - Previous is disabled at the start; next is disabled at the end.
-- Controls stay hidden when the content fits. The squad section is the
-  natural case: 7 cards at `w-40` do not overflow a wide desktop viewport,
-  so at a large `setViewportSize` its controls must remain hidden while the
-  fixtures carousel — 11 cards at `w-80`, which overflows at any realistic
-  width — still shows its own.
+- Controls stay hidden when the content fits, which the two Playwright
+  projects already express: on `desktop` the squad carousel's controls must
+  be hidden (1040px of cards in 1112px of shell) while the fixtures
+  carousel's are visible (1328px of cards); on `mobile` both are visible.
+  Guard these with the project name so the desktop expectation does not run
+  against Pixel 5.
 - The squad carousel advances on its own within the autoplay interval.
 - Hovering the squad carousel holds it still.
 
