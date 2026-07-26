@@ -23,6 +23,34 @@ import { describe, expect, it } from 'vitest';
 const ROOT = process.cwd();
 const BUILD_TIMEOUT_MS = 120_000;
 
+/**
+ * fixtures.yaml is empty between seasons, so the fixture cases below supply
+ * the match they need instead of mutating one that happens to be in the file.
+ * That also stops them breaking every time the real schedule changes.
+ */
+const SCHEDULED_FIXTURE = [
+  '- id: 2026-08-02-jdt-ii-h',
+  '  competition: A1 Semi-Pro League',
+  '  matchweek: 1',
+  '  date: 2026-08-02T20:45:00+08:00',
+  '  venue: Darul Aman Stadium',
+  '  home: kedah',
+  '  away: jdt-ii',
+  '  status: scheduled',
+  '',
+].join('\n');
+
+/**
+ * Between seasons the file holds a bare `[]` (a comments-only file is not a
+ * YAML array, which the loader rejects), and appending block entries after
+ * `[]` is invalid YAML — so the marker is swapped for the entry. Once a real
+ * schedule is in the file there is no marker and the entry is appended.
+ */
+function withFixtureEntry(entry: string): (text: string) => string {
+  return (text) =>
+    /^\[\]\s*$/m.test(text) ? text.replace(/^\[\]\s*$/m, entry) : text + entry;
+}
+
 interface BuildResult {
   status: number;
   output: string;
@@ -67,12 +95,14 @@ describe('the real build rejects bad content', () => {
     () => {
       withMutatedFile(
         'src/data/fixtures.yaml',
-        (text) => text.replace('date: 2026-08-02T20:45:00+08:00', 'date: 2026-08-02T20:45:00'),
+        withFixtureEntry(
+          SCHEDULED_FIXTURE.replace('2026-08-02T20:45:00+08:00', '2026-08-02T20:45:00'),
+        ),
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);
           expect(output).toMatch(/explicit UTC offset/);
-          expect(output).toMatch(/2026-08-02-jdt-h/);
+          expect(output).toMatch(/2026-08-02-jdt-ii-h/);
         },
       );
     },
@@ -85,13 +115,13 @@ describe('the real build rejects bad content', () => {
       withMutatedFile(
         'src/data/standings.yaml',
         (text) =>
-          `${text}- id: jdt\n  team: jdt\n  won: 1\n  drawn: 1\n  lost: 4\n  goalsFor: 4\n  goalsAgainst: 15\n`,
+          `${text}- id: kedah\n  team: kedah\n  won: 1\n  drawn: 1\n  lost: 4\n  goalsFor: 4\n  goalsAgainst: 15\n`,
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);
           expect(output).toMatch(/Duplicate ids/);
           expect(output).toMatch(/standings\.yaml/);
-          expect(output).toMatch(/"jdt" appears 2 times/);
+          expect(output).toMatch(/"kedah" appears 2 times/);
         },
       );
     },
@@ -103,7 +133,7 @@ describe('the real build rejects bad content', () => {
     () => {
       withMutatedFile(
         'src/data/fixtures.yaml',
-        (text) => text.replace('  away: jdt\n  status: scheduled', '  away: jdt\n  status: finished'),
+        withFixtureEntry(SCHEDULED_FIXTURE.replace('  status: scheduled', '  status: finished')),
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);
@@ -163,7 +193,7 @@ describe('the real build rejects bad content', () => {
     () => {
       withMutatedFile(
         'src/data/fixtures.yaml',
-        (text) => text.replace('  away: jdt\n  status: scheduled', '  away: not-a-real-team\n  status: scheduled'),
+        withFixtureEntry(SCHEDULED_FIXTURE.replace('  away: jdt-ii', '  away: not-a-real-team')),
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);
