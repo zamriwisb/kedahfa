@@ -21,9 +21,9 @@
   --color-text-muted: #a8a8b3;
 
   /* Result semantics */
-  --color-win: #2f9e5f;
-  --color-draw: #8a8a96;
-  --color-loss: #c2453c;
+  --color-win: #1b6b3f;
+  --color-draw: #55555e;
+  --color-loss: #b03a32;
 
   /* Type */
   --font-display: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
