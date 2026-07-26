@@ -52,3 +52,8 @@ Task 11: complete (commits 2051b22..1362dae, review clean)
 Task 12: complete (commits 945727c..8a6d704, review clean, 1 minor)
   MINOR: site domain duplicated in astro.config.mjs and public/robots.txt;
   can drift. FOLDED INTO TASK 14 as a robots.txt endpoint using Astro.site.
+Task 13: complete (commits 98802bc..a1d91f4, review clean after 1 fix)
+  E2E suite found 2 real site defects from earlier tasks, both fixed:
+   - 6 index routes had NO h1 (SectionHeading hardcoded h2) -> level prop
+   - axe scrollable-region-focusable (WCAG 2.1.1) on standings scroll wrapper
+  Final: 59 e2e passed / 0 failed / 1 intentional skip; 76 unit tests.
