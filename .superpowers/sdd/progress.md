@@ -173,3 +173,57 @@ Task 2: complete (commits b5e36ae..557c23d, spec ✅, quality approved after 1 f
   stray dev server on 4321 that was making Playwright reuse it (Astro Dev
   Toolbar injects its own "Menu" button -> 11 spurious navigation.spec failures).
   If the owner had that server running deliberately, it needs restarting.
+
+# Card carousel — SDD progress
+Plan: docs/superpowers/plans/2026-07-26-card-carousel.md
+Spec: docs/superpowers/specs/2026-07-26-card-carousel-design.md
+Branch: feat/a1-league-teams  Base: cc35dcc
+Pre-flight: plan corrected twice during authoring — featuredPlayers is
+slice(0,6) not 7 (so the squad track FITS the 1112px desktop shell and its
+controls/autoplay are mobile-only), and syncControls->pause was reordered to
+avoid the const-arrow TDZ that 05e889f fixed in the countdown island.
+Owner asked for the pre-existing working tree to be committed first: done in
+ccc859a (fonts+page-shell) and cc35dcc (gitignore+ledger).
+Task 1: complete (commits cc35dcc..c489de4, spec ✅, quality approved after 1 fix round)
+  CardCarousel.astro + FixturesStrip wired + tests/e2e/carousel.spec.ts.
+  113 e2e passed, astro check clean.
+  REVIEW FOUND IMPORTANT BUG, fixed in c489de4: syncControls paused the
+  autoplay timer when the track stopped overflowing but never restarted it
+  when the track became scrollable again — a resize round-trip (tablet
+  rotation, dragging a window past the breakpoint) left autoplay dead with no
+  user-visible cause. Now symmetric: if (scrollable) start(); else pause().
+  CARRIED INTO TASK 2 — the fixer proved empirically (reverted the fix AND
+  removed the ResizeObserver; 8/8 still passed both times) that this is NOT
+  regress-testable on a non-autoplay carousel. The squad strip is the first
+  consumer with autoplay, so Task 2 MUST add the resize-round-trip autoplay
+  assertion. If Task 2 ships without it, this bug has no test.
+  MINOR deferred: focusin/focusout are flat listeners on root, so tabbing
+  between two focusables INSIDE one carousel fires focusout->start() then
+  focusin->pause() per keystroke. Idempotent, no leak, but the "paused while
+  focused" contract is met by churn rather than a stable state. A depth
+  counter would fix it.
+  MINOR deferred: ResizeObserver watches only the track box, not the inner
+  ul/cards, and there is no document.fonts.ready hook. Harmless while cards
+  use fixed width classes (w-72/sm:w-80, w-40); would matter if a consumer
+  ever sizes cards to their text.
+Task 2: complete (commits 489eeb9..40d97a2, spec ✅, quality approved, no fix round)
+  Squad strip wired with autoplay + on="green". 15 e2e passed / 5 skipped by
+  project guard, 108 unit, astro check clean.
+  The carried-forward requirement WAS delivered: the resize-round-trip
+  autoplay test now covers Task 1's syncControls symmetry fix. Reviewer
+  INDEPENDENTLY reproduced the bite — reverted the fix and saw desktop fail at
+  the fits->overflows transition and mobile at the widen->narrow round-trip,
+  then restored to zero net diff. Task 1's bug is now genuinely regression-tested.
+  Controller did the Step 6 visual check the implementer could not (their
+  resize_window MCP tool did not shrink the viewport): drove a real 400px
+  viewport via Playwright MCP. Track 1040px in a 345px box, controls and
+  toggle visible, labels "Pause players carousel"/"Previous players", glyph
+  pure white on #0b5429 = 9.07:1, autoplay observed mid-cycle on cards 3-4.
+  MINOR deferred: button borders are --color-text-invert/40, compositing to
+  ~rgb(109,152,127) on the green panel = ~2.78:1, just under WCAG 1.4.11's 3:1
+  for UI component boundaries (light surface: --color-line on --color-page is
+  ~1.16:1). Defensible because the glyph carries identification at 9:1 / ~6:1
+  and the border is decorative — but it sits on the threshold. Bumping to /60
+  clears 3:1 outright. FOR THE FINAL REVIEW TO ADJUDICATE.
+  MINOR deferred: test.skip(project) guard repeated 5x in carousel.spec.ts;
+  a skipUnless helper would DRY it if the file grows.
