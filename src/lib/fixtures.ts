@@ -42,6 +42,22 @@ export function finishedMatches(all: Match[]): Match[] {
   return all.filter((m) => m.status === 'finished').sort(byDateDescending);
 }
 
+/**
+ * Scheduled matches whose kickoff has already passed but which have not yet
+ * been marked finished — most likely a result nobody has committed yet.
+ * Without this bucket such a match falls between upcomingMatches (requires a
+ * future date) and finishedMatches (requires status === 'finished') and
+ * disappears from the site entirely.
+ *
+ * Postponed matches are excluded for the same reason upcomingMatches excludes
+ * them: their stored date is stale.
+ */
+export function awaitingResult(all: Match[], now: Date): Match[] {
+  return all
+    .filter((m) => m.status === 'scheduled' && m.date.getTime() <= now.getTime())
+    .sort(byDateDescending);
+}
+
 export function nextMatch(all: Match[], now: Date): Match | null {
   return upcomingMatches(all, now)[0] ?? null;
 }

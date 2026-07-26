@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  awaitingResult,
   finishedMatches,
   groupByMonth,
   nextMatch,
@@ -71,6 +72,19 @@ const POSTPONED_CUP = match({
   status: 'postponed',
 });
 
+// Kickoff has passed but nobody has committed the score yet.
+const OVERDUE_SABAH = match({
+  id: 'overdue-sabah',
+  date: '2026-07-10T20:45:00+08:00',
+  away: 'sabah',
+});
+
+const OVERDUE_SELANGOR = match({
+  id: 'overdue-selangor',
+  date: '2026-07-15T20:45:00+08:00',
+  away: 'selangor',
+});
+
 const ALL = [
   TERENGGANU_AWAY,
   PENANG_AWAY_WIN,
@@ -79,6 +93,8 @@ const ALL = [
   JDT_HOME,
   SABAH_HOME_DRAW,
 ];
+
+const ALL_WITH_OVERDUE = [...ALL, OVERDUE_SABAH, OVERDUE_SELANGOR];
 
 describe('upcomingMatches', () => {
   it('returns only future scheduled matches, soonest first', () => {
@@ -94,6 +110,48 @@ describe('upcomingMatches', () => {
   it('drops a scheduled match once its kickoff has passed', () => {
     const now = new Date('2026-08-02T21:00:00+08:00');
     expect(upcomingMatches(ALL, now).map((m) => m.id)).toEqual(['terengganu-a']);
+  });
+});
+
+describe('awaitingResult', () => {
+  it('returns a scheduled match whose kickoff has passed', () => {
+    const now = new Date('2026-07-25T12:00:00+08:00');
+    expect(awaitingResult(ALL_WITH_OVERDUE, now).map((m) => m.id)).toContain('overdue-sabah');
+  });
+
+  it('excludes a scheduled match whose kickoff is still in the future', () => {
+    const now = new Date('2026-07-25T12:00:00+08:00');
+    expect(awaitingResult(ALL_WITH_OVERDUE, now).map((m) => m.id)).not.toContain('jdt-h');
+  });
+
+  it('excludes a match that already has a recorded result', () => {
+    const now = new Date('2026-07-25T12:00:00+08:00');
+    expect(awaitingResult(ALL_WITH_OVERDUE, now).map((m) => m.id)).not.toContain('sabah-h');
+  });
+
+  it('excludes a postponed match, whose stored date is stale', () => {
+    // POSTPONED_CUP's date (2026-08-29) is in the future here, but even a
+    // postponed match with a past stored date must not surface: the date is
+    // stale by definition once a fixture is postponed.
+    const now = new Date('2026-09-01T12:00:00+08:00');
+    expect(awaitingResult(ALL_WITH_OVERDUE, now).map((m) => m.id)).not.toContain('penang-cup');
+  });
+
+  it('orders results most-recent-first', () => {
+    const now = new Date('2026-07-25T12:00:00+08:00');
+    expect(awaitingResult(ALL_WITH_OVERDUE, now).map((m) => m.id)).toEqual([
+      'overdue-selangor',
+      'overdue-sabah',
+    ]);
+  });
+
+  it('includes a match whose kickoff is exactly now', () => {
+    const now = OVERDUE_SABAH.date;
+    expect(awaitingResult([OVERDUE_SABAH], now).map((m) => m.id)).toEqual(['overdue-sabah']);
+  });
+
+  it('returns an empty array for no matches', () => {
+    expect(awaitingResult([], new Date('2026-07-25T12:00:00+08:00'))).toEqual([]);
   });
 });
 

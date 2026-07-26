@@ -5,7 +5,7 @@ import EmptyState from '../components/EmptyState.astro';
 import MatchRow from '../components/MatchRow.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import { CLUB_SLUG, loadSiteData } from '../lib/content';
-import { finishedMatches, groupByMonth, upcomingMatches } from '../lib/fixtures';
+import { awaitingResult, finishedMatches, groupByMonth, upcomingMatches } from '../lib/fixtures';
 
 const { club, matches, teamsBySlug } = await loadSiteData();
 
@@ -13,6 +13,7 @@ const now = new Date();
 const upcoming = groupByMonth(upcomingMatches(matches, now));
 const results = groupByMonth(finishedMatches(matches)).reverse();
 const postponed = matches.filter((m) => m.status === 'postponed');
+const awaiting = awaitingResult(matches, now);
 
 const competitions = [...new Set(matches.map((m) => m.competition))].map((competition) => ({
   value: competition,
@@ -56,6 +57,19 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
         )
       }
     </section>
+
+    {
+      awaiting.length > 0 && (
+        <section>
+          <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">Awaiting Result</h2>
+          <div class="space-y-3">
+            {awaiting.map((match) => (
+              <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+            ))}
+          </div>
+        </section>
+      )
+    }
 
     {
       postponed.length > 0 && (
