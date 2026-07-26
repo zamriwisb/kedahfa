@@ -4480,7 +4480,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  // On CI, 'github' alone REPLACES the default html reporter, so
+  // playwright-report/ is never written and the workflow's upload-artifact
+  // step silently uploads nothing. Ask for both: inline annotations plus a
+  // report to download when a run fails.
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }]]
+    : 'list',
   use: {
     baseURL: 'http://localhost:4321',
     trace: 'on-first-retry',
@@ -4774,8 +4780,15 @@ jobs:
         if: failure()
         with:
           name: playwright-report
-          path: playwright-report/
+          # test-results/ carries traces and screenshots; playwright-report/ is
+          # the browsable HTML. Both are needed to debug a failed run.
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 7
+          # Fail loudly rather than uploading an empty artifact — a silent
+          # no-op here means a red CI run with nothing to inspect.
+          if-no-files-found: error
 ```
 
 - [ ] **Step 3: Write the README**
