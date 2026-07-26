@@ -118,7 +118,7 @@ const total = slides.length;
       {total > 1 && (
         <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10">
           <div class="mx-auto flex max-w-6xl justify-end px-(--spacing-gutter) pb-4">
-            <div class="pointer-events-auto flex items-center gap-4" role="group" aria-label="Choose a slide">
+            <div class="pointer-events-auto flex items-center gap-4" role="group" aria-label="Slideshow controls">
               {
                 /*
                  * Rendered hidden: without the script, or under
@@ -149,7 +149,7 @@ const total = slides.length;
                   <path d="M5 3l12 7-12 7V3Z" />
                 </svg>
               </button>
-              <div class="flex gap-2">
+              <div class="flex gap-2" role="group" aria-label="Choose a slide">
                 {slides.map((_, index) => (
                   <button
                     type="button"

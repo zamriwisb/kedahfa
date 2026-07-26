@@ -95,6 +95,14 @@ test('the pause control is visible and named for what it does', async ({ page })
 test('pressing the pause control stops autoplay', async ({ page }) => {
   await page.goto('/');
 
+  // Pin the starting slide: on a slow runner a >6s gap before the click would
+  // otherwise let autoplay reach slide 2 and fail the assertion below for a
+  // reason that has nothing to do with the pause control.
+  await expect(page.getByRole('button', { name: 'Go to slide 1' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+
   await page.getByRole('button', { name: 'Pause slideshow' }).click();
   await expect(page.getByRole('button', { name: 'Play slideshow' })).toBeVisible();
 
