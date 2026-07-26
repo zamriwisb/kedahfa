@@ -27,7 +27,7 @@ const nextUrl = currentPage < lastPage ? `/news/page/${currentPage + 1}` : null;
 ---
 
 <div class="mx-auto max-w-6xl px-[--spacing-gutter] py-12">
-  <SectionHeading title="News" />
+  <SectionHeading title="News" level={1} />
 
   {
     articles.length > 0 && (

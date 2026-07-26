@@ -12,7 +12,7 @@ const groups = groupByPosition(squad);
 
 <BaseLayout title="Squad" description={`The ${club.name} first-team squad.`}>
   <div class="mx-auto max-w-6xl space-y-12 px-[--spacing-gutter] py-12">
-    <SectionHeading title="First Team Squad" />
+    <SectionHeading title="First Team Squad" level={1} />
 
     {
       groups.length > 0 ? (

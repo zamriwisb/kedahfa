@@ -3,12 +3,19 @@ interface Props {
   title: string;
   href?: string;
   linkLabel?: string;
+  /**
+   * 1 for a page's primary heading, 2 for sections within a page. Index pages
+   * use this component for their title, so without it every list route would
+   * render an h2 as its highest heading and no h1 at all.
+   */
+  level?: 1 | 2;
 }
-const { title, href, linkLabel = 'View all' } = Astro.props;
+const { title, href, linkLabel = 'View all', level = 2 } = Astro.props;
+const Heading = `h${level}` as 'h1' | 'h2';
 ---
 
 <div class="mb-6 flex items-end justify-between gap-4 border-b border-[--color-line] pb-3">
-  <h2 class="text-2xl sm:text-3xl">{title}</h2>
+  <Heading class="text-2xl sm:text-3xl">{title}</Heading>
   {
     href && (
       <a href={href} class="shrink-0 text-sm tracking-wider text-[--color-club-gold] font-display">

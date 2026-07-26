@@ -12,7 +12,12 @@ interface Props {
 const { table, teamsBySlug, clubSlug, compact = false } = Astro.props;
 ---
 
-<div class="overflow-x-auto">
+<!--
+  The wrapper scrolls horizontally on narrow viewports, so it needs to be
+  keyboard reachable — a scrollable region a mouse can pan but a keyboard
+  cannot fails WCAG 2.1.1 (axe rule: scrollable-region-focusable).
+-->
+<div class="overflow-x-auto" tabindex="0" role="region" aria-label="League standings">
   <table class="w-full min-w-[32rem] border-collapse text-sm">
     <caption class="sr-only">League standings</caption>
     <thead>
