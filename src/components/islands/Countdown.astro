@@ -63,6 +63,14 @@ const units = [
       seconds: root.querySelector<HTMLElement>('[data-unit="seconds"]'),
     };
 
+    // Declared before tick() and assigned before the first call to it: tick()
+    // reads `timer` when the target has already passed, so if the interval
+    // were created after that first call (e.g. `tick(); const timer = ...`),
+    // that branch would throw "Cannot access 'timer' before initialization"
+    // and no interval would ever be created — breaking every other
+    // `.countdown` element on the page too.
+    let timer: ReturnType<typeof setInterval>;
+
     const tick = () => {
       const remaining = countdown(new Date(), target);
 
@@ -82,7 +90,7 @@ const units = [
       }
     };
 
+    timer = setInterval(tick, 1000);
     tick();
-    const timer = setInterval(tick, 1000);
   }
 </script>
