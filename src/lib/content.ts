@@ -1,3 +1,4 @@
+import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { getCollection, getEntry } from 'astro:content';
 import type { Match } from './fixtures';
@@ -79,19 +80,31 @@ export function loadSiteData(): Promise<SiteData> {
   return cached;
 }
 
-const DATA_FILES_WITH_IDS = [
-  'src/data/teams.yaml',
-  'src/data/fixtures.yaml',
-  'src/data/standings.yaml',
-  'src/data/squad.yaml',
-  'src/data/sponsors.yaml',
-];
+/**
+ * Every file()-loaded collection in src/content.config.ts points at a YAML
+ * file living directly in src/data/, and every one of those files is a YAML
+ * array of entries with an "id" field (assertNoDuplicateIds enforces the
+ * shape and throws if it isn't). Deriving the list from the directory —
+ * rather than hand-listing filenames here — means a newly added data file is
+ * covered automatically. A hand-maintained list is exactly how club.yaml and
+ * season.yaml went unchecked in an earlier pass: both existed, both matched
+ * the pattern, and both were simply missing from the array. The only way
+ * this list can go stale again is if a future file()-loaded collection lives
+ * outside src/data/ or uses the object-keyed (non-array) form of file() —
+ * neither is true of any collection today.
+ */
+function dataFilesWithIds(): string[] {
+  return readdirSync(join(process.cwd(), 'src/data'))
+    .filter((name) => name.endsWith('.yaml') || name.endsWith('.yml'))
+    .map((name) => `src/data/${name}`)
+    .sort();
+}
 
 async function build(): Promise<SiteData> {
   // Runs before anything touches getCollection(): Astro's file() loader
   // dedupes by id in its own store before getCollection() returns, so this
   // check must see the raw YAML or it can never catch a duplicate.
-  for (const dataFile of DATA_FILES_WITH_IDS) {
+  for (const dataFile of dataFilesWithIds()) {
     assertNoDuplicateIds(dataFile);
   }
 
