@@ -1,8 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-test('the homepage fixtures strip shows the pre-season empty state', async ({ page }) => {
+test('the homepage shows a countdown that advances', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('No fixtures are currently scheduled.')).toBeVisible();
+
+  const seconds = page.locator('.countdown [data-unit="seconds"]').first();
+  const first = await seconds.textContent();
+
+  await expect(async () => {
+    expect(await seconds.textContent()).not.toBe(first);
+  }).toPass({ timeout: 5000 });
 });
 
 test('the standings table highlights the club row', async ({ page }) => {
@@ -21,9 +27,22 @@ test('the standings table lists all twelve clubs, zeroed for the pre-season', as
   await expect(kedah.getByRole('cell').last()).toHaveText('0');
 });
 
-test('the fixtures page shows the empty state until the schedule is published', async ({ page }) => {
+test('the fixtures page lists the scheduled matches and no results yet', async ({ page }) => {
   await page.goto('/fixtures');
-  await expect(page.getByText('No fixtures are currently scheduled.')).toBeVisible();
+
+  await expect(page.getByRole('heading', { name: 'Upcoming' })).toBeVisible();
+
+  // Every placeholder fixture is scheduled, so Results stays empty while
+  // Upcoming is populated. This is the pairing that would break if a match
+  // were given a score without the standings table being updated to match.
+  await expect(page.getByText('No matches have been played yet this season.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Results', exact: true })).toBeVisible();
+});
+
+test('kickoff times render in Malaysian time', async ({ page }) => {
+  await page.goto('/fixtures');
+  // Home fixtures kick off at 20:45 +08:00. A naive UTC render would show 12:45.
+  await expect(page.getByText('20:45').first()).toBeVisible();
 });
 
 test('the news filter narrows the visible articles', async ({ page }) => {

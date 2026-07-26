@@ -74,14 +74,41 @@ describe('src/data/standings.yaml', () => {
   });
 });
 
+interface FixtureRow {
+  id: string;
+  home: string;
+  away: string;
+  status: string;
+  score?: unknown;
+}
+
 describe('src/data/fixtures.yaml', () => {
-  it('is an explicit empty array until the A1 schedule is published', () => {
-    const fixtures = load(readFileSync(join(ROOT, 'src/data/fixtures.yaml'), 'utf-8'));
-    // Not merely "no fixtures": a comments-only file parses to null, and
-    // both parseFixturesYaml (src/content.config.ts:19) and
-    // assertNoDuplicateIds (src/lib/validate.ts:54) throw on a non-array.
-    // The empty list has to be a real [] or the build fails.
+  const fixtures = readYaml<FixtureRow>('src/data/fixtures.yaml');
+
+  it('parses as an array, which the loader requires', () => {
+    // A comments-only file parses to null, and both parseFixturesYaml
+    // (src/content.config.ts:19) and assertNoDuplicateIds
+    // (src/lib/validate.ts:54) throw on a non-array. Whether the schedule is
+    // empty or full, the file has to be a real YAML list.
     expect(Array.isArray(fixtures)).toBe(true);
-    expect(fixtures).toEqual([]);
+  });
+
+  it('names only clubs that are in the league', () => {
+    const slugs = new Set(teams.map((t) => t.id));
+    const unknown = fixtures.flatMap((f) =>
+      [f.home, f.away].filter((slug) => !slugs.has(slug)),
+    );
+    expect(unknown).toEqual([]);
+  });
+
+  it('never has a club playing itself', () => {
+    expect(fixtures.filter((f) => f.home === f.away).map((f) => f.id)).toEqual([]);
+  });
+
+  it('carries no scores while the table is still zeroed', () => {
+    // The placeholder schedule is entirely `scheduled`. A finished match with
+    // a score would contradict standings.yaml, where every row reads zero.
+    const played = fixtures.filter((f) => f.status !== 'scheduled' || f.score !== undefined);
+    expect(played.map((f) => f.id)).toEqual([]);
   });
 });
