@@ -17,7 +17,7 @@ Every task's requirements implicitly include this section.
 - **Node `>=22.12.0`** — required by Astro 7. Verify with `node -v` before Task 1.
 - **Static output only.** No SSR adapter, no server endpoints. `astro build` must emit a self-contained `dist/`.
 - **All match times are `Asia/Kuala_Lumpur`.** Stored as ISO 8601 with an explicit `+08:00` offset; formatted only through `src/lib/dates.ts`, never with bare `toLocaleString()`. CI builds run in UTC, and an unqualified format shifts an evening kickoff to the wrong calendar day.
-- **`src/lib/` must not import from `astro:content` or any `.astro` file.** It holds pure functions so Vitest can run it directly.
+- **The pure modules in `src/lib/` must not import from `astro:content` or any `.astro` file.** This binds `dates.ts`, `standings.ts`, `fixtures.ts`, `squad.ts`, `pagination.ts` and `validate.ts` — they hold pure functions so Vitest can run them directly. `src/lib/content.ts` is the single deliberate exception: it is the Astro bridge that reads collections and hands plain data to those pure modules, and it is covered by the build and the e2e suite rather than by unit tests.
 - **No external network requests from the built site.** Fonts are self-hosted via Fontsource. No Google Fonts, no CDN scripts, no external analytics.
 - **English only.** No i18n routing or language switcher.
 - **Accessibility is a build requirement, not a polish pass.** Every image needs alt text, every interactive target is at least 44×44px, all text meets WCAG AA contrast, all motion respects `prefers-reduced-motion`.
@@ -3644,9 +3644,17 @@ The article body uses `prose` classes.
 npm install -D @tailwindcss/typography
 ```
 
-Add to the top of `src/styles/global.css`, immediately after the `@import 'tailwindcss';` line:
+Add `@plugin` to `src/styles/global.css` **after all four `@import` lines**, not
+between them — a non-import rule in the middle of the import block is invalid
+CSS and some tooling will drop everything after it. The top of the file becomes:
 
 ```css
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource/barlow-condensed/600.css';
+@import '@fontsource/barlow-condensed/700.css';
+@import './tokens.css';
+
 @plugin '@tailwindcss/typography';
 ```
 
