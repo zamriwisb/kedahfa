@@ -1377,6 +1377,23 @@ describe('selectHero', () => {
     expect(hero).toEqual({ kind: 'fixture', match: JDT_HOME });
   });
 
+  it('still shows the result at exactly the window boundary', () => {
+    // SELANGOR_HOME_WIN kicked off 2026-07-19T20:45+08:00, so this is 5.0 days
+    // later to the second. The comparison is <=, so the result still wins.
+    const exactlyFiveDays = new Date('2026-07-24T20:45:00+08:00');
+    expect(selectHero(ALL, exactlyFiveDays)).toEqual({
+      kind: 'result',
+      match: SELANGOR_HOME_WIN,
+    });
+  });
+
+  it('switches to the next fixture one minute past the boundary', () => {
+    // Pins the off-by-one: with `<` instead of `<=` the previous test fails,
+    // and with `<=` on a stale bound this one does.
+    const justPast = new Date('2026-07-24T20:46:00+08:00');
+    expect(selectHero(ALL, justPast)).toEqual({ kind: 'fixture', match: JDT_HOME });
+  });
+
   it('falls back to the latest result when no fixtures remain', () => {
     const hero = selectHero(ALL, new Date('2026-12-01T09:00:00+08:00'));
     expect(hero).toEqual({ kind: 'result', match: SELANGOR_HOME_WIN });
@@ -1403,7 +1420,26 @@ describe('groupByMonth', () => {
   it('places an after-midnight kickoff in its local month, not the UTC one', () => {
     // 00:30+08:00 on 1 September is 16:30 UTC on 31 August.
     const rollover = match({ id: 'rollover', date: '2026-09-01T00:30:00+08:00' });
-    expect(groupByMonth([rollover])[0].heading).toBe('September 2026');
+    const [group] = groupByMonth([rollover]);
+
+    expect(group.heading).toBe('September 2026');
+    // The key is what actually groups matches. Asserting only the heading
+    // would miss a raw getMonth() implementation: formatMonthHeading would
+    // still print "September 2026" while the key silently said 2026-08.
+    expect(group.key).toBe('2026-09');
+  });
+
+  it('does not merge two matches that share a UTC month but not a local one', () => {
+    // Both of these are 31 August in UTC (15:00 and 16:30), but they fall in
+    // different months in Kuala Lumpur. A UTC-based key collapses them into
+    // one group; a correct key keeps them apart.
+    const august = match({ id: 'aug', date: '2026-08-31T23:00:00+08:00' });
+    const september = match({ id: 'sep', date: '2026-09-01T00:30:00+08:00' });
+
+    const groups = groupByMonth([august, september]);
+
+    expect(groups.map((g) => g.key)).toEqual(['2026-08', '2026-09']);
+    expect(groups.map((g) => g.matches.length)).toEqual([1, 1]);
   });
 
   it('returns an empty array for no matches', () => {
