@@ -57,3 +57,4 @@ Task 13: complete (commits 98802bc..a1d91f4, review clean after 1 fix)
    - 6 index routes had NO h1 (SectionHeading hardcoded h2) -> level prop
    - axe scrollable-region-focusable (WCAG 2.1.1) on standings scroll wrapper
   Final: 59 e2e passed / 0 failed / 1 intentional skip; 76 unit tests.
+Task 14: complete (commits 105e5e6..0274f1a, review clean after 1 fix — CI artifact upload was a silent no-op)
