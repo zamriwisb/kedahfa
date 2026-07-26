@@ -1,0 +1,41 @@
+---
+import Countdown from './islands/Countdown.astro';
+import type { Team } from '../lib/content';
+import type { Match } from '../lib/fixtures';
+import { formatKickoffTime, formatMatchDate } from '../lib/dates';
+
+interface Props {
+  match: Match;
+  teamsBySlug: Map<string, Team>;
+}
+
+const { match, teamsBySlug } = Astro.props;
+const home = teamsBySlug.get(match.home);
+const away = teamsBySlug.get(match.away);
+---
+
+<div class="clip-corner bg-[--color-ink-card] p-6 sm:p-8">
+  <p class="text-xs tracking-[0.3em] text-[--color-club-gold] font-display">Next Match</p>
+
+  <div class="mt-6 flex items-center justify-center gap-6 sm:gap-12">
+    <div class="text-center">
+      <img src={home?.crest} alt="" width="64" height="64" aria-hidden="true" class="mx-auto" />
+      <p class="mt-2 text-sm font-display">{home?.name}</p>
+    </div>
+
+    <span class="text-2xl text-[--color-text-muted] font-display">v</span>
+
+    <div class="text-center">
+      <img src={away?.crest} alt="" width="64" height="64" aria-hidden="true" class="mx-auto" />
+      <p class="mt-2 text-sm font-display">{away?.name}</p>
+    </div>
+  </div>
+
+  <p class="mt-6 text-center text-sm text-[--color-text-muted]">
+    {formatMatchDate(match.date)} &middot; {formatKickoffTime(match.date)} &middot; {match.venue}
+  </p>
+
+  <div class="mt-6 flex justify-center">
+    <Countdown target={match.date} label={`Time until ${home?.name} versus ${away?.name}`} />
+  </div>
+</div>

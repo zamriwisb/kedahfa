@@ -1,0 +1,60 @@
+---
+import type { Team } from '../lib/content';
+import type { Hero } from '../lib/fixtures';
+import { formatKickoffTime, formatMatchDate } from '../lib/dates';
+
+interface Props {
+  hero: Hero;
+  teamsBySlug: Map<string, Team>;
+}
+
+const { hero, teamsBySlug } = Astro.props;
+---
+
+{
+  hero && (
+    <section class="relative isolate overflow-hidden bg-[--color-ink-raised]">
+      <img
+        src="/images/news/placeholder.svg"
+        alt=""
+        aria-hidden="true"
+        width="1600"
+        height="900"
+        class="absolute inset-0 -z-10 h-full w-full object-cover opacity-40"
+      />
+      <div
+        aria-hidden="true"
+        class="absolute inset-0 -z-10 bg-gradient-to-t from-[--color-ink] via-[--color-ink]/70 to-transparent"
+      />
+
+      <div class="mx-auto max-w-6xl px-[--spacing-gutter] pb-12 pt-24 sm:pt-36">
+        <p class="text-xs tracking-[0.3em] text-[--color-club-gold] font-display">
+          {hero.kind === 'result' ? 'Latest Result' : 'Next Match'}
+        </p>
+
+        <h1 class="mt-3 text-4xl leading-none sm:text-6xl">
+          {teamsBySlug.get(hero.match.home)?.shortName}
+          <span class="mx-2 text-[--color-club-red-bright]">
+            {hero.match.score ? `${hero.match.score.home} - ${hero.match.score.away}` : 'v'}
+          </span>
+          {teamsBySlug.get(hero.match.away)?.shortName}
+        </h1>
+
+        <p class="mt-3 text-sm text-[--color-text-muted]">
+          {hero.match.competition} &middot; {formatMatchDate(hero.match.date)}
+          {hero.kind === 'fixture' && ` · ${formatKickoffTime(hero.match.date)}`}
+          &middot; {hero.match.venue}
+        </p>
+
+        {hero.match.report && (
+          <a
+            href={`/news/${hero.match.report}`}
+            class="clip-corner mt-6 bg-[--color-club-red] px-6 text-sm tracking-widest text-white font-display"
+          >
+            Match Report
+          </a>
+        )}
+      </div>
+    </section>
+  )
+}

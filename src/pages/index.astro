@@ -1,13 +1,112 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { loadSiteData } from '../lib/content';
+import ArticleCard from '../components/ArticleCard.astro';
+import EmptyState from '../components/EmptyState.astro';
+import HeroPanel from '../components/HeroPanel.astro';
+import MatchRow from '../components/MatchRow.astro';
+import NextMatchCard from '../components/NextMatchCard.astro';
+import PlayerCard from '../components/PlayerCard.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import SponsorGrid from '../components/SponsorGrid.astro';
+import StandingsTable from '../components/StandingsTable.astro';
+import { CLUB_SLUG, loadSiteData } from '../lib/content';
+import { nextMatch, recentResults, selectHero } from '../lib/fixtures';
+import { deriveTable, tableSnippet } from '../lib/standings';
+import { groupByPosition } from '../lib/squad';
 
-const { club } = await loadSiteData();
+const { club, teamsBySlug, matches, standings, squad, sponsors, articles } = await loadSiteData();
+
+// Build time. The site must redeploy for these to advance — see the plan's
+// operational note about the daily scheduled build.
+const now = new Date();
+
+const hero = selectHero(matches, now);
+const upcoming = nextMatch(matches, now);
+const results = recentResults(matches, 3);
+const snippet = tableSnippet(deriveTable(standings), CLUB_SLUG, 5);
+const featuredPlayers = groupByPosition(squad).flatMap((group) => group.players).slice(0, 6);
+const latestArticles = articles.slice(0, 6);
 ---
 
-<BaseLayout title="Home" description={`Official website of ${club.name}.`}>
-  <div class="mx-auto max-w-6xl px-[--spacing-gutter] py-16">
-    <h1 class="text-5xl">{club.name}</h1>
-    <p class="mt-4 text-[--color-text-muted]">Homepage sections are built in Task 8.</p>
+<BaseLayout
+  title="Home"
+  description={`Official website of ${club.name}: news, fixtures, results, squad and standings.`}
+>
+  <HeroPanel hero={hero} teamsBySlug={teamsBySlug} />
+
+  <div class="mx-auto max-w-6xl space-y-16 px-[--spacing-gutter] py-16">
+    {upcoming && <NextMatchCard match={upcoming} teamsBySlug={teamsBySlug} />}
+
+    <section>
+      <SectionHeading title="Recent Results" href="/fixtures" />
+      {
+        results.length > 0 ? (
+          <div class="space-y-3">
+            {results.map((match) => (
+              <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState message="No matches have been played yet this season." />
+        )
+      }
+    </section>
+
+    <section>
+      <SectionHeading title="Standings" href="/standings" linkLabel="Full table" />
+      {
+        snippet.length > 0 ? (
+          <StandingsTable
+            table={snippet}
+            teamsBySlug={teamsBySlug}
+            clubSlug={CLUB_SLUG}
+            compact
+          />
+        ) : (
+          <EmptyState message="The league table will appear once the season is under way." />
+        )
+      }
+    </section>
+
+    <section>
+      <SectionHeading title="Latest News" href="/news" />
+      {
+        latestArticles.length > 0 ? (
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {latestArticles.map((article, index) => (
+              <ArticleCard article={article} featured={index === 0} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState message="There is no club news to show yet." />
+        )
+      }
+    </section>
+
+    <section>
+      <SectionHeading title="First Team" href="/squad" />
+      {
+        featuredPlayers.length > 0 ? (
+          <ul class="-mx-[--spacing-gutter] flex snap-x gap-4 overflow-x-auto px-[--spacing-gutter] pb-2">
+            {featuredPlayers.map((player) => (
+              <li class="w-40 shrink-0 snap-start">
+                <PlayerCard player={player} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState message="The squad list will be published shortly." />
+        )
+      }
+    </section>
+
+    {
+      sponsors.length > 0 && (
+        <section>
+          <SectionHeading title="Partners" />
+          <SponsorGrid sponsors={sponsors} />
+        </section>
+      )
+    }
   </div>
 </BaseLayout>
