@@ -49,3 +49,6 @@ Task 8: complete (commits a18b6fe..e8110f5, review clean, 2 minor deferred)
 Task 9: complete (commits e6f8bb7..2ceb36f, review clean — pagination proven at scale with 13 articles)
 Task 10: complete (commits df8a00b..914ee29, review clean)
 Task 11: complete (commits 2051b22..1362dae, review clean)
+Task 12: complete (commits 945727c..8a6d704, review clean, 1 minor)
+  MINOR: site domain duplicated in astro.config.mjs and public/robots.txt;
+  can drift. FOLDED INTO TASK 14 as a robots.txt endpoint using Astro.site.
