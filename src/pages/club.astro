@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import SponsorGrid from '../components/SponsorGrid.astro';
+import { loadSiteData } from '../lib/content';
+
+const { club, sponsors } = await loadSiteData();
+
+const facts = [
+  { label: 'Founded', value: String(club.founded) },
+  { label: 'Stadium', value: club.stadium },
+  { label: 'Capacity', value: club.stadiumCapacity.toLocaleString('en-GB') },
+  { label: 'City', value: club.city },
+];
+---
+
+<BaseLayout title="The Club" description={`About ${club.name}.`}>
+  <div class="mx-auto max-w-4xl space-y-12 px-[--spacing-gutter] py-12">
+    <SectionHeading title="The Club" />
+
+    <p class="text-lg text-[--color-text-muted]">
+      {club.name} is based at {club.stadium} in {club.city} and has represented the
+      state since {club.founded}.
+    </p>
+
+    <dl class="grid grid-cols-2 gap-6 sm:grid-cols-4">
+      {
+        facts.map((fact) => (
+          <div class="clip-corner bg-[--color-ink-card] p-4">
+            <dt class="text-xs tracking-widest text-[--color-text-muted] font-display">
+              {fact.label}
+            </dt>
+            <dd class="mt-1 text-2xl font-display">{fact.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    {
+      sponsors.length > 0 && (
+        <section>
+          <SectionHeading title="Partners" />
+          <SponsorGrid sponsors={sponsors} />
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>
