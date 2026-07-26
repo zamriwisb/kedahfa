@@ -2936,14 +2936,24 @@ const { table, teamsBySlug, clubSlug, compact = false } = Astro.props;
           <tr
             class:list={[
               'border-b border-[--color-line]',
-              entry.team === clubSlug && 'bg-[--color-club-red]/20',
+              // Bold weight, not just the tint: WCAG 1.4.1 forbids conveying
+              // meaning by colour alone, and the sr-only marker below gives
+              // screen reader users the same cue.
+              entry.team === clubSlug && 'bg-[--color-club-red]/20 font-semibold',
             ]}
           >
             <td class="py-2 pr-2 text-[--color-text-muted]">{entry.position}</td>
-            <th scope="row" class="py-2 pr-2 text-left font-normal">
+            <th
+              scope="row"
+              class:list={[
+                'py-2 pr-2 text-left',
+                entry.team === clubSlug ? 'font-semibold' : 'font-normal',
+              ]}
+            >
               <span class="flex items-center gap-2">
                 <img src={teamsBySlug.get(entry.team)?.crest} alt="" width="20" height="20" aria-hidden="true" />
                 <span class="truncate">{entry.name}</span>
+                {entry.team === clubSlug && <span class="sr-only">(your club)</span>}
               </span>
             </th>
             <td class="py-2 pr-2 text-center">{entry.played}</td>
@@ -3047,19 +3057,27 @@ const units = [
 ---
 
 <div
-  class="countdown flex gap-3"
+  class:list={['countdown flex gap-3', !initial && 'font-display text-2xl']}
   data-target={target.toISOString()}
   role="timer"
   aria-label={label}
 >
   {
-    units.map((unit) => (
+    /*
+     * A past target renders "Kick-off" server-side rather than 00 00 00 00.
+     * Without this the no-JavaScript view of a stale build shows a countdown
+     * of all zeros, which reads as broken rather than as "already started".
+     */
+    !initial && 'Kick-off'
+  }
+  {
+    initial && units.map((unit) => (
       <div class="text-center">
         <span
           class="block text-3xl leading-none tabular-nums font-display"
           data-unit={unit.key}
         >
-          {String(initial?.[unit.key] ?? 0).padStart(2, '0')}
+          {String(initial[unit.key]).padStart(2, '0')}
         </span>
         <span class="text-[0.65rem] tracking-widest text-[--color-text-muted]">
           {unit.label}
