@@ -46,3 +46,4 @@ Task 6: complete (commits 5d63fca..856905b, review clean after 1 fix)
   Astro bundled the module) and Tailwind scanning docs/ (26KB -> 13.7KB CSS).
 Task 7: complete (commits f91b68c..4bc3d37, review clean after 1 fix — WCAG 1.4.1 colour-only club row + no-JS countdown state)
 Task 8: complete (commits a18b6fe..e8110f5, review clean, 2 minor deferred)
+Task 9: complete (commits e6f8bb7..2ceb36f, review clean — pagination proven at scale with 13 articles)
