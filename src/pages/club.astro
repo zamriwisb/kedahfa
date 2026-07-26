@@ -18,7 +18,15 @@ const facts = [
   <div class="page-shell space-y-12 py-12">
     <SectionHeading title="The Club" level={1} />
 
-    <p class="text-lg text-(--color-text-muted)">
+    {/*
+      page-shell sets the page's outer column at --container-6xl so every
+      template lines up, but running copy needs a narrower measure than a
+      grid of cards does: at the full 1112px this paragraph ran to roughly
+      130 characters a line, well past the 45-75 that stays comfortable to
+      read. max-w-3xl matches the article body on /news/[slug]. The fact grid
+      and sponsor grid below keep the full width, which suits them.
+    */}
+    <p class="max-w-3xl text-lg text-(--color-text-muted)">
       {club.name} is based at {club.stadium} in {club.city} and has represented the
       state since {club.founded}.
     </p>
