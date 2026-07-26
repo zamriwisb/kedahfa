@@ -40,12 +40,16 @@ test.describe('above-the-fold fonts are preloaded', () => {
 });
 
 test.describe('metric-matched fallbacks absorb the swap', () => {
+  // font-weight matters here: Barlow Condensed Fallback registers separate
+  // @font-face overrides for 600 and 700, and .font-display/h1-h3 (global.css)
+  // only ever render the display stack at 700 — a test at the wrong weight
+  // would measure overrides nobody uses.
   const STACKS = [
-    { token: '--font-body', fallback: 'Inter Fallback' },
-    { token: '--font-display', fallback: 'Barlow Condensed Fallback' },
+    { token: '--font-body', fallback: 'Inter Fallback', weight: '400' },
+    { token: '--font-display', fallback: 'Barlow Condensed Fallback', weight: '700' },
   ];
 
-  for (const { token, fallback } of STACKS) {
+  for (const { token, fallback, weight } of STACKS) {
     test(`${token} lists "${fallback}" ahead of the generic stack`, async ({ page }) => {
       await page.goto('/');
 
@@ -59,35 +63,56 @@ test.describe('metric-matched fallbacks absorb the swap', () => {
       expect(stack.indexOf(fallback)).toBeLessThan(stack.indexOf('ui-sans-serif'));
     });
 
-    test(`"${fallback}" is registered with metric overrides`, async ({ page }) => {
+    test(`"${fallback}" renders text within 3% of the real font's width`, async ({ page }) => {
       await page.goto('/');
 
-      const overrides = await page.evaluate((family) => {
-        for (const sheet of Array.from(document.styleSheets)) {
-          let rules: CSSRuleList;
-          try {
-            rules = sheet.cssRules;
-          } catch {
-            continue;
-          }
-          for (const rule of Array.from(rules)) {
-            if (!(rule instanceof CSSFontFaceRule)) continue;
-            const style = rule.style as CSSStyleDeclaration & Record<string, string>;
-            if (!style.getPropertyValue('font-family').includes(family)) continue;
-            return {
-              sizeAdjust: style.getPropertyValue('size-adjust'),
-              ascent: style.getPropertyValue('ascent-override'),
-              descent: style.getPropertyValue('descent-override'),
-            };
-          }
-        }
-        return null;
-      }, fallback);
+      // The describe block's claim is that the fallback absorbs the swap
+      // without a reflow — the only way to prove that is to actually render
+      // the same string in both faces and compare pixel widths. Asserting
+      // that size-adjust/ascent-override/descent-override merely end in "%"
+      // (the previous version of this test) would let `size-adjust: 1%`
+      // through: it matches the pattern while being wildly wrong. This
+      // measures the property the describe block names.
+      const { realFamily, realWidth, fallbackWidth, diffPct } = await page.evaluate(
+        async ({ token, fallback, weight }) => {
+          const stack = getComputedStyle(document.documentElement).getPropertyValue(token);
+          const realFamily = stack.split(',')[0].trim().replace(/^['"]|['"]$/g, '');
 
-      expect(overrides, `no @font-face for ${fallback}`).not.toBeNull();
-      expect(overrides!.sizeAdjust).toMatch(/%$/);
-      expect(overrides!.ascent).toMatch(/%$/);
-      expect(overrides!.descent).toMatch(/%$/);
+          const fontString = (family: string) => `${weight} 64px "${family}"`;
+          await Promise.all([
+            document.fonts.load(fontString(realFamily)),
+            document.fonts.load(fontString(fallback)),
+          ]);
+
+          const text = 'The quick brown fox jumps over the lazy dog 0123456789';
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d')!;
+
+          ctx.font = fontString(realFamily);
+          const realWidth = ctx.measureText(text).width;
+
+          ctx.font = fontString(fallback);
+          const fallbackWidth = ctx.measureText(text).width;
+
+          return {
+            realFamily,
+            realWidth,
+            fallbackWidth,
+            diffPct: (Math.abs(fallbackWidth - realWidth) / realWidth) * 100,
+          };
+        },
+        { token, fallback, weight },
+      );
+
+      // Widths of 0 mean the family failed to resolve (e.g. a typo'd name)
+      // and would make diffPct meaningless (0/0 or a false-positive small
+      // ratio) rather than genuinely close.
+      expect(realWidth, `"${realFamily}" measured zero width`).toBeGreaterThan(0);
+      expect(fallbackWidth, `"${fallback}" measured zero width`).toBeGreaterThan(0);
+      // Reviewer measured today's values at 0.18% (Inter Fallback) and 2.77%
+      // (Barlow Condensed Fallback at weight 700) — both comfortably inside
+      // this budget.
+      expect(diffPct).toBeLessThan(3);
     });
   }
 });
