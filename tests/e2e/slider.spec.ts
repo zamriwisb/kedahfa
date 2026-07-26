@@ -23,3 +23,60 @@ test('every slide names its own position in the set', async ({ page }) => {
   await expect(page.locator('.hero-slider__slide').first()).toHaveAttribute('aria-label', '1 of 3');
   await expect(page.locator('.hero-slider__slide').last()).toHaveAttribute('aria-label', '3 of 3');
 });
+
+test('clicking a dash moves to that slide', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Go to slide 3' }).click();
+
+  await expect(page.getByRole('button', { name: 'Go to slide 3' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+  await expect(page.getByRole('button', { name: 'Go to slide 1' })).not.toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+  await expect(page.locator('.hero-slider__slide').nth(2)).toBeInViewport();
+});
+
+test('the arrow keys move through the slides', async ({ page }) => {
+  await page.goto('/');
+
+  await page.locator('.hero-slider__track').focus();
+  await page.keyboard.press('ArrowRight');
+
+  await expect(page.getByRole('button', { name: 'Go to slide 2' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+});
+
+test('autoplay advances the slider on its own', async ({ page }) => {
+  await page.goto('/');
+
+  // Autoplay is 6s per slide; give it one full cycle plus the smooth scroll.
+  await expect(page.getByRole('button', { name: 'Go to slide 2' })).toHaveAttribute(
+    'aria-current',
+    'true',
+    { timeout: 12_000 },
+  );
+});
+
+test('autoplay stops once the visitor takes control', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Go to slide 2' }).click();
+  await expect(page.getByRole('button', { name: 'Go to slide 2' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+
+  // A slide must never be yanked away from someone reading it: well past one
+  // autoplay interval, slide 2 is still the active one.
+  await page.waitForTimeout(9000);
+  await expect(page.getByRole('button', { name: 'Go to slide 2' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+});

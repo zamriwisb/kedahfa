@@ -107,7 +107,7 @@ const total = slides.length;
         <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10">
           <div class="mx-auto flex max-w-6xl justify-end px-(--spacing-gutter) pb-4">
             <div class="pointer-events-auto flex gap-2" role="group" aria-label="Choose a slide">
-              {slides.map((slide, index) => (
+              {slides.map((_, index) => (
                 <button
                   type="button"
                   class="hero-slider__dot justify-center px-1"
@@ -153,3 +153,106 @@ const total = slides.length;
     background-color: var(--color-accent);
   }
 </style>
+
+<script>
+  const AUTOPLAY_MS = 6000;
+
+  for (const root of document.querySelectorAll<HTMLElement>('.hero-slider')) {
+    const track = root.querySelector<HTMLElement>('.hero-slider__track');
+    const slides = [...root.querySelectorAll<HTMLElement>('.hero-slider__slide')];
+    const dots = [...root.querySelectorAll<HTMLButtonElement>('.hero-slider__dot')];
+
+    // One slide needs no timer, no observer and no listeners.
+    if (!track || slides.length < 2) continue;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let current = 0;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    // Reduced motion means autoplay never starts in the first place.
+    let stopped = reduceMotion;
+
+    const goTo = (index: number) => {
+      current = (index + slides.length) % slides.length;
+      // Every slide is exactly the width of the track, so the offset is a
+      // multiplication — no offsetLeft arithmetic that depends on which
+      // ancestor happens to be the offsetParent.
+      track.scrollTo({
+        left: track.clientWidth * current,
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      });
+    };
+
+    const pause = () => {
+      if (timer === null) return;
+      clearInterval(timer);
+      timer = null;
+    };
+
+    const start = () => {
+      if (stopped || timer !== null) return;
+      timer = setInterval(() => goTo(current + 1), AUTOPLAY_MS);
+    };
+
+    // Deliberate interaction ends autoplay for this page view. Pausing would
+    // not be enough: a slide must never be yanked away from someone who
+    // chose it and is reading it.
+    const stop = () => {
+      stopped = true;
+      pause();
+    };
+
+    // Observing the result rather than the cause: whatever moved the track —
+    // autoplay, a swipe, the keyboard, the scrollbar — the dashes follow.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const index = slides.indexOf(entry.target as HTMLElement);
+          if (index < 0) continue;
+
+          current = index;
+          for (const [position, dot] of dots.entries()) {
+            if (position === index) dot.setAttribute('aria-current', 'true');
+            else dot.removeAttribute('aria-current');
+          }
+        }
+      },
+      { root: track, threshold: 0.6 },
+    );
+    for (const slide of slides) observer.observe(slide);
+
+    for (const [index, dot] of dots.entries()) {
+      dot.addEventListener('click', () => {
+        stop();
+        goTo(index);
+      });
+    }
+
+    track.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      event.preventDefault();
+      stop();
+      goTo(current + (event.key === 'ArrowRight' ? 1 : -1));
+    });
+
+    // Touch, wheel and drag are the honest signals that the visitor is
+    // driving. A plain 'scroll' listener cannot be used here — it fires for
+    // this script's own scrollTo() as well, which would stop autoplay one
+    // tick after it started.
+    for (const eventName of ['pointerdown', 'touchstart', 'wheel'] as const) {
+      track.addEventListener(eventName, stop, { passive: true });
+    }
+
+    root.addEventListener('pointerenter', pause);
+    root.addEventListener('pointerleave', start);
+    root.addEventListener('focusin', pause);
+    root.addEventListener('focusout', start);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) pause();
+      else start();
+    });
+
+    start();
+  }
+</script>
