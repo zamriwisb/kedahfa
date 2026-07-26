@@ -115,6 +115,23 @@ describe('the real build rejects bad content', () => {
   );
 
   it(
+    'fails a news article date with a time component',
+    () => {
+      withMutatedFile(
+        'src/content/news/kedah-edge-selangor.md',
+        (text) => text.replace('date: 2026-07-19', 'date: 2026-07-19T23:30:00'),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(/must be a plain date with no time component/);
+          expect(output).toMatch(/date/);
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
+
+  it(
     'fails a fixture referencing a team slug that does not exist',
     () => {
       withMutatedFile(

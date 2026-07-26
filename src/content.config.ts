@@ -30,6 +30,29 @@ const FIXTURE_DATE_MESSAGE =
   'Fixture date must include an explicit UTC offset or "Z", e.g. "2026-08-02T20:45:00+08:00". ' +
   'A bare local time like "2026-08-02T20:45:00" builds successfully but renders the wrong time and day.';
 
+// Calendar dates — a news article's publish day, a player's birth day, the
+// day standings were last updated — name a day, not an instant, so a value
+// carrying a time-of-day is a content error rather than a legitimate value.
+// z.coerce.date() parses a plain "2026-07-19" as exactly UTC midnight and
+// any value with an actual time component (bare local time, or an explicit
+// non-zero offset) as something else, so validating the parsed Date's UTC
+// clock fields is equivalent to requiring a date-only source string — the
+// same hazard the fixture `date` field above guards against with a regex on
+// the raw string, but these fields lose that raw string to js-yaml/Zod
+// coercion before this schema runs, so the check has to live after coercion.
+function dateOnly(fieldLabel: string) {
+  return z.coerce.date().refine(
+    (d) =>
+      d.getUTCHours() === 0 &&
+      d.getUTCMinutes() === 0 &&
+      d.getUTCSeconds() === 0 &&
+      d.getUTCMilliseconds() === 0,
+    {
+      message: `${fieldLabel} must be a plain date with no time component, e.g. "2026-07-19".`,
+    },
+  );
+}
+
 const club = defineCollection({
   loader: file('src/data/club.yaml'),
   schema: z.object({
@@ -51,7 +74,7 @@ const season = defineCollection({
   schema: z.object({
     id: z.literal('current'),
     competition: z.string(),
-    standingsUpdated: z.coerce.date(),
+    standingsUpdated: dateOnly('standingsUpdated'),
   }),
 });
 
@@ -121,7 +144,7 @@ const squad = defineCollection({
     number: z.number().int().min(1).max(99),
     position: z.enum(['Goalkeeper', 'Defender', 'Midfielder', 'Forward']),
     nationality: z.string().length(2),
-    dateOfBirth: z.coerce.date(),
+    dateOfBirth: dateOnly('dateOfBirth'),
     heightCm: z.number().int().min(140).max(220),
     photo: z.string().startsWith('/images/squad/'),
     joined: z.number().int(),
@@ -151,7 +174,7 @@ const news = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
   schema: z.object({
     title: z.string(),
-    date: z.coerce.date(),
+    date: dateOnly('date'),
     category: z.enum(['match-report', 'club', 'transfer', 'academy']),
     excerpt: z.string().min(20).max(200),
     image: z.string().startsWith('/images/news/'),
