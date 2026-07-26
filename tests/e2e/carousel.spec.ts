@@ -87,3 +87,125 @@ test('the scroll region is reachable by keyboard', async ({ page }) => {
   // WCAG 2.1.1: a region a mouse can pan must be focusable too.
   await expect(page.locator(`${FIXTURES} .card-carousel__track`)).toHaveAttribute('tabindex', '0');
 });
+
+const SQUAD = '.card-carousel[data-carousel="squad"]';
+
+test('the squad carousel advances on its own', async ({ page }, testInfo) => {
+  // 6 cards at 160px fit the 1112px desktop shell, so there is nothing to
+  // autoplay there. Pixel 5 is where the track actually overflows.
+  test.skip(testInfo.project.name !== 'mobile', 'squad track only overflows on mobile');
+
+  await page.goto('/');
+  const track = page.locator(`${SQUAD} .card-carousel__track`);
+  await expect(track).toHaveJSProperty('scrollLeft', 0);
+
+  // Autoplay is 6s; allow one interval plus the smooth scroll.
+  await expect(async () => {
+    expect(await track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  }).toPass({ timeout: 12_000 });
+});
+
+test('hovering the squad carousel holds it still', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'squad track only overflows on mobile');
+
+  await page.goto('/');
+  const track = page.locator(`${SQUAD} .card-carousel__track`);
+
+  // Hover without clicking: this must PAUSE, not stop.
+  await track.hover();
+  await page.waitForTimeout(9000);
+  expect(await track.evaluate((el) => el.scrollLeft)).toBe(0);
+
+  // Moving off must resume. Without this half the test cannot tell a pause
+  // from a stop — slider.spec.ts records the same lesson.
+  await page.mouse.move(0, 0);
+  await expect(async () => {
+    expect(await track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  }).toPass({ timeout: 12_000 });
+});
+
+test('the squad carousel offers a pause control that stops it', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'squad track only overflows on mobile');
+
+  await page.goto('/');
+
+  // WCAG 2.2.2: auto-moving content needs a discoverable way to stop it.
+  const pauseButton = page.getByRole('button', { name: 'Pause players carousel' });
+  await expect(pauseButton).toBeVisible();
+
+  await pauseButton.click();
+  await expect(page.getByRole('button', { name: 'Play players carousel' })).toBeVisible();
+
+  // Off the control, so the durable stopped state is what is measured rather
+  // than the transient hover-pause.
+  await page.mouse.move(0, 0);
+  const track = page.locator(`${SQUAD} .card-carousel__track`);
+  const resting = await track.evaluate((el) => el.scrollLeft);
+  await page.waitForTimeout(9000);
+  expect(await track.evaluate((el) => el.scrollLeft)).toBe(resting);
+});
+
+test('a carousel whose cards already fit shows no controls', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'the squad track only fits on desktop');
+
+  await page.goto('/');
+
+  // 6 × 160px + 5 × 16px = 1040px inside 1112px of shell: nothing to page
+  // through, so the controls must stay hidden rather than move nothing.
+  await expect(page.locator(`${SQUAD} .card-carousel__controls`)).toBeHidden();
+  // The fixtures track on the same page does overflow, which proves the
+  // hidden state above is a real measurement and not a broken selector.
+  await expect(page.locator(`${FIXTURES} .card-carousel__controls`)).toBeVisible();
+});
+
+test('reduced motion suppresses autoplay and its pause control', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'squad track only overflows on mobile');
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+
+  const track = page.locator(`${SQUAD} .card-carousel__track`);
+  await page.waitForTimeout(9000);
+  expect(await track.evaluate((el) => el.scrollLeft)).toBe(0);
+
+  // The toggle is only unhidden when the timer starts, so it must not appear.
+  await expect(page.locator(`${SQUAD} .card-carousel__toggle`)).toBeHidden();
+});
+
+test('autoplay resumes after a resize round-trip back to an overflowing track', async ({ page }) => {
+  // This is desktop-only on purpose. The squad track fits at desktop width
+  // (1112px shell, 1040px of cards) and overflows on a narrow one — exactly
+  // the pair of states syncControls' start()/pause() symmetry has to survive.
+  // Starting narrow, widening past the fit point, then narrowing back is the
+  // only round-trip that can observe the resume half of that fix: it was
+  // proven un-testable on the fixtures carousel (which always overflows, so
+  // syncControls never has a reason to call pause() there) and the fixtures
+  // resize test above says as much.
+  await page.goto('/');
+  await page.setViewportSize({ width: 353, height: 800 });
+
+  const track = page.locator(`${SQUAD} .card-carousel__track`);
+  const controls = page.locator(`${SQUAD} .card-carousel__controls`);
+
+  await expect(controls).toBeVisible();
+  await expect(async () => {
+    expect(await track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  }).toPass({ timeout: 12_000 });
+
+  // Widen past the fit point: the track no longer overflows, so autoplay
+  // must pause and the controls must hide.
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await expect(controls).toBeHidden();
+  const restingLeft = await track.evaluate((el) => el.scrollLeft);
+  await page.waitForTimeout(7000);
+  expect(await track.evaluate((el) => el.scrollLeft)).toBe(restingLeft);
+
+  // Narrow back: the track overflows again, and this is the assertion the
+  // fix is for — autoplay must have resumed, not stay dead from the wide step.
+  await page.setViewportSize({ width: 353, height: 800 });
+  await expect(controls).toBeVisible();
+  const afterResize = await track.evaluate((el) => el.scrollLeft);
+  await expect(async () => {
+    expect(await track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(afterResize);
+  }).toPass({ timeout: 12_000 });
+});

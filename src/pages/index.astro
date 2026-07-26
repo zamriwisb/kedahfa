@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
+import CardCarousel from '../components/CardCarousel.astro';
 import CtaButton from '../components/CtaButton.astro';
 import EmptyState from '../components/EmptyState.astro';
 import FixturesStrip from '../components/FixturesStrip.astro';
@@ -114,15 +115,19 @@ const latestArticles = articles.slice(0, 5);
 
       {
         featuredPlayers.length > 0 ? (
-          <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Featured squad players">
-            <ul class="flex snap-x gap-4 pb-2">
-              {featuredPlayers.map((player) => (
-                <li class="w-40 shrink-0 snap-start">
-                  <PlayerCard player={player} />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <CardCarousel
+            name="squad"
+            label="Featured squad players"
+            itemNoun="players"
+            on="green"
+            autoplay
+          >
+            {featuredPlayers.map((player) => (
+              <li class="w-40 shrink-0 snap-start">
+                <PlayerCard player={player} />
+              </li>
+            ))}
+          </CardCarousel>
         ) : (
           <EmptyState message="The squad list will be published shortly." />
         )
