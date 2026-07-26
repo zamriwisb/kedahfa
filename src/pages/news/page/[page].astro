@@ -1,0 +1,26 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import NewsList from '../../../components/NewsList.astro';
+import { loadSiteData } from '../../../lib/content';
+import { NEWS_PAGE_SIZE, pageCount, paginate } from '../../../lib/pagination';
+
+export const getStaticPaths = (async () => {
+  const { articles } = await loadSiteData();
+  const last = pageCount(articles.length, NEWS_PAGE_SIZE);
+
+  return Array.from({ length: Math.max(0, last - 1) }, (_, index) => ({
+    params: { page: String(index + 2) },
+  }));
+}) satisfies GetStaticPaths;
+
+const { articles } = await loadSiteData();
+const page = paginate(articles, Number(Astro.params.page), NEWS_PAGE_SIZE);
+---
+
+<BaseLayout
+  title={`News — page ${page.currentPage}`}
+  description="The latest news, match reports and announcements."
+>
+  <NewsList articles={page.items} currentPage={page.currentPage} lastPage={page.lastPage} />
+</BaseLayout>

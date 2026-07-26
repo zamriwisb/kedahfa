@@ -4,6 +4,8 @@
 @import '@fontsource/barlow-condensed/700.css';
 @import './tokens.css';
 
+@plugin '@tailwindcss/typography';
+
 /*
  * Tailwind 4 auto-detects content sources across the repo. docs/ holds this
  * plan, whose code samples contain Tailwind classes for all 14 tasks — without

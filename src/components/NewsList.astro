@@ -1,0 +1,75 @@
+---
+import ArticleCard from './ArticleCard.astro';
+import CategoryFilter from './islands/CategoryFilter.astro';
+import EmptyState from './EmptyState.astro';
+import SectionHeading from './SectionHeading.astro';
+import type { Article } from '../lib/content';
+
+interface Props {
+  articles: Article[];
+  currentPage: number;
+  lastPage: number;
+}
+
+const { articles, currentPage, lastPage } = Astro.props;
+
+const CATEGORIES = [
+  { value: 'match-report', label: 'Match Reports' },
+  { value: 'club', label: 'Club' },
+  { value: 'transfer', label: 'Transfers' },
+  { value: 'academy', label: 'Academy' },
+];
+
+// Page 1 lives at /news, not /news/page/1.
+const previousUrl =
+  currentPage <= 1 ? null : currentPage === 2 ? '/news' : `/news/page/${currentPage - 1}`;
+const nextUrl = currentPage < lastPage ? `/news/page/${currentPage + 1}` : null;
+---
+
+<div class="mx-auto max-w-6xl px-[--spacing-gutter] py-12">
+  <SectionHeading title="News" />
+
+  {
+    articles.length > 0 && (
+      <CategoryFilter categories={CATEGORIES} targetSelector="[data-category]" filterKey="category" />
+    )
+  }
+
+  {
+    articles.length > 0 ? (
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {articles.map((article) => (
+          <ArticleCard article={article} />
+        ))}
+      </div>
+    ) : (
+      <EmptyState message="There is no club news to show yet." />
+    )
+  }
+
+  {
+    lastPage > 1 && (
+      <nav class="mt-10 flex items-center justify-between" aria-label="Pagination">
+        {previousUrl ? (
+          <a href={previousUrl} class="text-sm text-[--color-club-gold] font-display">
+            &larr; Newer
+          </a>
+        ) : (
+          <span />
+        )}
+
+        <p class="text-sm text-[--color-text-muted]">
+          Page {currentPage} of {lastPage}
+        </p>
+
+        {nextUrl ? (
+          <a href={nextUrl} class="text-sm text-[--color-club-gold] font-display">
+            Older &rarr;
+          </a>
+        ) : (
+          <span />
+        )}
+      </nav>
+    )
+  }
+</div>

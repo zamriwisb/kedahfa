@@ -1,0 +1,61 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatArticleDate } from '../../lib/dates';
+
+export const getStaticPaths = (async () => {
+  const articles = await getCollection('news', ({ data }) => import.meta.env.DEV || !data.draft);
+  return articles.map((article) => ({ params: { slug: article.id } }));
+}) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+const article = await getEntry('news', slug!);
+
+// getStaticPaths only emits slugs that exist, so a miss is a build-time bug,
+// not a visitor reaching a bad URL. Throwing fails the build; Astro.redirect
+// would be meaningless in a static render.
+if (!article) throw new Error(`No news article for slug "${slug}".`);
+
+const { Content } = await render(article);
+---
+
+<BaseLayout
+  title={article.data.title}
+  description={article.data.excerpt}
+  image={article.data.image}
+  imageAlt={article.data.imageAlt}
+>
+  <article class="mx-auto max-w-3xl px-[--spacing-gutter] py-12">
+    <p class="text-xs tracking-widest text-[--color-club-gold] font-display">
+      {article.data.category.replace('-', ' ')}
+    </p>
+
+    <h1 class="mt-3 text-4xl leading-tight sm:text-5xl">{article.data.title}</h1>
+
+    <p class="mt-4 text-sm text-[--color-text-muted]">
+      <time datetime={article.data.date.toISOString()}>
+        {formatArticleDate(article.data.date)}
+      </time>
+      &middot; {article.data.author}
+    </p>
+
+    <img
+      src={article.data.image}
+      alt={article.data.imageAlt}
+      width="960"
+      height="540"
+      class="clip-corner mt-8 aspect-video w-full object-cover"
+    />
+
+    <div
+      class="prose prose-invert mt-8 max-w-none prose-headings:font-display prose-headings:uppercase prose-a:text-[--color-club-gold]"
+    >
+      <Content />
+    </div>
+
+    <a href="/news" class="mt-10 text-sm text-[--color-club-gold] font-display">
+      &larr; All news
+    </a>
+  </article>
+</BaseLayout>

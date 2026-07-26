@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NewsList from '../../components/NewsList.astro';
+import { loadSiteData } from '../../lib/content';
+import { NEWS_PAGE_SIZE, paginate } from '../../lib/pagination';
+
+const { articles } = await loadSiteData();
+const page = paginate(articles, 1, NEWS_PAGE_SIZE);
+---
+
+<BaseLayout title="News" description="The latest news, match reports and announcements.">
+  <NewsList articles={page.items} currentPage={page.currentPage} lastPage={page.lastPage} />
+</BaseLayout>

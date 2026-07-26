@@ -1,0 +1,67 @@
+---
+interface Props {
+  categories: { value: string; label: string }[];
+  targetSelector: string;
+  /** The data-* attribute on each item to match against, without the prefix. */
+  filterKey: string;
+}
+
+const { categories, targetSelector, filterKey } = Astro.props;
+---
+
+<div
+  class="filter mb-6 flex flex-wrap gap-2"
+  data-target={targetSelector}
+  data-key={filterKey}
+>
+  <button
+    type="button"
+    data-filter="all"
+    aria-pressed="true"
+    class="clip-corner bg-[--color-club-red] px-4 text-xs tracking-widest text-white font-display"
+  >
+    All
+  </button>
+  {
+    categories.map((category) => (
+      <button
+        type="button"
+        data-filter={category.value}
+        aria-pressed="false"
+        class="clip-corner bg-[--color-ink-card] px-4 text-xs tracking-widest text-[--color-text-muted] font-display"
+      >
+        {category.label}
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  for (const bar of document.querySelectorAll<HTMLElement>('.filter')) {
+    const selector = bar.dataset.target;
+    const key = bar.dataset.key;
+    if (!selector || !key) continue;
+
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>('button[data-filter]')];
+    const items = [...document.querySelectorAll<HTMLElement>(selector)];
+
+    const apply = (value: string) => {
+      for (const button of buttons) {
+        const active = button.dataset.filter === value;
+        button.setAttribute('aria-pressed', String(active));
+        button.classList.toggle('bg-[--color-club-red]', active);
+        button.classList.toggle('text-white', active);
+        button.classList.toggle('bg-[--color-ink-card]', !active);
+        button.classList.toggle('text-[--color-text-muted]', !active);
+      }
+
+      for (const item of items) {
+        item.hidden = value !== 'all' && item.dataset[key] !== value;
+      }
+    };
+
+    for (const button of buttons) {
+      button.addEventListener('click', () => apply(button.dataset.filter ?? 'all'));
+    }
+  }
+</script>
