@@ -1,0 +1,90 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatArticleDate } from '../../lib/dates';
+import { loadSiteData } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const { squad } = await loadSiteData();
+  return squad.map((player) => ({ params: { slug: player.id }, props: { player } }));
+}) satisfies GetStaticPaths;
+
+const { player } = Astro.props;
+
+const details = [
+  { label: 'Squad number', value: String(player.number) },
+  { label: 'Position', value: player.position },
+  { label: 'Nationality', value: player.nationality },
+  { label: 'Date of birth', value: formatArticleDate(player.dateOfBirth) },
+  { label: 'Height', value: `${player.heightCm} cm` },
+  { label: 'Joined', value: String(player.joined) },
+];
+---
+
+<BaseLayout
+  title={player.name}
+  description={`${player.name}, ${player.position.toLowerCase()} for the first team.`}
+  image={player.photo}
+  imageAlt={`${player.name}, ${player.position}`}
+>
+  <div class="mx-auto max-w-5xl px-[--spacing-gutter] py-12">
+    <a href="/squad" class="text-sm text-[--color-club-gold] font-display">&larr; Squad</a>
+
+    <div class="mt-6 grid gap-8 sm:grid-cols-[300px_1fr]">
+      <img
+        src={player.photo}
+        alt={`${player.name}, ${player.position}`}
+        width="300"
+        height="360"
+        class="clip-corner aspect-[5/6] w-full bg-[--color-ink-card] object-cover"
+      />
+
+      <div>
+        <p class="text-6xl leading-none text-[--color-club-red] font-display">
+          {player.number}
+        </p>
+        <h1 class="mt-2 text-4xl leading-tight">{player.name}</h1>
+        <p class="mt-1 text-sm tracking-widest text-[--color-club-gold] font-display">
+          {player.position}
+        </p>
+
+        {player.bio && <p class="mt-6 text-[--color-text-muted]">{player.bio}</p>}
+
+        <dl class="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+          {
+            details.map((detail) => (
+              <div class="border-b border-[--color-line] pb-2">
+                <dt class="text-xs tracking-widest text-[--color-text-muted] font-display">
+                  {detail.label}
+                </dt>
+                <dd class="mt-1">{detail.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        {
+          player.stats && (
+            <div class="mt-8">
+              <h2 class="text-sm tracking-[0.3em] text-[--color-club-gold]">Season Stats</h2>
+              <dl class="mt-4 flex gap-8">
+                <div>
+                  <dd class="text-3xl font-display">{player.stats.appearances}</dd>
+                  <dt class="text-xs tracking-widest text-[--color-text-muted]">Apps</dt>
+                </div>
+                <div>
+                  <dd class="text-3xl font-display">{player.stats.goals}</dd>
+                  <dt class="text-xs tracking-widest text-[--color-text-muted]">Goals</dt>
+                </div>
+                <div>
+                  <dd class="text-3xl font-display">{player.stats.assists}</dd>
+                  <dt class="text-xs tracking-widest text-[--color-text-muted]">Assists</dt>
+                </div>
+              </dl>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</BaseLayout>

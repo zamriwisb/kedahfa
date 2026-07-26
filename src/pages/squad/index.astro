@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import PlayerCard from '../../components/PlayerCard.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import { loadSiteData } from '../../lib/content';
+import { groupByPosition } from '../../lib/squad';
+
+const { club, squad } = await loadSiteData();
+const groups = groupByPosition(squad);
+---
+
+<BaseLayout title="Squad" description={`The ${club.name} first-team squad.`}>
+  <div class="mx-auto max-w-6xl space-y-12 px-[--spacing-gutter] py-12">
+    <SectionHeading title="First Team Squad" />
+
+    {
+      groups.length > 0 ? (
+        groups.map((group) => (
+          <section>
+            <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">
+              {group.position}s
+            </h2>
+            <ul class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {group.players.map((player) => (
+                <li>
+                  <PlayerCard player={player} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      ) : (
+        <EmptyState message="The squad list will be published shortly." />
+      )
+    }
+  </div>
+</BaseLayout>
