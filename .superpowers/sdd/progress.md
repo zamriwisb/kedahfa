@@ -87,3 +87,47 @@ Task 14: complete (commits 105e5e6..0274f1a, review clean after 1 fix — CI art
   FIXED 96979d2 (id collision, uses Astro's own github-slugger),
         61ea4a1 (validate raw input pre-coercion; all 8 schemas .strict())
   Verified by me: both now exit 1. 94 unit + 59 e2e green, tree clean.
+
+# Hero slider — SDD progress
+Plan: docs/superpowers/plans/2026-07-26-hero-slider.md
+Branch: feat/slask-inspired-redesign  Base: 02deec9
+Task 1: complete (commit 794912a, review clean — no findings)
+Task 2: complete (commit 2339d3b, review clean — approved)
+  Deviation from plan, reviewer-confirmed correct: only the FIRST slide's title
+  renders <h1> (rest <h2>). Deleting HeroPanel left the homepage with no h1 and
+  broke the pre-existing navigation.spec.ts one-h1-per-route check.
+  MINOR deferred: HeroSlider dot .map((slide, index)) never uses `slide` ->
+  astro check emits 1 hint. Folded into Task 3 dispatch (same file).
+  MINOR deferred: rgb(255 255 255 / 45%) dash colour is a raw literal outside
+  tokens.css; matches existing global.css idiom, candidate for a token later.
+Task 3: complete (commits 2339d3b..77f3912, review clean after 1 fix round)
+  Two Important findings, BOTH plan-mandated, escalated to owner, both fixed:
+   - wheel listener stopped autoplay on ANY wheel -> vertical page scroll over
+     the hero killed autoplay for most desktop visitors. Now horizontal only.
+   - "autoplay stops on interaction" e2e could not tell stop() from pause()
+     (mouse rested on the dash, pointerleave never fired). Now moves mouse off.
+  Controller verified full suite after fix round: 95 unit, 73 e2e, 1 pre-existing skip.
+  MINOR deferred: no test for the wheel horizontal-vs-vertical distinction itself.
+  MINOR deferred: no coverage of prefers-reduced-motion or single-slide paths.
+Task 4: complete (commit 503daec, README slides section verified by controller)
+
+## FINAL WHOLE-BRANCH REVIEW (opus) — "merge with fixes", 5 Important, 0 Critical
+  Owner approved 4 of 5; all applied in 5e1c130, re-reviewed (opus) -> Ready: Yes.
+  I1 scrim calibrated for the flat dark placeholder; over a real daytime photo
+     the headline measured ~3.2:1. axe CANNOT see it (resolves background from
+     the section background-color, never the image). Now flat /40 + /80 ramp.
+  I2 homepage h1 was whichever promo sorted first, and [] slides left / with no
+     h1 while the build still passed. Now sr-only h1 in index.astro, slides h2.
+  I3 href schema rejected external ticketing links (BUILD FAILURE for editors)
+     while letting //evil.com and /\evil.com through. Now relative-or-https,
+     both bypasses closed + build-negative case.
+  I4 WCAG 2.2.2: no discoverable pause control. Added pause/play toggle, hidden
+     until the script actually starts autoplay so it never lies (no-JS, reduced
+     motion). Spec had never mentioned 2.2.2 — plan-level omission.
+  I5 /news/* slide hrefs get no referential validation -> DEFERRED by owner.
+  Re-review minor fixed by controller in cb20236: pause toggle was inside the
+  group labelled "Choose a slide".
+  Open minors: tab/newline href bypass ("/<TAB>/evil.com"); rel="noopener" is
+  inert without target=_blank; no test for reduced-motion / single-slide /
+  wheel-direction paths; README doesn't say the flat layer darkens the WHOLE
+  frame 40%; Number(dot.dataset.slideTo) unguarded -> NaN if attribute dropped.
