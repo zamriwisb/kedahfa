@@ -12,9 +12,9 @@ const club = defineCollection({
     stadium: z.string(),
     stadiumCapacity: z.number().int().positive(),
     city: z.string(),
-    emails: z.array(z.object({ label: z.string(), address: z.string().email() })).min(1),
+    emails: z.array(z.object({ label: z.string(), address: z.email() })).min(1),
     phone: z.string(),
-    socials: z.array(z.object({ platform: z.string(), url: z.string().url() })),
+    socials: z.array(z.object({ platform: z.string(), url: z.url() })),
   }),
 });
 
@@ -115,7 +115,7 @@ const sponsors = defineCollection({
     name: z.string(),
     tier: z.enum(['main', 'official', 'partner']),
     logo: z.string().startsWith('/images/sponsors/'),
-    url: z.string().url(),
+    url: z.url(),
   }),
 });
 
