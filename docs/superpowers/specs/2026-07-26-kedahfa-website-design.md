@@ -112,6 +112,15 @@ Schema refinements:
 - `home` and `away` must exist in `teams.yaml` and must differ.
 - `report`, when present, must match an existing news article slug.
 
+Implementation note, established during the build: Astro's `reference()` does
+**not** verify that a referenced entry exists — it supplies typing and transforms
+a slug into `{ collection, id }`, and a fixture naming a team absent from
+`teams.yaml` builds clean. Verified against Astro 7.1.3. Zod refinements cannot
+close the gap either, since they see one entry at a time. The existence half of
+these rules is therefore enforced in the site data loader, the one place holding
+every collection at once. The guarantees stand; the mechanism is the loader
+rather than the schema.
+
 A `postponed` fixture keeps its original date for ordering but renders the label
 "Postponed" in place of the kickoff time, and is excluded from both the next-match
 card and the recent-results strip. When a new date is confirmed, the record is

@@ -378,6 +378,17 @@ git commit -m "feat: scaffold Astro project and add Kuala Lumpur date utilities"
 
 - [ ] **Step 1: Write the collection schemas**
 
+**`reference()` does NOT verify that the referenced entry exists.** Verified
+against Astro 7.1.3: a fixture naming a team slug absent from `teams.yaml`
+builds successfully with exit 0. `reference()` supplies typing and transforms a
+slug string into `{ collection, id }`, but performs no lookup in the target
+collection. Zod refinements cannot close the gap either — they see one entry at
+a time and cannot query another collection.
+
+Referential integrity is therefore enforced in Task 5's `loadSiteData()`, the
+one place that holds every collection at once. **Task 2 delivers shape and
+intra-entry validation only.** Do not attempt to enforce existence here.
+
 Create `src/content.config.ts`:
 
 ```ts
@@ -1559,6 +1570,7 @@ Zod validates one entry at a time. Uniqueness and asset existence span entries, 
   - `assertUniqueSquadNumbers(players: { id: string; number: number }[]): void`
   - `assertUniqueIds(items: { id: string }[], label: string): void`
   - `assertPublicAssetsExist(paths: string[], publicDir: string): void`
+  - `assertReferencesResolve(refs: Reference[], knownIds: Set<string>, label: string): void` where `interface Reference { from: string; field: string; id: string }`
   - `POSITIONS: readonly Position[]`, `type Position`, `interface Player`, `groupByPosition(players: Player[]): PositionGroup[]`
   - `loadSiteData(): Promise<SiteData>`
 
@@ -1573,6 +1585,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   assertPublicAssetsExist,
+  assertReferencesResolve,
   assertUniqueIds,
   assertUniqueSquadNumbers,
 } from '../../src/lib/validate';
@@ -1643,6 +1656,50 @@ describe('assertPublicAssetsExist', () => {
         fixtureDir(),
       ),
     ).toThrow(/gone\.svg/);
+  });
+});
+
+describe('assertReferencesResolve', () => {
+  const teams = new Set(['kedah', 'jdt', 'selangor']);
+
+  it('accepts references whose targets all exist', () => {
+    expect(() =>
+      assertReferencesResolve(
+        [
+          { from: '2026-08-02-jdt-h', field: 'home', id: 'kedah' },
+          { from: '2026-08-02-jdt-h', field: 'away', id: 'jdt' },
+        ],
+        teams,
+        'teams',
+      ),
+    ).not.toThrow();
+  });
+
+  it('throws naming the entry, the field and the missing target', () => {
+    expect(() =>
+      assertReferencesResolve(
+        [{ from: '2026-08-02-jdt-h', field: 'away', id: 'perak' }],
+        teams,
+        'teams',
+      ),
+    ).toThrow(/2026-08-02-jdt-h.*away.*perak/s);
+  });
+
+  it('reports every broken reference, not only the first', () => {
+    expect(() =>
+      assertReferencesResolve(
+        [
+          { from: 'fixture-a', field: 'home', id: 'ghost-one' },
+          { from: 'fixture-b', field: 'report', id: 'ghost-two' },
+        ],
+        teams,
+        'teams',
+      ),
+    ).toThrow(/ghost-one[\s\S]*ghost-two/);
+  });
+
+  it('accepts an empty reference list', () => {
+    expect(() => assertReferencesResolve([], teams, 'teams')).not.toThrow();
   });
 });
 ```
@@ -1762,6 +1819,38 @@ export function assertPublicAssetsExist(paths: string[], publicDir: string): voi
     `Referenced files are missing from public/:\n${missing.map((p) => `  ${p}`).join('\n')}`,
   );
 }
+
+export interface Reference {
+  /** The id of the entry holding the reference, for the error message. */
+  from: string;
+  /** The field name holding the reference, e.g. "home" or "report". */
+  field: string;
+  /** The id being referenced. */
+  id: string;
+}
+
+/**
+ * Astro's reference() supplies typing and transforms a slug into
+ * { collection, id }, but does NOT verify the target exists — a fixture naming
+ * a team absent from teams.yaml builds clean. Verified against Astro 7.1.3.
+ * This is the check that actually enforces referential integrity.
+ */
+export function assertReferencesResolve(
+  refs: Reference[],
+  knownIds: Set<string>,
+  label: string,
+): void {
+  const broken = refs.filter((ref) => !knownIds.has(ref.id));
+  if (broken.length === 0) return;
+
+  const detail = broken
+    .map((ref) => `  ${ref.from} → ${ref.field}: "${ref.id}"`)
+    .join('\n');
+  throw new Error(
+    `References to unknown ${label} entries:\n${detail}\n` +
+      `Known ${label}: ${[...knownIds].sort().join(', ')}`,
+  );
+}
 ```
 
 - [ ] **Step 4: Implement the squad module**
@@ -1828,6 +1917,7 @@ import type { StandingsInput } from './standings';
 import type { Player, Position } from './squad';
 import {
   assertPublicAssetsExist,
+  assertReferencesResolve,
   assertUniqueIds,
   assertUniqueSquadNumbers,
 } from './validate';
@@ -1982,6 +2072,35 @@ async function build(): Promise<SiteData> {
   assertUniqueSquadNumbers(squad);
   assertUniqueIds(standingEntries, 'standings');
   assertUniqueIds(teamEntries, 'teams');
+
+  // Astro's reference() does not check existence, so do it here — this is the
+  // only place that holds every collection at once.
+  const teamIds = new Set(teams.map((t) => t.id));
+  assertReferencesResolve(
+    [
+      ...matches.flatMap((m) => [
+        { from: m.id, field: 'home', id: m.home },
+        { from: m.id, field: 'away', id: m.away },
+      ]),
+      ...standingEntries.map((e) => ({
+        from: e.id,
+        field: 'team',
+        id: e.data.team.id,
+      })),
+    ],
+    teamIds,
+    'teams',
+  );
+
+  const articleIds = new Set(articles.map((a) => a.slug));
+  assertReferencesResolve(
+    matches
+      .filter((m) => m.report)
+      .map((m) => ({ from: m.id, field: 'report', id: m.report! })),
+    articleIds,
+    'news',
+  );
+
   assertPublicAssetsExist(
     [
       ...teams.map((t) => t.crest),
@@ -2028,7 +2147,27 @@ npm run build
 
 Expected: PASS.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 9: Verify a dangling team reference is caught**
+
+This is the check Astro's `reference()` does not perform. It must fail here.
+
+```bash
+cp src/data/fixtures.yaml /tmp/fixtures.backup.yaml
+printf '\n- id: 2026-09-12-ghost\n  competition: Super League\n  date: 2026-09-12T20:45:00+08:00\n  venue: Darul Aman Stadium\n  home: kedah\n  away: perak\n  status: scheduled\n' >> src/data/fixtures.yaml
+npm run build; echo "EXIT: $?"
+cp /tmp/fixtures.backup.yaml src/data/fixtures.yaml
+npm run build
+```
+
+Expected: the first build FAILS with `References to unknown teams entries:` naming
+`2026-09-12-ghost → away: "perak"`; the second build PASSES.
+
+Like Step 7, this only fires once a page calls `loadSiteData()`. If both builds
+pass because no page uses it yet, re-run this check at the end of Task 8 and
+treat it as that task's verification — but confirm now that
+`npm test` covers `assertReferencesResolve` directly.
+
+- [ ] **Step 10: Commit**
 
 ```bash
 git add -A
