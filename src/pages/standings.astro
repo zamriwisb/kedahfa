@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EmptyState from '../components/EmptyState.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import StandingsTable from '../components/StandingsTable.astro';
+import { CLUB_SLUG, loadSiteData } from '../lib/content';
+import { formatArticleDate } from '../lib/dates';
+import { deriveTable } from '../lib/standings';
+
+const { season, standings, teamsBySlug } = await loadSiteData();
+const table = deriveTable(standings);
+---
+
+<BaseLayout title="Standings" description={`${season.competition} league table.`}>
+  <div class="mx-auto max-w-4xl px-[--spacing-gutter] py-12">
+    <SectionHeading title={season.competition} />
+
+    {
+      table.length > 0 ? (
+        <>
+          <StandingsTable table={table} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+          <p class="mt-4 text-xs text-[--color-text-muted]">
+            Last updated{' '}
+            <time datetime={season.standingsUpdated.toISOString()}>
+              {formatArticleDate(season.standingsUpdated)}
+            </time>
+            . Points, played and goal difference are calculated from results.
+          </p>
+        </>
+      ) : (
+        <EmptyState message="The league table will appear once the season is under way." />
+      )
+    }
+  </div>
+</BaseLayout>

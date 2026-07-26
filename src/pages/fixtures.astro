@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CategoryFilter from '../components/islands/CategoryFilter.astro';
+import EmptyState from '../components/EmptyState.astro';
+import MatchRow from '../components/MatchRow.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { CLUB_SLUG, loadSiteData } from '../lib/content';
+import { finishedMatches, groupByMonth, upcomingMatches } from '../lib/fixtures';
+
+const { club, matches, teamsBySlug } = await loadSiteData();
+
+const now = new Date();
+const upcoming = groupByMonth(upcomingMatches(matches, now));
+const results = groupByMonth(finishedMatches(matches)).reverse();
+const postponed = matches.filter((m) => m.status === 'postponed');
+
+const competitions = [...new Set(matches.map((m) => m.competition))].map((competition) => ({
+  value: competition,
+  label: competition,
+}));
+---
+
+<BaseLayout
+  title="Fixtures & Results"
+  description={`Every ${club.shortName} fixture and result this season.`}
+>
+  <div class="mx-auto max-w-4xl space-y-14 px-[--spacing-gutter] py-12">
+    <SectionHeading title="Fixtures & Results" />
+
+    {
+      competitions.length > 1 && (
+        <CategoryFilter
+          categories={competitions}
+          targetSelector="[data-competition]"
+          filterKey="competition"
+        />
+      )
+    }
+
+    <section>
+      <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">Upcoming</h2>
+      {
+        upcoming.length > 0 ? (
+          upcoming.map((group) => (
+            <div class="mb-8">
+              <h3 class="mb-3 text-lg text-[--color-text-muted]">{group.heading}</h3>
+              <div class="space-y-3">
+                {group.matches.map((match) => (
+                  <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <EmptyState message="No fixtures are currently scheduled." />
+        )
+      }
+    </section>
+
+    {
+      postponed.length > 0 && (
+        <section>
+          <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">Postponed</h2>
+          <div class="space-y-3">
+            {postponed.map((match) => (
+              <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <section>
+      <h2 class="mb-4 text-sm tracking-[0.3em] text-[--color-club-gold]">Results</h2>
+      {
+        results.length > 0 ? (
+          results.map((group) => (
+            <div class="mb-8">
+              <h3 class="mb-3 text-lg text-[--color-text-muted]">{group.heading}</h3>
+              <div class="space-y-3">
+                {group.matches.map((match) => (
+                  <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <EmptyState message="No matches have been played yet this season." />
+        )
+      }
+    </section>
+  </div>
+</BaseLayout>
