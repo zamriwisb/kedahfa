@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import { getCollection, getEntry } from 'astro:content';
 import type { Match } from './fixtures';
 import type { StandingsInput } from './standings';
@@ -11,7 +12,12 @@ import {
 
 export const CLUB_SLUG = 'kedah';
 
-const PUBLIC_DIR = new URL('../../public', import.meta.url).pathname;
+// import.meta.url is unreliable here: Astro bundles this module into
+// dist/.prerender/chunks/ for prerendering, so a URL relative to the source
+// file's location no longer points at public/. process.cwd() is stable
+// across `astro dev`, `astro build` and vitest, which all run from the
+// project root.
+const PUBLIC_DIR = join(process.cwd(), 'public');
 
 export interface Team {
   id: string;
