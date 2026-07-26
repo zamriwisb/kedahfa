@@ -1,14 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('the homepage shows a countdown that advances', async ({ page }) => {
+test('the homepage fixtures strip shows the pre-season empty state', async ({ page }) => {
   await page.goto('/');
-
-  const seconds = page.locator('.countdown [data-unit="seconds"]').first();
-  const first = await seconds.textContent();
-
-  await expect(async () => {
-    expect(await seconds.textContent()).not.toBe(first);
-  }).toPass({ timeout: 5000 });
+  await expect(page.getByText('No fixtures are currently scheduled.')).toBeVisible();
 });
 
 test('the standings table highlights the club row', async ({ page }) => {
@@ -16,28 +10,20 @@ test('the standings table highlights the club row', async ({ page }) => {
   await expect(page.getByRole('rowheader', { name: /Kedah/ })).toBeVisible();
 });
 
-test('standings points are derived, not stored', async ({ page }) => {
+test('the standings table lists all twelve clubs, zeroed for the pre-season', async ({ page }) => {
   await page.goto('/standings');
 
-  // JDT: 9 wins, 2 draws => 29 points, 11 played.
-  const row = page.getByRole('row').filter({ hasText: "Johor Darul Ta'zim" });
-  await expect(row.getByRole('cell').last()).toHaveText('29');
+  // One rowheader per club; the header row contributes none.
+  await expect(page.getByRole('rowheader')).toHaveCount(12);
+
+  // Last cell of a row is its points total.
+  const kedah = page.getByRole('row').filter({ hasText: 'Kedah Football Association' });
+  await expect(kedah.getByRole('cell').last()).toHaveText('0');
 });
 
-test('the fixtures page separates upcoming, postponed and results', async ({ page }) => {
+test('the fixtures page shows the empty state until the schedule is published', async ({ page }) => {
   await page.goto('/fixtures');
-
-  await expect(page.getByRole('heading', { name: 'Upcoming' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Postponed' })).toBeVisible();
-  // exact: true — "Results" is otherwise a substring match of the page's own
-  // "Fixtures & Results" heading, which makes the locator ambiguous.
-  await expect(page.getByRole('heading', { name: 'Results', exact: true })).toBeVisible();
-});
-
-test('kickoff times render in Malaysian time', async ({ page }) => {
-  await page.goto('/fixtures');
-  // The JDT home fixture kicks off at 20:45 +08:00.
-  await expect(page.getByText('20:45').first()).toBeVisible();
+  await expect(page.getByText('No fixtures are currently scheduled.')).toBeVisible();
 });
 
 test('the news filter narrows the visible articles', async ({ page }) => {
@@ -49,13 +35,6 @@ test('the news filter narrows the visible articles', async ({ page }) => {
 
   expect(after).toBeLessThan(before);
   expect(after).toBeGreaterThan(0);
-});
-
-test('a match report links from the fixture row to the article', async ({ page }) => {
-  await page.goto('/fixtures');
-  await page.getByRole('link', { name: 'Report' }).first().click();
-  await expect(page).toHaveURL(/\/news\//);
-  await expect(page.locator('h1')).toBeVisible();
 });
 
 test('a player profile shows the squad number and details', async ({ page }) => {
