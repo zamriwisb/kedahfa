@@ -1,0 +1,75 @@
+---
+import type { Team } from '../lib/content';
+import { outcomeFor, type Match } from '../lib/fixtures';
+import { formatKickoffTime, formatMatchDate } from '../lib/dates';
+
+interface Props {
+  match: Match;
+  teamsBySlug: Map<string, Team>;
+  clubSlug: string;
+}
+
+const { match, teamsBySlug, clubSlug } = Astro.props;
+
+const home = teamsBySlug.get(match.home);
+const away = teamsBySlug.get(match.away);
+const outcome = outcomeFor(match, clubSlug);
+
+const OUTCOME_STYLES: Record<string, string> = {
+  W: 'bg-[--color-win]',
+  D: 'bg-[--color-draw]',
+  L: 'bg-[--color-loss]',
+};
+
+const OUTCOME_LABELS: Record<string, string> = { W: 'Win', D: 'Draw', L: 'Loss' };
+---
+
+<div
+  class="clip-corner flex items-center gap-4 bg-[--color-ink-card] p-4"
+  data-competition={match.competition}
+>
+  <div class="w-28 shrink-0 text-xs text-[--color-text-muted]">
+    <p>{formatMatchDate(match.date)}</p>
+    <p>
+      {match.status === 'postponed' ? 'Postponed' : formatKickoffTime(match.date)}
+    </p>
+  </div>
+
+  <div class="flex min-w-0 flex-1 items-center gap-3">
+    <img src={home?.crest} alt="" width="28" height="28" aria-hidden="true" />
+    <span class="truncate text-sm">{home?.name}</span>
+
+    <span class="mx-auto shrink-0 px-2 text-lg font-display">
+      {
+        match.score
+          ? `${match.score.home} - ${match.score.away}`
+          : match.status === 'postponed'
+            ? 'P-P'
+            : 'v'
+      }
+    </span>
+
+    <span class="truncate text-right text-sm">{away?.name}</span>
+    <img src={away?.crest} alt="" width="28" height="28" aria-hidden="true" />
+  </div>
+
+  <div class="flex w-24 shrink-0 items-center justify-end gap-2">
+    {
+      outcome && (
+        <span
+          class:list={['h-6 w-6 items-center justify-center rounded-full text-xs flex', OUTCOME_STYLES[outcome]]}
+        >
+          <span class="sr-only">{OUTCOME_LABELS[outcome]}</span>
+          <span aria-hidden="true">{outcome}</span>
+        </span>
+      )
+    }
+    {
+      match.report && (
+        <a href={`/news/${match.report}`} class="text-xs text-[--color-club-gold] underline">
+          Report
+        </a>
+      )
+    }
+  </div>
+</div>

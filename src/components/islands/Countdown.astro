@@ -1,0 +1,86 @@
+---
+import { countdown } from '../../lib/dates';
+
+interface Props {
+  target: Date;
+  label: string;
+}
+
+const { target, label } = Astro.props;
+
+// Rendered at build time so the countdown is meaningful without JavaScript.
+const initial = countdown(new Date(), target);
+const units = [
+  { key: 'days', label: 'Days' },
+  { key: 'hours', label: 'Hrs' },
+  { key: 'minutes', label: 'Min' },
+  { key: 'seconds', label: 'Sec' },
+] as const;
+---
+
+<div
+  class="countdown flex gap-3"
+  data-target={target.toISOString()}
+  role="timer"
+  aria-label={label}
+>
+  {
+    units.map((unit) => (
+      <div class="text-center">
+        <span
+          class="block text-3xl leading-none tabular-nums font-display"
+          data-unit={unit.key}
+        >
+          {String(initial?.[unit.key] ?? 0).padStart(2, '0')}
+        </span>
+        <span class="text-[0.65rem] tracking-widest text-[--color-text-muted]">
+          {unit.label}
+        </span>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('.countdown')) {
+    const target = new Date(root.dataset.target ?? '');
+    if (Number.isNaN(target.getTime())) continue;
+
+    const fields = {
+      days: root.querySelector<HTMLElement>('[data-unit="days"]'),
+      hours: root.querySelector<HTMLElement>('[data-unit="hours"]'),
+      minutes: root.querySelector<HTMLElement>('[data-unit="minutes"]'),
+      seconds: root.querySelector<HTMLElement>('[data-unit="seconds"]'),
+    };
+
+    const tick = () => {
+      const remaining = target.getTime() - Date.now();
+
+      if (remaining <= 0) {
+        // Kickoff has passed. The static build still lists this as the next
+        // match until the next deploy, so say so rather than counting down.
+        root.textContent = 'Kick-off';
+        root.classList.add('font-display', 'text-2xl');
+        clearInterval(timer);
+        return;
+      }
+
+      const total = Math.floor(remaining / 1000);
+      const values = {
+        days: Math.floor(total / 86400),
+        hours: Math.floor((total % 86400) / 3600),
+        minutes: Math.floor((total % 3600) / 60),
+        seconds: total % 60,
+      };
+
+      for (const [key, element] of Object.entries(fields)) {
+        if (element) {
+          element.textContent = String(values[key as keyof typeof values]).padStart(2, '0');
+        }
+      }
+    };
+
+    tick();
+    const timer = setInterval(tick, 1000);
+  }
+</script>

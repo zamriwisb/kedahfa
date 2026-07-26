@@ -1,0 +1,46 @@
+---
+import type { Sponsor } from '../lib/content';
+
+interface Props {
+  sponsors: Sponsor[];
+}
+const { sponsors } = Astro.props;
+
+const TIER_LABELS = {
+  main: 'Main Partner',
+  official: 'Official Partners',
+  partner: 'Club Partners',
+} as const;
+
+const tiers = (['main', 'official', 'partner'] as const)
+  .map((tier) => ({ tier, items: sponsors.filter((s) => s.tier === tier) }))
+  .filter((group) => group.items.length > 0);
+---
+
+<div class="space-y-8">
+  {
+    tiers.map((group) => (
+      <div>
+        <h3 class="mb-4 text-center text-xs tracking-[0.3em] text-[--color-text-muted] font-display">
+          {TIER_LABELS[group.tier]}
+        </h3>
+        <ul class="flex flex-wrap items-center justify-center gap-8">
+          {group.items.map((sponsor) => (
+            <li>
+              <a href={sponsor.url} rel="noopener sponsored" target="_blank">
+                <img
+                  src={sponsor.logo}
+                  alt={sponsor.name}
+                  width="120"
+                  height="60"
+                  loading="lazy"
+                  class="h-12 w-auto opacity-60 grayscale transition hover:opacity-100 hover:grayscale-0"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</div>

@@ -1,0 +1,74 @@
+---
+import type { Team } from '../lib/content';
+import type { TableEntry } from '../lib/standings';
+
+interface Props {
+  table: TableEntry[];
+  teamsBySlug: Map<string, Team>;
+  clubSlug: string;
+  compact?: boolean;
+}
+
+const { table, teamsBySlug, clubSlug, compact = false } = Astro.props;
+---
+
+<div class="overflow-x-auto">
+  <table class="w-full min-w-[32rem] border-collapse text-sm">
+    <caption class="sr-only">League standings</caption>
+    <thead>
+      <tr class="border-b border-[--color-line] text-left text-xs tracking-widest text-[--color-text-muted] font-display">
+        <th scope="col" class="py-2 pr-2">#</th>
+        <th scope="col" class="py-2 pr-2">Team</th>
+        <th scope="col" class="py-2 pr-2 text-center">P</th>
+        {
+          !compact && (
+            <>
+              <th scope="col" class="py-2 pr-2 text-center">W</th>
+              <th scope="col" class="py-2 pr-2 text-center">D</th>
+              <th scope="col" class="py-2 pr-2 text-center">L</th>
+              <th scope="col" class="py-2 pr-2 text-center">GF</th>
+              <th scope="col" class="py-2 pr-2 text-center">GA</th>
+            </>
+          )
+        }
+        <th scope="col" class="py-2 pr-2 text-center">GD</th>
+        <th scope="col" class="py-2 text-center">Pts</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {
+        table.map((entry) => (
+          <tr
+            class:list={[
+              'border-b border-[--color-line]',
+              entry.team === clubSlug && 'bg-[--color-club-red]/20',
+            ]}
+          >
+            <td class="py-2 pr-2 text-[--color-text-muted]">{entry.position}</td>
+            <th scope="row" class="py-2 pr-2 text-left font-normal">
+              <span class="flex items-center gap-2">
+                <img src={teamsBySlug.get(entry.team)?.crest} alt="" width="20" height="20" aria-hidden="true" />
+                <span class="truncate">{entry.name}</span>
+              </span>
+            </th>
+            <td class="py-2 pr-2 text-center">{entry.played}</td>
+            {!compact && (
+              <>
+                <td class="py-2 pr-2 text-center">{entry.won}</td>
+                <td class="py-2 pr-2 text-center">{entry.drawn}</td>
+                <td class="py-2 pr-2 text-center">{entry.lost}</td>
+                <td class="py-2 pr-2 text-center">{entry.goalsFor}</td>
+                <td class="py-2 pr-2 text-center">{entry.goalsAgainst}</td>
+              </>
+            )}
+            <td class="py-2 pr-2 text-center">
+              {entry.goalDifference > 0 ? `+${entry.goalDifference}` : entry.goalDifference}
+            </td>
+            <td class="py-2 text-center font-display">{entry.points}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
