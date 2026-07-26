@@ -72,6 +72,11 @@ test('autoplay stops once the visitor takes control', async ({ page }) => {
     'true',
   );
 
+  // Move the pointer off the slider so pointerleave fires: an implementation
+  // that merely paused instead of stopping would restart its timer here, and
+  // the assertion below would fail.
+  await page.mouse.move(0, 0);
+
   // A slide must never be yanked away from someone reading it: well past one
   // autoplay interval, slide 2 is still the active one.
   await page.waitForTimeout(9000);
