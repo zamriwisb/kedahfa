@@ -14,3 +14,10 @@ Task 2: complete (commit 39fb5cd) — content.config.ts + placeholder data for
 club/season/teams/fixtures/standings/squad/sponsors/news. Step 11 negative
 test confirmed Astro's top-level Zod .refine() fires on build (exact
 expected error message observed); no fallback to src/lib/validate.ts needed.
+Task 2: code complete (commits 3c1224d..13785c9)
+  Review found CRITICAL: Astro reference() does not check existence.
+  RESOLVED by relocation, not by dismissal:
+    - plan/spec corrected; Task 2 owns shape validation only
+    - Task 5 MUST implement assertReferencesResolve + wire into loadSiteData
+    - Task 5 Step 9 verifies a dangling team ref fails the build
+  If Task 5 ships without assertReferencesResolve, this gap is live.
