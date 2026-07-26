@@ -1229,7 +1229,12 @@ import {
 
 const CLUB = 'kedah';
 
-function match(overrides: Partial<Match> & { id: string; date: string }): Match {
+// `date` is Omit-ted from Partial<Match> before intersecting: Match.date is a
+// Date, and intersecting `date?: Date` with `date: string` resolves to `never`,
+// which makes every call site a type error under strict mode.
+function match(
+  overrides: Omit<Partial<Match>, 'date'> & { id: string; date: string },
+): Match {
   return {
     competition: 'Super League',
     venue: 'Darul Aman Stadium',
