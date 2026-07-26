@@ -19,6 +19,13 @@ const { table, teamsBySlug, clubSlug, compact = false } = Astro.props;
  * adjoining cells share border edges and a radius on one cell's edge has
  * nothing to round against.
  */
+/**
+ * NOTE for callers: any COLOUR utility passed in `extra` must be guarded on
+ * `!isClub`. The club-row treatment below sets its own text colour, and two
+ * competing `text-*` utilities on one element are resolved by CSS source
+ * order, not by the order they appear in the class attribute — so an
+ * unguarded one can silently win and render the cell unreadable.
+ */
 function cellClass(isClub: boolean, extra: string): string {
   return [
     extra,
@@ -74,7 +81,14 @@ function cellClass(isClub: boolean, extra: string): string {
             const isClub = entry.team === clubSlug;
             return (
               <tr>
-                <td class={cellClass(isClub, 'py-3 pr-2 text-(--color-text-muted)')}>{entry.position}</td>
+                <td
+                  class={cellClass(
+                    isClub,
+                    `py-3 pr-2 ${isClub ? '' : 'text-(--color-text-muted)'}`,
+                  )}
+                >
+                  {entry.position}
+                </td>
                 <th
                   scope="row"
                   class={cellClass(isClub, `py-3 pr-2 text-left ${isClub ? '' : 'font-normal'}`)}
