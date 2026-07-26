@@ -21,3 +21,4 @@ Task 2: code complete (commits 3c1224d..13785c9)
     - Task 5 MUST implement assertReferencesResolve + wire into loadSiteData
     - Task 5 Step 9 verifies a dangling team ref fails the build
   If Task 5 ships without assertReferencesResolve, this gap is live.
+Task 3: complete (commits e7a50df..3e545f6, review clean — 3 mutations caught)
