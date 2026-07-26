@@ -195,10 +195,10 @@ const buttonClass =
       // timer running against it, and one that becomes scrollable again must
       // get it back — otherwise a resize round-trip (rotating a tablet,
       // dragging a desktop window past the breakpoint) leaves autoplay dead
-      // with nothing the visitor can do about it. start() is a no-op when
-      // autoplay is stopped, already running, or was never wanted.
-      if (scrollable) start();
-      else pause();
+      // with nothing the visitor can do about it. Routed through the same
+      // resolver as hover/focus/visibility so a resize can't override any of
+      // those reasons either — it can only add "does not overflow" to them.
+      syncAutoplay();
     };
 
     const page = (direction: 1 | -1) => {
@@ -242,6 +242,23 @@ const buttonClass =
       pause();
     };
 
+    // Hover, focus and tab-visibility are independent, overlapping reasons to
+    // hold autoplay still — a visitor can, for instance, be hovering AND
+    // focused inside at once. Calling pause()/start() straight from each
+    // event let whichever fired last win, so tabbing out of a focused card
+    // (focusout -> start()) resumed the track while the cursor was still
+    // resting on it, and moving the pointer away while focus stayed inside
+    // (pointerleave -> start()) scrolled the focused link off-screen. One
+    // resolver, reading every reason together, replaces all four bare calls
+    // below so nothing can win by firing last.
+    let hovered = false;
+    let focused = false;
+    let pageHidden = false;
+    const syncAutoplay = () => {
+      if (stopped || hovered || focused || pageHidden || !overflows()) pause();
+      else start();
+    };
+
     prev.addEventListener('click', () => {
       stop();
       page(-1);
@@ -254,7 +271,12 @@ const buttonClass =
     toggle?.addEventListener('click', () => {
       if (stopped) {
         setStopped(false);
-        start();
+        // Routed through the resolver rather than a bare start(): a click
+        // here is an explicit request to resume, but it must still yield to
+        // a cursor resting on the strip or focus inside it, the same as any
+        // other reason autoplay holds still. Moving off/blurring afterwards
+        // is what actually starts it, via the same resolver.
+        syncAutoplay();
       } else {
         stop();
       }
@@ -286,13 +308,25 @@ const buttonClass =
     // touches the stopped flag, so it cannot be confused for the same fix.
     track.addEventListener('scroll', syncControls, { passive: true });
 
-    root.addEventListener('pointerenter', pause);
-    root.addEventListener('pointerleave', start);
-    root.addEventListener('focusin', pause);
-    root.addEventListener('focusout', start);
+    root.addEventListener('pointerenter', () => {
+      hovered = true;
+      syncAutoplay();
+    });
+    root.addEventListener('pointerleave', () => {
+      hovered = false;
+      syncAutoplay();
+    });
+    root.addEventListener('focusin', () => {
+      focused = true;
+      syncAutoplay();
+    });
+    root.addEventListener('focusout', () => {
+      focused = false;
+      syncAutoplay();
+    });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) pause();
-      else start();
+      pageHidden = document.hidden;
+      syncAutoplay();
     });
 
     // Whether the track overflows depends on the viewport, so the controls

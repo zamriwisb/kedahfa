@@ -123,6 +123,69 @@ test('hovering the squad carousel holds it still', async ({ page }, testInfo) =>
   }).toPass({ timeout: 12_000 });
 });
 
+test('tabbing out of a card while the pointer still rests on the carousel does not resume it', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'squad track only overflows on mobile');
+
+  await page.goto('/');
+  const track = page.locator(`${SQUAD} .card-carousel__track`);
+
+  // Hover first (pauses), then focus a card link inside it (still paused) —
+  // this is the state a keyboard user tabbing through the page while the
+  // mouse happens to rest on the strip ends up in.
+  await track.hover();
+  const firstLink = track.locator('a').first();
+  await firstLink.focus();
+
+  // Tab back OUT: focus leaves the carousel entirely, firing focusout while
+  // the cursor is still over the track. Four independent bare pause()/start()
+  // calls used to let focusout's start() win outright here, resuming the
+  // track under a resting cursor — breaking "pause on hover". The resolver
+  // must still see `hovered` and hold still.
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+
+  await page.waitForTimeout(9000);
+  expect(await track.evaluate((el) => el.scrollLeft)).toBe(0);
+
+  // Sanity: moving the pointer away (the only remaining reason to hold
+  // still) resumes it, proving this was a pause and not a stop.
+  await page.mouse.move(0, 0);
+  await expect(async () => {
+    expect(await track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  }).toPass({ timeout: 12_000 });
+});
+
+test('moving the pointer away while focus stays inside the carousel does not resume it', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'squad track only overflows on mobile');
+
+  await page.goto('/');
+  const track = page.locator(`${SQUAD} .card-carousel__track`);
+
+  await track.hover();
+  const firstLink = track.locator('a').first();
+  await firstLink.focus();
+
+  // Move the pointer away while focus is still on the first player link.
+  // pointerleave's bare start() used to win here regardless of focus,
+  // scrolling the focused link off-screen while it still held focus (WCAG
+  // 2.4.11 Focus Not Obscured).
+  await page.mouse.move(0, 0);
+
+  await page.waitForTimeout(9000);
+  expect(await track.evaluate((el) => el.scrollLeft)).toBe(0);
+  await expect(firstLink).toBeFocused();
+
+  // Sanity: blurring (the only remaining reason to hold still) resumes it,
+  // proving this was a pause tied to focus, not a stop.
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await expect(async () => {
+    expect(await track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  }).toPass({ timeout: 12_000 });
+});
+
 test('the squad carousel offers a pause control that stops it', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'squad track only overflows on mobile');
 
