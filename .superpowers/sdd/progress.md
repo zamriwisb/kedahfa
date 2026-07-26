@@ -38,3 +38,4 @@ Task 6: complete (commits 5d63fca..856905b, review clean after 1 fix)
   dangling team ref -> exit 1. Task 2's Critical finding verified closed.
   Also fixed latent Task 5 bug (PUBLIC_DIR via import.meta.url broke once
   Astro bundled the module) and Tailwind scanning docs/ (26KB -> 13.7KB CSS).
+Task 7: complete (commits f91b68c..4bc3d37, review clean after 1 fix — WCAG 1.4.1 colour-only club row + no-JS countdown state)
