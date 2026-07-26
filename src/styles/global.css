@@ -17,7 +17,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: var(--color-ink);
+    background-color: var(--color-page);
     color: var(--color-text);
     font-family: var(--font-body);
     -webkit-text-size-adjust: 100%;
@@ -33,10 +33,16 @@
     font-weight: 700;
   }
 
-  /* Visible focus for keyboard users on a dark background. */
+  /*
+   * A single outline colour can't clear 3:1 against both the light page and
+   * the brand greens (measured: gold-on-page is ~2:1, action-red-on-brand-deep
+   * is ~1.9:1). The red ring plus a white halo is visible against every
+   * surface the chrome uses without needing per-surface overrides.
+   */
   :focus-visible {
-    outline: 3px solid var(--color-club-gold);
+    outline: 3px solid var(--color-action);
     outline-offset: 2px;
+    box-shadow: 0 0 0 5px rgb(255 255 255 / 0.7);
   }
 
   /* Every interactive target clears the 44px minimum. */
@@ -73,4 +79,32 @@
 /* The angular corner used on cards and the hero. */
 @utility clip-corner {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 1.25rem), calc(100% - 1.25rem) 100%, 0 100%);
+}
+
+/*
+ * Faint angular texture for full-bleed green bands (news, squad). `isolation:
+ * isolate` gives the element its own stacking context so the ::before can sit
+ * at z-index -1 and stay behind ordinary-flow content automatically — no
+ * consumer has to remember to add `relative` or `z-10` to its children. Kept
+ * at ~4% white so it reads as texture rather than stripes and never touches
+ * text contrast, since it never renders above content.
+ */
+@utility chevron-texture {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgb(255 255 255 / 4%) 0px,
+      rgb(255 255 255 / 4%) 2px,
+      transparent 2px,
+      transparent 14px
+    );
+  }
 }

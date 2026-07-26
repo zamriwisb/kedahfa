@@ -1,0 +1,29 @@
+---
+// The solid red call-to-action used throughout the reference design: a
+// filled button with a trailing chevron. `a, button` in global.css already
+// enforces the 44px minimum target size; the padding here comfortably clears
+// it on top of that.
+interface Props {
+  href: string;
+  label: string;
+}
+const { href, label } = Astro.props;
+---
+
+<a
+  href={href}
+  class="inline-flex items-center gap-2 rounded-(--radius-card) bg-(--color-action) px-6 py-3 font-display text-sm tracking-[0.1em] text-(--color-text-invert) transition-colors hover:bg-(--color-action-deep)"
+>
+  {label}
+  <svg
+    viewBox="0 0 20 20"
+    class="h-3.5 w-3.5 shrink-0"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="3"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="M7 4l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+</a>

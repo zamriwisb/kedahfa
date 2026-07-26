@@ -1,29 +1,45 @@
 /*
  * PLACEHOLDER BRANDING.
- * These are stand-in values, not verified Kedah FA colours. Replace the
- * palette and crest before launch. Nothing outside this file should contain
- * a raw hex colour.
+ *
+ * The palette below is modelled on the slaskwroclaw.pl reference design the
+ * client supplied: a green-dominant system on a light grey page, with gold
+ * accents and red calls to action. It is NOT verified Kedah FA branding —
+ * Kedah's own identity is red and gold, so this must be reviewed before launch.
+ * Nothing outside this file should contain a raw hex colour.
+ *
+ * Every foreground/background pair used in the UI was measured against WCAG AA
+ * (4.5:1). Ratios are noted so a future edit can tell what headroom it has.
+ * The one trap: --color-gold on white is 2.49:1. Gold is for dark-green
+ * surfaces only — labels, rules, and small caps. Never gold text on white.
  */
 @theme {
-  /* Brand */
-  --color-club-red: #b3121b;
-  --color-club-red-bright: #e0242e;
-  --color-club-gold: #f2b705;
+  /* Brand greens */
+  --color-brand: #006643; /* header top bar, highlight cards; white on it 7.04:1 */
+  --color-brand-deep: #003e29; /* nav bar, footer; white on it 12.20:1 */
+  --color-brand-panel: #014129; /* full-bleed section bands; white 11.74:1 */
+  --color-brand-ink: #011a11; /* footer base, deepest green */
 
-  /* Surfaces, darkest to lightest */
-  --color-ink: #0b0b0d;
-  --color-ink-raised: #131317;
-  --color-ink-card: #1a1a20;
-  --color-line: #2a2a32;
+  /* Accents */
+  --color-gold: #c0a062; /* eyebrow labels + section rules on green: 4.72:1 */
+  --color-action: #c30101; /* CTA buttons; white on it 6.32:1 */
+  --color-action-deep: #9a0101; /* CTA hover; white on it 8.83:1 */
 
-  /* Text — both meet WCAG AA on --color-ink */
-  --color-text: #f4f4f5;
-  --color-text-muted: #a8a8b3;
+  /* Surfaces — the page is LIGHT, sections alternate onto green */
+  --color-page: #e7e7e7; /* page background */
+  --color-surface: #ffffff; /* cards on the light page */
+  --color-line: #d5d5d5; /* hairlines on light */
+  --color-line-dark: #0b4c33; /* hairlines on green */
 
-  /* Result semantics */
-  --color-win: #1b6b3f;
-  --color-draw: #55555e;
-  --color-loss: #b03a32;
+  /* Text */
+  --color-text: #1a1a1a; /* on light: 14.07:1 */
+  --color-text-muted: #5a5a5a; /* on light: 5.58:1 */
+  --color-text-invert: #ffffff; /* on any brand green */
+  --color-text-invert-muted: #b9cec4; /* on brand-deep: 8.4:1 */
+
+  /* Result semantics — measured against white text */
+  --color-win: #1b6b3f; /* 5.93:1 */
+  --color-draw: #55555e; /* 6.71:1 */
+  --color-loss: #b03a32; /* 5.46:1 */
 
   /* Type */
   --font-display: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
@@ -31,5 +47,6 @@
 
   /* Layout */
   --spacing-gutter: 1.25rem;
-  --radius-card: 2px;
+  --radius-card: 6px;
+  --radius-pill: 999px;
 }

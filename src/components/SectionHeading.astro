@@ -1,6 +1,7 @@
 ---
 interface Props {
   title: string;
+  eyebrow?: string;
   href?: string;
   linkLabel?: string;
   /**
@@ -9,18 +10,40 @@ interface Props {
    * render an h2 as its highest heading and no h1 at all.
    */
   level?: 1 | 2;
+  /**
+   * Which surface this heading sits on. Gold text is only ever AA-compliant
+   * on the brand greens, so the eyebrow (and the link, if any) switch to a
+   * muted grey when the surrounding section is the light page.
+   */
+  on?: 'light' | 'green';
 }
-const { title, href, linkLabel = 'View all', level = 2 } = Astro.props;
+const { title, eyebrow, href, linkLabel = 'View all', level = 2, on = 'light' } = Astro.props;
 const Heading = `h${level}` as 'h1' | 'h2';
+
+const eyebrowClass =
+  on === 'green' ? 'text-(--color-gold)' : 'text-(--color-text-muted)';
+const headingClass = on === 'green' ? 'text-(--color-text-invert)' : 'text-(--color-text)';
+const linkClass =
+  on === 'green'
+    ? 'text-(--color-text-invert-muted) hover:text-(--color-text-invert)'
+    : 'text-(--color-action) hover:text-(--color-action-deep)';
 ---
 
-<div class="mb-6 flex items-end justify-between gap-4 border-b border-[--color-line] pb-3">
-  <Heading class="text-2xl sm:text-3xl">{title}</Heading>
+<div class="mb-8">
   {
-    href && (
-      <a href={href} class="shrink-0 text-sm tracking-wider text-[--color-club-gold] font-display">
-        {linkLabel}
-      </a>
+    eyebrow && (
+      <p class={`text-xs font-semibold uppercase tracking-[0.2em] ${eyebrowClass}`}>{eyebrow}</p>
     )
   }
+  <div class="mt-1 flex flex-wrap items-end justify-between gap-4">
+    <Heading class={`text-4xl sm:text-5xl ${headingClass}`}>{title}</Heading>
+    {
+      href && (
+        <a href={href} class={`shrink-0 text-sm tracking-wider font-display ${linkClass}`}>
+          {linkLabel}
+        </a>
+      )
+    }
+  </div>
+  <div class="mt-4 h-1 w-16 bg-(--color-gold)"></div>
 </div>

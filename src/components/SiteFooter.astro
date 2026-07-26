@@ -5,37 +5,48 @@ const { club } = await loadSiteData();
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-20 border-t border-[--color-line] bg-[--color-ink-raised]">
-  <div class="mx-auto grid max-w-6xl gap-8 px-[--spacing-gutter] py-12 sm:grid-cols-3">
+<footer class="mt-20 bg-(--color-brand-deep) text-(--color-text-invert)">
+  <div class="mx-auto grid max-w-6xl gap-10 px-(--spacing-gutter) py-14 sm:grid-cols-3">
     <div>
-      <h2 class="font-display text-base">{club.name}</h2>
-      <p class="mt-2 text-sm text-[--color-text-muted]">
-        {club.stadium}, {club.city}
-      </p>
+      <a href="/" class="flex items-center gap-3" aria-label={`${club.name} home`}>
+        <img src="/images/teams/kedah.svg" alt={`${club.name} crest`} width="56" height="56" class="h-14 w-14" />
+        <span class="font-display text-lg leading-tight">{club.name}</span>
+      </a>
+      <address class="mt-4 text-sm not-italic text-(--color-text-invert-muted)">
+        {club.stadium}<br />
+        {club.city}, Malaysia
+      </address>
     </div>
 
     <div>
-      <h2 class="font-display text-base">Contact</h2>
-      <ul class="mt-2 space-y-1 text-sm">
+      <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-(--color-gold)">Contact</h2>
+      <ul class="mt-4 space-y-3 text-sm">
         {
           club.emails.map((email) => (
             <li>
-              <a href={`mailto:${email.address}`} class="text-[--color-text-muted] underline">
-                {email.label}
+              <p class="text-(--color-text-invert-muted)">{email.label}</p>
+              <a href={`mailto:${email.address}`} class="underline decoration-(--color-text-invert-muted)">
+                {email.address}
               </a>
             </li>
           ))
         }
+        <li>
+          <p class="text-(--color-text-invert-muted)">Phone</p>
+          <a href={`tel:${club.phone.replace(/\s/g, '')}`} class="underline decoration-(--color-text-invert-muted)">
+            {club.phone}
+          </a>
+        </li>
       </ul>
     </div>
 
     <div>
-      <h2 class="font-display text-base">Follow</h2>
-      <ul class="mt-2 space-y-1 text-sm">
+      <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-(--color-gold)">Follow</h2>
+      <ul class="mt-4 space-y-3 text-sm">
         {
           club.socials.map((social) => (
             <li>
-              <a href={social.url} rel="me noopener" class="text-[--color-text-muted] underline">
+              <a href={social.url} rel="me noopener" class="underline decoration-(--color-text-invert-muted)">
                 {social.platform}
               </a>
             </li>
@@ -45,7 +56,9 @@ const year = new Date().getFullYear();
     </div>
   </div>
 
-  <div class="border-t border-[--color-line] px-[--spacing-gutter] py-4 text-center text-xs text-[--color-text-muted]">
-    &copy; {year} {club.name}. All rights reserved.
+  <div class="bg-(--color-brand-ink)">
+    <p class="mx-auto max-w-6xl px-(--spacing-gutter) py-4 text-center text-xs text-(--color-text-invert-muted)">
+      &copy; {year} {club.name}. All rights reserved.
+    </p>
   </div>
 </footer>
