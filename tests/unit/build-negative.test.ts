@@ -48,7 +48,15 @@ const SCHEDULED_FIXTURE = [
  */
 function withFixtureEntry(entry: string): (text: string) => string {
   return (text) =>
-    /^\[\]\s*$/m.test(text) ? text.replace(/^\[\]\s*$/m, entry) : text + entry;
+    /^\[\]\s*$/m.test(text)
+      ? text.replace(/^\[\]\s*$/m, entry)
+      : // text.replace(/\n*$/, '\n') normalises to exactly one trailing
+        // newline before appending, regardless of whether fixtures.yaml ends
+        // with one, none, or several: a bare `text + entry` would silently
+        // concatenate onto a missing trailing newline and produce invalid
+        // YAML, failing these cases on a parse error instead of the guard
+        // they name.
+        text.replace(/\n*$/, '\n') + entry;
 }
 
 interface BuildResult {
