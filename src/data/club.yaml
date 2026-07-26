@@ -1,0 +1,24 @@
+# PLACEHOLDER DATA. Founding year, stadium capacity and contact details
+# are unverified and must be confirmed with the club before launch.
+- id: club
+  name: Kedah Football Association
+  shortName: Kedah
+  founded: 1924
+  stadium: Darul Aman Stadium
+  stadiumCapacity: 32387
+  city: Alor Setar
+  emails:
+    - label: General enquiries
+      address: enquiries@kedahfa.example
+    - label: Media
+      address: media@kedahfa.example
+    - label: Commercial
+      address: commercial@kedahfa.example
+  phone: "+60 4-000 0000"
+  socials:
+    - platform: Facebook
+      url: https://facebook.com/example
+    - platform: Instagram
+      url: https://instagram.com/example
+    - platform: X
+      url: https://x.com/example

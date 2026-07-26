@@ -1,0 +1,74 @@
+# PLACEHOLDER SQUAD. Names are fictional; replace with the real squad before launch.
+- id: arif-hakimi
+  name: Arif Hakimi
+  number: 1
+  position: Goalkeeper
+  nationality: MY
+  dateOfBirth: 1995-03-11
+  heightCm: 188
+  photo: /images/squad/placeholder.svg
+  joined: 2022
+  bio: Shot-stopper who came through the state youth system and took the gloves in 2022.
+  stats: { appearances: 11, goals: 0, assists: 0 }
+- id: danial-syafiq
+  name: Danial Syafiq
+  number: 4
+  position: Defender
+  nationality: MY
+  dateOfBirth: 1997-09-02
+  heightCm: 183
+  photo: /images/squad/placeholder.svg
+  joined: 2023
+  stats: { appearances: 11, goals: 1, assists: 0 }
+- id: lucas-ferreira
+  name: Lucas Ferreira
+  number: 5
+  position: Defender
+  nationality: BR
+  dateOfBirth: 1994-01-22
+  heightCm: 190
+  photo: /images/squad/placeholder.svg
+  joined: 2025
+  stats: { appearances: 10, goals: 2, assists: 1 }
+- id: haziq-nadzri
+  name: Haziq Nadzri
+  number: 8
+  position: Midfielder
+  nationality: MY
+  dateOfBirth: 1999-06-30
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2021
+  bio: Academy graduate and the side's metronome in midfield.
+  stats: { appearances: 11, goals: 3, assists: 5 }
+- id: kenji-watanabe
+  name: Kenji Watanabe
+  number: 10
+  position: Midfielder
+  nationality: JP
+  dateOfBirth: 1996-11-14
+  heightCm: 172
+  photo: /images/squad/placeholder.svg
+  joined: 2024
+  stats: { appearances: 11, goals: 4, assists: 6 }
+- id: firdaus-rahman
+  name: Firdaus Rahman
+  number: 9
+  position: Forward
+  nationality: MY
+  dateOfBirth: 1998-04-12
+  heightCm: 182
+  photo: /images/squad/placeholder.svg
+  joined: 2024
+  bio: Top scorer in each of his first two seasons at Darul Aman.
+  stats: { appearances: 11, goals: 7, assists: 3 }
+- id: samuel-osei
+  name: Samuel Osei
+  number: 11
+  position: Forward
+  nationality: GH
+  dateOfBirth: 1997-02-08
+  heightCm: 186
+  photo: /images/squad/placeholder.svg
+  joined: 2025
+  stats: { appearances: 9, goals: 2, assists: 2 }

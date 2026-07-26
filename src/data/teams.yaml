@@ -1,0 +1,24 @@
+- id: kedah
+  name: Kedah Football Association
+  shortName: KDH
+  crest: /images/teams/kedah.svg
+- id: jdt
+  name: Johor Darul Ta'zim
+  shortName: JDT
+  crest: /images/teams/jdt.svg
+- id: selangor
+  name: Selangor FC
+  shortName: SEL
+  crest: /images/teams/selangor.svg
+- id: terengganu
+  name: Terengganu FC
+  shortName: TRG
+  crest: /images/teams/terengganu.svg
+- id: penang
+  name: Penang FC
+  shortName: PEN
+  crest: /images/teams/penang.svg
+- id: sabah
+  name: Sabah FC
+  shortName: SAB
+  crest: /images/teams/sabah.svg

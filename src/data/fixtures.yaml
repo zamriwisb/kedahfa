@@ -1,0 +1,57 @@
+# Finished matches carry a score. Scheduled and postponed matches must not.
+- id: 2026-06-28-penang-a
+  competition: Super League
+  matchweek: 9
+  date: 2026-06-28T20:15:00+08:00
+  venue: Penang State Stadium
+  home: penang
+  away: kedah
+  status: finished
+  score: { home: 0, away: 2 }
+
+- id: 2026-07-05-sabah-h
+  competition: Super League
+  matchweek: 10
+  date: 2026-07-05T20:45:00+08:00
+  venue: Darul Aman Stadium
+  home: kedah
+  away: sabah
+  status: finished
+  score: { home: 1, away: 1 }
+
+- id: 2026-07-19-selangor-h
+  competition: Super League
+  matchweek: 11
+  date: 2026-07-19T20:45:00+08:00
+  venue: Darul Aman Stadium
+  home: kedah
+  away: selangor
+  status: finished
+  score: { home: 3, away: 2 }
+  report: kedah-edge-selangor
+
+- id: 2026-08-02-jdt-h
+  competition: Super League
+  matchweek: 12
+  date: 2026-08-02T20:45:00+08:00
+  venue: Darul Aman Stadium
+  home: kedah
+  away: jdt
+  status: scheduled
+
+- id: 2026-08-15-terengganu-a
+  competition: Super League
+  matchweek: 13
+  date: 2026-08-15T18:00:00+08:00
+  venue: Sultan Mizan Zainal Abidin Stadium
+  home: terengganu
+  away: kedah
+  status: scheduled
+
+- id: 2026-08-29-penang-h
+  competition: Malaysia Cup
+  date: 2026-08-29T20:45:00+08:00
+  venue: Darul Aman Stadium
+  home: kedah
+  away: penang
+  status: postponed

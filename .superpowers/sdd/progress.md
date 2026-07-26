@@ -9,3 +9,4 @@ content.ts; @plugin placement in global.css) in commit below.
 (none yet)
 
 ## Tasks
+Task 1: complete (commits 293d828..3c1224d, review clean — reviewer mutation-tested TZ handling)

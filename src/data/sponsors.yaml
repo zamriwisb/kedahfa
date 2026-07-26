@@ -1,0 +1,20 @@
+- id: main-sponsor
+  name: Placeholder Main Sponsor
+  tier: main
+  logo: /images/sponsors/placeholder.svg
+  url: https://example.com
+- id: kit-supplier
+  name: Placeholder Kit Supplier
+  tier: official
+  logo: /images/sponsors/placeholder.svg
+  url: https://example.com
+- id: stadium-partner
+  name: Placeholder Stadium Partner
+  tier: official
+  logo: /images/sponsors/placeholder.svg
+  url: https://example.com
+- id: community-partner
+  name: Placeholder Community Partner
+  tier: partner
+  logo: /images/sponsors/placeholder.svg
+  url: https://example.com
