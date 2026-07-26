@@ -1,0 +1,28 @@
+# Slides are curated, not generated. Order is explicit so re-ordering is a
+# one-line edit. Images point at the shared placeholder until real
+# photography lands in /images/slides/ — swap the paths there, and the build
+# will reject a typo rather than shipping a broken slide.
+- id: season-tickets
+  image: /images/news/placeholder.svg
+  imageAlt: Supporters filling the stands at Darul Aman Stadium
+  eyebrow: Season 2026/27
+  title: Season tickets are on sale now
+  href: /contact
+  cta: Buy Tickets
+  order: 1
+
+- id: new-signing
+  image: /images/news/placeholder.svg
+  imageAlt: A new signing holding up a Kedah shirt
+  eyebrow: Transfer news
+  title: Kedah complete the signing of a new forward
+  href: /news/new-signing-announced
+  order: 2
+
+- id: academy-trials
+  image: /images/news/placeholder.svg
+  imageAlt: Young players training on a grass pitch
+  eyebrow: Academy
+  title: Academy trials open for the 2027 intake
+  href: /news/academy-trials-open
+  order: 3

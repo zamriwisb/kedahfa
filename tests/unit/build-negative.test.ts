@@ -174,4 +174,40 @@ describe('the real build rejects bad content', () => {
     },
     BUILD_TIMEOUT_MS,
   );
+
+  it(
+    'fails a slide whose image is missing from public/',
+    () => {
+      withMutatedFile(
+        'src/data/slides.yaml',
+        // Only the first occurrence is replaced, so exactly one slide breaks.
+        (text) =>
+          text.replace('image: /images/news/placeholder.svg', 'image: /images/slides/not-here.jpg'),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(/Referenced files are missing from public/);
+          expect(output).toMatch(/not-here\.jpg/);
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
+
+  it(
+    'fails a slide that has a cta label but nothing to link it to',
+    () => {
+      withMutatedFile(
+        'src/data/slides.yaml',
+        // season-tickets is the only slide carrying both href and cta.
+        (text) => text.replace('  href: /contact\n', ''),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(/also needs an "href"/);
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
 });

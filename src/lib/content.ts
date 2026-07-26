@@ -4,6 +4,7 @@ import { getCollection, getEntry } from 'astro:content';
 import type { Match } from './fixtures';
 import type { StandingsInput } from './standings';
 import type { Player, Position } from './squad';
+import { sortSlides, type Slide } from './slides';
 import {
   assertNoDuplicateIds,
   assertNoDuplicateNewsIds,
@@ -66,6 +67,7 @@ export interface SiteData {
   standings: StandingsInput[];
   squad: Player[];
   sponsors: Sponsor[];
+  slides: Slide[];
   articles: Article[];
 }
 
@@ -118,15 +120,23 @@ async function build(): Promise<SiteData> {
   if (!clubEntry) throw new Error('src/data/club.yaml is missing its "club" entry.');
   if (!seasonEntry) throw new Error('src/data/season.yaml is missing its "current" entry.');
 
-  const [teamEntries, fixtureEntries, standingEntries, squadEntries, sponsorEntries, newsEntries] =
-    await Promise.all([
-      getCollection('teams'),
-      getCollection('fixtures'),
-      getCollection('standings'),
-      getCollection('squad'),
-      getCollection('sponsors'),
-      getCollection('news', ({ data }) => import.meta.env.DEV || !data.draft),
-    ]);
+  const [
+    teamEntries,
+    fixtureEntries,
+    standingEntries,
+    squadEntries,
+    sponsorEntries,
+    newsEntries,
+    slideEntries,
+  ] = await Promise.all([
+    getCollection('teams'),
+    getCollection('fixtures'),
+    getCollection('standings'),
+    getCollection('squad'),
+    getCollection('sponsors'),
+    getCollection('news', ({ data }) => import.meta.env.DEV || !data.draft),
+    getCollection('slides'),
+  ]);
 
   const teams: Team[] = teamEntries.map((e) => ({
     id: e.id,
@@ -182,6 +192,19 @@ async function build(): Promise<SiteData> {
     url: e.data.url,
   }));
 
+  const slides: Slide[] = sortSlides(
+    slideEntries.map((e) => ({
+      id: e.id,
+      image: e.data.image,
+      imageAlt: e.data.imageAlt,
+      eyebrow: e.data.eyebrow,
+      title: e.data.title,
+      href: e.data.href,
+      cta: e.data.cta,
+      order: e.data.order,
+    })),
+  );
+
   const articles: Article[] = newsEntries
     .map((e) => ({
       slug: e.id,
@@ -231,6 +254,7 @@ async function build(): Promise<SiteData> {
       ...squad.map((p) => p.photo),
       ...sponsors.map((s) => s.logo),
       ...articles.map((a) => a.image),
+      ...slides.map((s) => s.image),
     ],
     PUBLIC_DIR,
   );
@@ -244,6 +268,7 @@ async function build(): Promise<SiteData> {
     standings,
     squad,
     sponsors,
+    slides,
     articles,
   };
 }

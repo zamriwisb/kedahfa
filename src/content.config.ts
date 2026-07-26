@@ -235,6 +235,32 @@ const sponsors = defineCollection({
     .strict(),
 });
 
+const slides = defineCollection({
+  loader: file('src/data/slides.yaml'),
+  schema: z
+    .object({
+      id: z.string(),
+      // Deliberately "/images/" and not "/images/slides/": the seed slides
+      // point at the shared placeholder in /images/news/ until real
+      // photography arrives, and a slide may legitimately reuse a news photo.
+      // assertPublicAssetsExist() is what actually guarantees the file is
+      // there, so this prefix only rules out off-site and relative URLs.
+      image: z.string().startsWith('/images/'),
+      // Required, not optional: accessibility must not be droppable by omission.
+      imageAlt: z.string().min(1),
+      eyebrow: z.string().optional(),
+      title: z.string().min(1),
+      href: z.string().startsWith('/').optional(),
+      cta: z.string().optional(),
+      order: z.number().int().optional(),
+    })
+    .strict()
+    .refine((slide) => slide.cta === undefined || slide.href !== undefined, {
+      message: 'A slide with a "cta" label also needs an "href" for the button to link to.',
+      path: ['cta'],
+    }),
+});
+
 const news = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
   schema: z
@@ -252,4 +278,4 @@ const news = defineCollection({
     .strict(),
 });
 
-export const collections = { club, season, teams, fixtures, standings, squad, sponsors, news };
+export const collections = { club, season, teams, fixtures, standings, squad, slides, sponsors, news };
