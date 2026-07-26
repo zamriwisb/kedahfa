@@ -37,6 +37,17 @@ test('the news filter narrows the visible articles', async ({ page }) => {
   expect(after).toBeGreaterThan(0);
 });
 
+test('a news article opens from the listing and renders its content', async ({ page }) => {
+  await page.goto('/news');
+
+  // Target the card link by structure, not by title text, so renaming an
+  // article doesn't break this test.
+  await page.locator('[data-category] a').first().click();
+
+  await expect(page).toHaveURL(/\/news\/[^/]+$/);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+});
+
 test('a player profile shows the squad number and details', async ({ page }) => {
   await page.goto('/squad');
   await page.getByRole('link', { name: /Firdaus Rahman/ }).click();
