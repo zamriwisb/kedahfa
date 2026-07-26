@@ -58,3 +58,17 @@ Task 13: complete (commits 98802bc..a1d91f4, review clean after 1 fix)
    - axe scrollable-region-focusable (WCAG 2.1.1) on standings scroll wrapper
   Final: 59 e2e passed / 0 failed / 1 intentional skip; 76 unit tests.
 Task 14: complete (commits 105e5e6..0274f1a, review clean after 1 fix — CI artifact upload was a silent no-op)
+
+## FINAL WHOLE-BRANCH REVIEW (opus) — blocked merge, 2 CRITICAL
+  C1: fixture date accepted with no +08:00 offset -> under UTC rendered 04:45
+      instead of 20:45, wrong day. Exactly the spec's headline timezone risk.
+      FIXED 5087893 (custom YAML parser + regex-guarded schema).
+  C2: Astro's file() loader dedupes by id BEFORE getCollection, so
+      assertUniqueIds could never throw — dead code reading as coverage.
+      Duplicate id dropped JDT from 1st/29pts to 6th/4pts, build exit 0.
+      FIXED c8667b5 (raw-YAML dup detection); assertUniqueIds removed.
+  Plus 3dbbcd4 build-level negative tests (the spec's least-delivered item).
+  I3 badge contrast 3.09/3.10:1 -> 5.93/6.71/5.46:1  FIXED 4dacdab
+  I4 past scheduled match vanished from site -> Awaiting Result  FIXED de7e2e5
+  I5 countdown maths duplicated in island -> imports tested fn  FIXED 2f4313d
+  Verified by me: both criticals now exit 1. 89 unit + 59 e2e green.
