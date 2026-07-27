@@ -13,9 +13,15 @@ npm install       # install dependencies
 npm run dev       # local dev server at http://localhost:4321
 npm run build     # type check and build to dist/
 npm run preview   # serve the built site
-npm test          # unit tests
+npm test          # unit tests (fast — run these on every edit)
+npm run test:build # asserts the real build rejects bad content (slow)
 npm run test:e2e  # end-to-end and accessibility tests
 ```
+
+`npm run test:build` spawns a real `npm run build` per case, so it takes far
+longer than the rest. Run it before pushing anything that touches
+`src/content.config.ts`, `src/lib/validate.ts`, or the shape of `src/data/*`.
+CI runs it on every push regardless.
 
 ## Updating content
 

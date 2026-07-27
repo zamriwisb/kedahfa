@@ -13,11 +13,14 @@ import { describe, expect, it } from 'vitest';
  * content.
  *
  * Each case runs a full `astro check && astro build`, so this file is slow
- * (tens of seconds total). It still lives in tests/unit/ so `npm test` — and
- * therefore CI — runs it; nothing here is skipped or gated behind a manual
- * flag. If that turns out to be too slow for local iteration, split it into
- * its own vitest project/script, but as delivered it runs with the rest of
- * the suite.
+ * (tens of seconds total) — which is why it is no longer part of `npm test`.
+ * It runs under `npm run test:build` (vitest.build.config.ts), and CI runs
+ * that as its own step. Nothing here is skipped or gated behind a manual
+ * flag; the split is about local iteration speed, not about running less.
+ *
+ * The cost of the split is that `npm test` alone no longer proves the build
+ * rejects bad content. Run `npm run test:build` before pushing any change to
+ * src/content.config.ts, src/lib/validate.ts, or the shape of src/data/*.
  */
 
 const ROOT = process.cwd();

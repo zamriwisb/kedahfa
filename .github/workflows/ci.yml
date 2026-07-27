@@ -28,6 +28,13 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      # Split out of `npm test` so local iteration stays fast. Each case
+      # spawns a real `npm run build`, so this step is slow by nature — but
+      # it is the only thing that proves bad content fails the build rather
+      # than rendering wrong. It must not be dropped to save CI minutes.
+      - name: Build-rejects-bad-content tests
+        run: npm run test:build
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 

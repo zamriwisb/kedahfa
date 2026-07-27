@@ -8,13 +8,15 @@ export default defineConfig({
     // Cloudflare builds in UTC; if the date helpers are correct only on a
     // machine set to Kuala Lumpur time, these tests must fail.
     env: { TZ: 'UTC' },
-    // build-negative.test.ts writes real mutated content to src/data/*.yaml
-    // for the duration of each case before restoring it. league-data.test.ts
-    // reads those same files straight off disk, so running test files in
-    // parallel makes it flaky: it can observe the mutated content of
-    // whichever case happens to be mid-flight in another worker. Files still
-    // run in a single worker, sequentially, which costs nothing here since
-    // build-negative's real `astro build` calls already dominate total time.
-    fileParallelism: false,
+    // fileParallelism is left at its default (parallel) deliberately. It was
+    // previously disabled because build-negative.test.ts mutates real
+    // src/data/*.yaml files while league-data.test.ts reads those same files
+    // off disk, which races across workers. That file now lives in tests/build/
+    // and runs under vitest.build.config.ts, so nothing this config picks up
+    // writes into src/ — validate.test.ts, the only other test that writes,
+    // does so inside mkdtempSync(tmpdir()).
+    //
+    // If you add a test here that mutates a file inside src/, move it to
+    // tests/build/ instead of turning fileParallelism off again.
   },
 });
