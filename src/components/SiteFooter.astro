@@ -1,64 +1,128 @@
 ---
+import SocialIcon from './SocialIcon.astro';
+import SponsorGrid from './SponsorGrid.astro';
 import { loadSiteData } from '../lib/content';
 
-const { club } = await loadSiteData();
+const { club, sponsors } = await loadSiteData();
 const year = new Date().getFullYear();
+
+const columns = [
+  {
+    heading: 'Sport',
+    links: [
+      { href: '/news', label: 'News' },
+      { href: '/squad', label: 'Squad' },
+      { href: '/fixtures', label: 'Match Fixtures' },
+      { href: '/standings', label: 'Standings' },
+    ],
+  },
+  {
+    heading: 'Our Club',
+    links: [
+      { href: '/club', label: 'Club History' },
+      { href: '/contact', label: 'Contact' },
+    ],
+  },
+  {
+    heading: 'Info',
+    links: [
+      { href: '/privacy', label: 'Privacy Policy' },
+      { href: '/terms', label: 'Terms & Conditions' },
+    ],
+  },
+];
 ---
 
-<footer class="mt-20 bg-(--color-brand-deep) text-(--color-text-invert)">
-  <div class="page-shell grid gap-10 py-14 sm:grid-cols-3">
-    <div>
-      <a href="/" class="flex items-center gap-3" aria-label={`${club.name} home`}>
-        <img src="/images/teams/kedah.png" alt={`${club.name} crest`} width="793" height="853" class="h-14 w-auto" />
-        <span class="font-display text-lg leading-tight">{club.name}</span>
+{/*
+  No top margin. The footer used to clear itself from the page with mt-20,
+  which worked while it followed a section on the light page background. It now
+  opens on the brand green, so that margin renders as a grey band between two
+  green surfaces. Every page already ends in its own bottom padding, so the
+  footer can butt straight up against the content above it.
+*/}
+<footer class="text-(--color-text-invert)">
+  {/*
+    The partner band is the one light surface in the footer. The sections above
+    it are already green — stacking a third green here made the whole page
+    bottom read as one undifferentiated block. White separates the partners
+    from both the page and the navigation beneath, and it keeps the brand
+    yellow spent only on the column headings below.
+  */}
+  {
+    sponsors.length > 0 && (
+      <section class="bg-(--color-surface)" aria-labelledby="footer-partners">
+        <div class="page-shell py-12">
+          <h2 id="footer-partners" class="sr-only">
+            Our partners
+          </h2>
+          <SponsorGrid sponsors={sponsors} />
+        </div>
+      </section>
+    )
+  }
+
+  <div class="bg-(--color-brand-deep)">
+    <nav aria-label="Footer" class="page-shell grid gap-10 py-14 text-center sm:grid-cols-3">
+      {
+        columns.map((column) => (
+          <div>
+            <h2 class="text-sm tracking-[0.2em] text-(--color-accent)">{column.heading}</h2>
+            <ul class="mt-2">
+              {column.links.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    class="text-sm text-(--color-text-invert) transition-colors hover:text-(--color-accent)"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </nav>
+  </div>
+
+  {/*
+    The rule between the two dark bands is the brand green, not a token line
+    colour: brand-deep and brand-ink are close enough that a hairline between
+    them disappears, and the green reads as a deliberate divider rather than a
+    seam.
+  */}
+  <div class="border-t-2 border-(--color-brand) bg-(--color-brand-ink)">
+    <div class="page-shell flex flex-col items-center gap-6 py-10 text-center">
+      <a href="/" aria-label={`${club.name} home`}>
+        <img
+          src="/images/teams/kedah.png"
+          alt={`${club.name} crest`}
+          width="793"
+          height="853"
+          class="h-16 w-auto"
+        />
       </a>
-      <address class="mt-4 text-sm not-italic text-(--color-text-invert-muted)">
-        {club.stadium}<br />
-        {club.city}, Malaysia
-      </address>
-    </div>
 
-    <div>
-      <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-(--color-accent)">Contact</h2>
-      <ul class="mt-4 space-y-3 text-sm">
-        {
-          club.emails.map((email) => (
-            <li>
-              <p class="text-(--color-text-invert-muted)">{email.label}</p>
-              <a href={`mailto:${email.address}`} class="underline decoration-(--color-text-invert-muted)">
-                {email.address}
-              </a>
-            </li>
-          ))
-        }
-        <li>
-          <p class="text-(--color-text-invert-muted)">Phone</p>
-          <a href={`tel:${club.phone.replace(/\s/g, '')}`} class="underline decoration-(--color-text-invert-muted)">
-            {club.phone}
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <div>
-      <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-(--color-accent)">Follow</h2>
-      <ul class="mt-4 space-y-3 text-sm">
+      <ul class="flex flex-wrap items-center justify-center gap-3">
         {
           club.socials.map((social) => (
             <li>
-              <a href={social.url} rel="me noopener" class="underline decoration-(--color-text-invert-muted)">
-                {social.platform}
+              <a
+                href={social.url}
+                rel="me noopener"
+                aria-label={social.platform}
+                class="flex h-11 w-11 items-center justify-center rounded-(--radius-pill) border border-(--color-text-invert-muted) text-(--color-text-invert-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent)"
+              >
+                <SocialIcon platform={social.platform} class="h-4 w-4" />
               </a>
             </li>
           ))
         }
       </ul>
-    </div>
-  </div>
 
-  <div class="bg-(--color-brand-ink)">
-    <p class="page-shell py-4 text-center text-xs text-(--color-text-invert-muted)">
-      &copy; {year} {club.name}. All rights reserved.
-    </p>
+      <p class="text-xs text-(--color-text-invert-muted)">
+        &copy; {year} | {club.name} | All Rights Reserved
+      </p>
+    </div>
   </div>
 </footer>

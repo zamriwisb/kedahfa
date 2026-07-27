@@ -8,13 +8,12 @@ import FixturesStrip from '../components/FixturesStrip.astro';
 import HeroSlider from '../components/HeroSlider.astro';
 import PlayerCard from '../components/PlayerCard.astro';
 import SectionHeading from '../components/SectionHeading.astro';
-import SponsorGrid from '../components/SponsorGrid.astro';
 import StandingsTable from '../components/StandingsTable.astro';
 import { CLUB_SLUG, loadSiteData } from '../lib/content';
 import { deriveTable, tableSnippet } from '../lib/standings';
 import { groupByPosition } from '../lib/squad';
 
-const { club, teamsBySlug, matches, standings, squad, sponsors, articles, slides } = await loadSiteData();
+const { club, teamsBySlug, matches, standings, squad, articles, slides } = await loadSiteData();
 
 // Build time. The site must redeploy for these to advance — see the plan's
 // operational note about the daily scheduled build.
@@ -142,15 +141,4 @@ const latestArticles = articles.slice(0, 5);
       }
     </div>
   </section>
-
-  {
-    sponsors.length > 0 && (
-      <section class="bg-(--color-page) py-16">
-        <div class="page-shell">
-          <SectionHeading eyebrow="Thank You" title="Partners" />
-          <SponsorGrid sponsors={sponsors} />
-        </div>
-      </section>
-    )
-  }
 </BaseLayout>

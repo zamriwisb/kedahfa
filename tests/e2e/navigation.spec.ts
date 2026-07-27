@@ -19,7 +19,11 @@ test('the header links reach their pages', async ({ page, isMobile }) => {
     await page.getByRole('button', { name: 'Menu' }).click();
   }
 
-  await page.getByRole('link', { name: 'Squad', exact: true }).click();
+  // Scoped to the header: the footer's Sport column links /squad under the same
+  // name, so a page-wide query matches two links and fails strict mode. Only
+  // the header's copy is under test here. getByRole skips the display:none
+  // desktop nav on mobile, so this resolves to one link on both projects.
+  await page.locator('header').getByRole('link', { name: 'Squad', exact: true }).click();
   await expect(page).toHaveURL(/\/squad$/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Squad');
 });

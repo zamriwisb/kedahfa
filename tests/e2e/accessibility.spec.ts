@@ -10,6 +10,8 @@ const ROUTES = [
   '/standings',
   '/club',
   '/contact',
+  '/privacy',
+  '/terms',
   '/404',
 ];
 

@@ -1,0 +1,29 @@
+---
+import { socialIcon } from '../lib/social';
+
+interface Props {
+  /** A platform name from club.yaml. Unknown names fail the build. */
+  platform: string;
+  /** Sizing utilities for the svg; the mark fills whatever box it is given. */
+  class?: string;
+}
+
+const { platform, class: className = 'h-4 w-4' } = Astro.props;
+const { width, height, path } = socialIcon(platform);
+---
+
+{/*
+  Font Awesome brand marks are solid shapes, so they fill with currentColor
+  rather than stroke like the hand-drawn paths this replaced. The viewBox comes
+  from the icon definition — the packs are not all on a 24×24 grid, and several
+  brand marks are 512 tall with their own aspect ratio.
+*/}
+<svg
+  viewBox={`0 0 ${width} ${height}`}
+  class={className}
+  fill="currentColor"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path d={path} />
+</svg>

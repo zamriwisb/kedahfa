@@ -17,24 +17,46 @@ const tiers = (['main', 'official', 'partner'] as const)
   .filter((group) => group.items.length > 0);
 ---
 
+{/*
+  Footer-only: this renders on the white band at the top of SiteFooter and
+  nowhere else, so it is styled for that surface directly rather than taking a
+  variant prop. The silhouette filter below is tied to that surface — moving
+  this onto a dark band means flipping the filter with it.
+
+  The tier captions are sr-only. Visually the tiers read as rows separated by
+  hairlines, which is the grouping without the labels; a screen reader still
+  hears which tier it is in.
+*/}
 <div class="divide-y divide-(--color-line)">
   {
     tiers.map((group) => (
       <div class="py-8 first:pt-0 last:pb-0">
-        <h3 class="mb-6 text-center text-xs tracking-[0.3em] text-(--color-text-muted) font-display">
-          {TIER_LABELS[group.tier]}
-        </h3>
-        <ul class="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+        <h3 class="sr-only">{TIER_LABELS[group.tier]}</h3>
+        <ul class="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
           {group.items.map((sponsor) => (
             <li>
               <a href={sponsor.url} rel="noopener sponsored" target="_blank">
+                {/*
+                  brightness(0) collapses any source artwork to solid black, so
+                  every logo becomes a black silhouette on the white band
+                  whatever colours the file ships with — one uniform treatment
+                  across sponsors who will supply wildly different artwork.
+
+                  The filter direction is bound to the band's surface: on a dark
+                  band this would need `invert` after it to come out white
+                  instead. Black on white is the pairing here.
+
+                  The cost is that a sponsor's brand colours are discarded. The
+                  alternative is a mono variant of every logo, supplied and kept
+                  in sync by the club.
+                */}
                 <img
                   src={sponsor.logo}
                   alt={sponsor.name}
                   width="120"
                   height="60"
                   loading="lazy"
-                  class="h-12 w-auto grayscale opacity-60 transition hover:opacity-100 hover:grayscale-0"
+                  class="h-12 w-auto opacity-70 brightness-0 transition-opacity hover:opacity-100"
                 />
               </a>
             </li>

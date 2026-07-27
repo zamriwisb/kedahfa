@@ -1,4 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Placeholder">
-  <rect width="160" height="160" fill="#16161A"/>
-  <path d="M80 34a46 46 0 1 0 0 92 46 46 0 0 0 0-92Zm0 12 26 19-10 31H64l-10-31Z" fill="#26262C"/>
+<!--
+  Placeholder partner logo. The background is deliberately transparent: the
+  footer renders every sponsor logo through `brightness(0)` to make it a black
+  silhouette on the white band, and an opaque background rect would flatten the
+  whole viewBox to a solid black block. Real sponsor artwork must arrive with a
+  transparent background for the same reason.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" role="img" aria-label="Placeholder">
+  <g fill="#16161A">
+    <path d="M28 16a24 24 0 1 0 0 48 24 24 0 0 0 0-48Zm0 7 13.6 9.9-5.2 16H19.6l-5.2-16Z" />
+    <rect x="62" y="27" width="84" height="7" rx="3.5" />
+    <rect x="62" y="41" width="62" height="7" rx="3.5" />
+  </g>
 </svg>

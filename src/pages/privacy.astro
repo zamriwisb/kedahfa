@@ -1,0 +1,53 @@
+---
+/*
+ * PLACEHOLDER COPY. This page exists so the footer's Info column resolves; the
+ * text below is not a legal document and must be replaced with a policy the
+ * club has reviewed before launch. Same status as the contact details in
+ * src/data/club.yaml.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { loadSiteData } from '../lib/content';
+
+const { club } = await loadSiteData();
+---
+
+<BaseLayout
+  title="Privacy Policy"
+  description={`How ${club.name} handles the information you share with this website.`}
+>
+  <div class="page-shell py-12">
+    <SectionHeading title="Privacy Policy" level={1} />
+
+    <p class="mb-8 border-l-4 border-(--color-action) bg-(--color-surface) p-4 text-sm">
+      <strong>Draft.</strong> This policy has not been reviewed by the club and is not yet binding.
+    </p>
+
+    <div class="prose max-w-none">
+      <h2>What we collect</h2>
+      <p>
+        This website does not ask you to create an account and does not run advertising trackers.
+        Standard server logs record the pages requested, along with the date, time and browser
+        used, so that faults can be diagnosed.
+      </p>
+
+      <h2>Email you send us</h2>
+      <p>
+        Messages sent to the addresses on the <a href="/contact">contact page</a> are read by
+        {club.name} staff and kept only as long as needed to answer them.
+      </p>
+
+      <h2>Other sites</h2>
+      <p>
+        Links to partner and social media sites are outside our control. Once you follow one, that
+        site's own policy applies.
+      </p>
+
+      <h2>Asking about your information</h2>
+      <p>
+        Write to the general enquiries address on the <a href="/contact">contact page</a> and we
+        will respond.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

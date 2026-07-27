@@ -2,7 +2,17 @@ import { expect, test } from '@playwright/test';
 
 // Pages whose main content column must line up with the header — the crest is
 // the leftmost thing on the page, so it is the reference edge readers notice.
-const ROUTES = ['/', '/news', '/squad', '/fixtures', '/standings', '/club', '/contact'];
+const ROUTES = [
+  '/',
+  '/news',
+  '/squad',
+  '/fixtures',
+  '/standings',
+  '/club',
+  '/contact',
+  '/privacy',
+  '/terms',
+];
 
 test.describe('the content column aligns with the header', () => {
   for (const route of ROUTES) {

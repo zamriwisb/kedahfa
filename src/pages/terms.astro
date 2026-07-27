@@ -1,0 +1,55 @@
+---
+/*
+ * PLACEHOLDER COPY. This page exists so the footer's Info column resolves; the
+ * text below is not a legal document and must be replaced with terms the club
+ * has reviewed before launch. Same status as the contact details in
+ * src/data/club.yaml.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { loadSiteData } from '../lib/content';
+
+const { club } = await loadSiteData();
+---
+
+<BaseLayout
+  title="Terms & Conditions"
+  description={`The terms on which ${club.name} makes this website available.`}
+>
+  <div class="page-shell py-12">
+    <SectionHeading title="Terms & Conditions" level={1} />
+
+    <p class="mb-8 border-l-4 border-(--color-action) bg-(--color-surface) p-4 text-sm">
+      <strong>Draft.</strong> These terms have not been reviewed by the club and are not yet
+      binding.
+    </p>
+
+    <div class="prose max-w-none">
+      <h2>Using this site</h2>
+      <p>
+        This website is published by {club.name} for supporters and the public. You may read,
+        print and share its pages for personal, non-commercial use.
+      </p>
+
+      <h2>Crest, photographs and text</h2>
+      <p>
+        The club crest, player photographs and written content belong to {club.name} or to the
+        people who produced them. Reproducing them commercially needs written permission — write to
+        the commercial address on the <a href="/contact">contact page</a>.
+      </p>
+
+      <h2>Accuracy</h2>
+      <p>
+        Fixtures, results, league tables and squad details are published in good faith and can
+        change at short notice. Confirm kickoff times with the competition organiser before
+        travelling.
+      </p>
+
+      <h2>Links out</h2>
+      <p>
+        Partner and social media links are provided for convenience. {club.name} is not responsible
+        for the content of sites it does not operate.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
