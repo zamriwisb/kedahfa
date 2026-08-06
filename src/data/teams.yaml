@@ -1,19 +1,19 @@
 # The fourteen clubs of the A1 Semi-Pro League 2026/27.
 #
-# Crests are monogram placeholders except Kedah's. To swap in a real logo,
-# drop the file into public/images/teams/ and update the crest path below —
-# the build fails if the file is missing.
+# Every crest is the club's real logo. To swap one out, drop the new file
+# into public/images/teams/ and update the crest path below — the build
+# fails if the file is missing.
 #
 # shortName is capped at four characters by the schema, which is why the
 # reserve sides read JDT2/SEL2/NS2/IMG2 rather than the broadcast "JDT II".
 - id: jdt-ii
   name: Johor Darul Ta'zim II
   shortName: JDT2
-  crest: /images/teams/jdt-ii.svg
+  crest: /images/teams/jdt-ii.png
 - id: selangor-ii
   name: Selangor FC II
   shortName: SEL2
-  crest: /images/teams/selangor-ii.svg
+  crest: /images/teams/selangor-ii.png
 - id: kedah
   # "Kedah FA", not the full "Kedah Football Association": this name is what
   # fixtures and the standings table render, where the long form crowds the
@@ -25,44 +25,44 @@
 - id: negeri-sembilan-ii
   name: Negeri Sembilan FC II
   shortName: NS2
-  crest: /images/teams/negeri-sembilan-ii.svg
+  crest: /images/teams/negeri-sembilan-ii.png
 - id: usm
   name: USM FC
   shortName: USM
-  crest: /images/teams/usm.svg
+  crest: /images/teams/usm.png
 - id: perak
   name: Perak FA
   shortName: PRK
-  crest: /images/teams/perak.svg
+  crest: /images/teams/perak.png
 - id: um-damansara
   name: UM-Damansara United
   shortName: UMD
-  crest: /images/teams/um-damansara.svg
+  crest: /images/teams/um-damansara.png
 - id: kelantan-city
   name: Kelantan City FC
   shortName: KCFC
-  crest: /images/teams/kelantan-city.svg
+  crest: /images/teams/kelantan-city.png
 - id: armed-forces
   name: Armed Forces FC
   shortName: AFFC
-  crest: /images/teams/armed-forces.svg
+  crest: /images/teams/armed-forces.png
 - id: uitm
   name: Malaysian University-UITM
   shortName: UITM
-  crest: /images/teams/uitm.svg
+  crest: /images/teams/uitm.png
 - id: manjung-city
   name: Manjung City FC
   shortName: MCFC
-  crest: /images/teams/manjung-city.svg
+  crest: /images/teams/manjung-city.png
 - id: bunga-raya
   name: Bunga Raya FC
   shortName: BRFC
-  crest: /images/teams/bunga-raya.svg
+  crest: /images/teams/bunga-raya.png
 - id: aak-unisel
   name: AAK Unisel FC
   shortName: AAKU
-  crest: /images/teams/aak-unisel.svg
+  crest: /images/teams/aak-unisel.png
 - id: imigresen-ii
   name: Imigresen FC II
   shortName: IMG2
-  crest: /images/teams/imigresen-ii.svg
+  crest: /images/teams/imigresen-ii.png
