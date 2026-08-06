@@ -752,6 +752,166 @@ git commit -m "feat: offer tickets and the PPV stream on upcoming home fixtures"
 
 ---
 
+### Task 5: Align the crests across cards
+
+**Files:**
+- Modify: `src/components/MatchRow.astro` (the crest row and the venue row)
+- Test: `tests/e2e/layout.spec.ts`
+
+**Interfaces:**
+- Consumes: `MatchRow`'s post-Task-4 structure — header row, crest row, venue/report row, `<MatchActions />`.
+- Produces: no API change. Purely presentational.
+
+**The defect.** `MatchRow`'s crest row is `flex flex-1 items-center`, so the crest/name block is centred in whatever vertical space the card has left over. That leftover differs card to card for two reasons: a club name long enough to wrap ("Negeri Sembilan II") takes two lines where "Kedah FA" takes one, and after Task 4 a card with an action bar has less room than one without. Neighbouring cards therefore render their crests at different heights — visible as a ragged row in the homepage slider and in the `/fixtures` grid.
+
+Card *height* is not the problem and needs no fix: the carousel's `flex` row and the grid both stretch items to a common height already.
+
+**The fix.** Stop letting the crest row absorb slack, and reserve a fixed two lines for every club name. Then the header and crest rows are identical in height on every card, the crests land at the same offset from the card top regardless of what sits below, and the leftover space collects above the pinned bottom stack instead.
+
+- [ ] **Step 1: Write the failing test**
+
+Append to `tests/e2e/layout.spec.ts`. This measures the rendered geometry rather than asserting on classes, so it survives a different fix:
+
+```ts
+test('club crests line up across neighbouring fixture cards', async ({ page }) => {
+  await page.goto('/fixtures');
+
+  // The first row of the Upcoming grid: cards whose names wrap differently
+  // and, after the ticket CTAs landed, whose bottom stacks differ in height.
+  const crests = page.locator('[data-competition] img');
+  const count = await crests.count();
+  expect(count).toBeGreaterThan(3);
+
+  const tops: number[] = [];
+  for (let i = 0; i < 4; i++) {
+    const box = await crests.nth(i).boundingBox();
+    expect(box).not.toBeNull();
+    tops.push(box!.y);
+  }
+
+  // Cards in the same grid row must place their crests at the same y. Cards
+  // in the next row down are offset by the row height, so compare only the
+  // distinct values within a row: the first two cards share row one.
+  expect(Math.abs(tops[0] - tops[1])).toBeLessThan(1);
+  expect(Math.abs(tops[2] - tops[3])).toBeLessThan(1);
+});
+
+test('a card with ticket actions keeps its crests level with one without', async ({ page }) => {
+  await page.goto('/');
+
+  const cards = page.locator('.card-carousel__track [data-competition]');
+  const withActions = cards.filter({ has: page.locator('[data-match-actions]') }).first();
+  const withoutActions = cards.filter({ hasNot: page.locator('[data-match-actions]') }).first();
+
+  const a = await withActions.locator('img').first().boundingBox();
+  const b = await withoutActions.locator('img').first().boundingBox();
+  expect(a).not.toBeNull();
+  expect(b).not.toBeNull();
+
+  // This is the regression the action bar introduced: the taller card's
+  // crest floated up because the crest row was centred in the slack.
+  expect(Math.abs(a!.y - b!.y)).toBeLessThan(1);
+});
+```
+
+- [ ] **Step 2: Run the tests to verify they fail**
+
+Run: `npx playwright test tests/e2e/layout.spec.ts -g "crests"`
+Expected: FAIL — the crest `y` values differ by more than a pixel.
+
+- [ ] **Step 3: Drop `flex-1` from the crest row**
+
+In `src/components/MatchRow.astro`, the crest row currently opens:
+
+```astro
+  <div class="flex flex-1 items-center justify-between gap-2 px-3 py-5">
+```
+
+Remove `flex-1` so the row's height is decided by its content, identical on every card. Keep `items-center` — it is what vertically centres the VS/score column against the crest columns, and with a now-fixed row height it centres consistently:
+
+```astro
+  <div class="flex items-center justify-between gap-2 px-3 py-5">
+```
+
+- [ ] **Step 4: Reserve two lines for every club name**
+
+Both the home and away name spans currently read:
+
+```astro
+      <span
+        class:list={[
+          'w-full text-sm leading-tight font-display',
+          highlight ? 'text-(--color-text-invert)' : 'text-(--color-text)',
+        ]}
+      >
+```
+
+Add `min-h-9` to each (`2.25rem` = 36px, which is two lines of `text-sm`/`leading-tight` at 17.5px each). A one-line name then occupies the same box as a wrapped one:
+
+```astro
+      <span
+        class:list={[
+          'w-full min-h-9 text-sm leading-tight font-display',
+          highlight ? 'text-(--color-text-invert)' : 'text-(--color-text)',
+        ]}
+      >
+```
+
+Apply to both spans — the home one and the away one.
+
+- [ ] **Step 5: Pin the bottom stack**
+
+The slack removed in Step 3 has to go somewhere, or short cards will not fill the height the grid stretches them to. Send it above the venue row by adding `mt-auto` to that row's class list. It currently opens:
+
+```astro
+  <div
+    class:list={[
+      'flex items-center justify-between gap-2 px-4 py-2 text-xs',
+      highlight
+        ? 'bg-(--color-brand-ink) text-(--color-text-invert-muted)'
+        : 'bg-(--color-page) text-(--color-text-muted)',
+    ]}
+  >
+```
+
+becomes:
+
+```astro
+  <div
+    class:list={[
+      'mt-auto flex items-center justify-between gap-2 px-4 py-2 text-xs',
+      highlight
+        ? 'bg-(--color-brand-ink) text-(--color-text-invert-muted)'
+        : 'bg-(--color-page) text-(--color-text-muted)',
+    ]}
+  >
+```
+
+`MatchActions` sits below it and needs no change — it follows the pinned venue row.
+
+- [ ] **Step 6: Run the tests to verify they pass**
+
+Run: `npx playwright test tests/e2e/layout.spec.ts`
+Expected: PASS, including the pre-existing cases in that file.
+
+- [ ] **Step 7: Check it visually**
+
+Capture `/` and `/fixtures` at both a 390px (phone) and 1280px (desktop) viewport and look at them. The crest rows must read as a level line across each row of cards, and no card may show an awkward gap between its crests and its venue row. Attach the observation to the report — a passing geometry assertion is not the same as it looking right.
+
+- [ ] **Step 8: Run the full suite**
+
+Run: `npm run build && npm test && npm run test:e2e`
+Expected: PASS. `tests/e2e/accessibility.spec.ts` must stay green.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add src/components/MatchRow.astro tests/e2e/layout.spec.ts
+git commit -m "fix: line the crests up across fixture cards"
+```
+
+---
+
 ## Verification
 
 After Task 4, run everything once more from a clean state:
