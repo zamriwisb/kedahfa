@@ -1,28 +1,32 @@
 # Slides are curated, not generated. Order is explicit so re-ordering is a
-# one-line edit. Images point at the shared placeholder until real
-# photography lands in /images/slides/ — swap the paths there, and the build
-# will reject a typo rather than shipping a broken slide.
-- id: season-tickets
-  image: /images/news/placeholder.svg
-  imageAlt: Supporters filling the stands at Darul Aman Stadium
-  eyebrow: Season 2026/27
-  title: Season tickets are on sale now
-  href: /contact
-  cta: Buy Tickets
+# one-line edit.
+#
+# The hero crops to 16:9 (1600x900, object-cover in HeroSlider.astro), so a
+# slide image belongs in /images/slides/ already cut to that ratio rather
+# than pointing straight at a portrait article photo — centred in a 16:9 box,
+# a portrait subject loses their head. league-confirmed is the exception: its
+# source is a poster graphic whose own layout cannot survive a crop, so it
+# still points at the article image and leans on the hero's lg:object-top.
+- id: top-three-target
+  image: /images/slides/akmal-rizal-targets-top-three.jpg
+  imageAlt: Akmal Rizal in a red Kedah training shirt and cap directing a session, with a member of his coaching staff alongside him
+  eyebrow: Club news
+  title: Akmal Rizal targets a top-three finish
+  href: /news/akmal-rizal-targets-top-three
   order: 1
 
 - id: new-signing
-  image: /images/news/placeholder.svg
-  imageAlt: A new signing holding up a Kedah shirt
+  image: /images/slides/ibrahima-barry-signing.jpg
+  imageAlt: Ibrahima Barry smiling in the yellow Kedah home shirt against a yellow backdrop
   eyebrow: Transfer news
-  title: Kedah complete the signing of a new forward
-  href: /news/new-signing-announced
+  title: Ibrahima Barry joins from Brothers Union
+  href: /news/ibrahima-barry-joins-kedah
   order: 2
 
-- id: academy-trials
-  image: /images/news/placeholder.svg
-  imageAlt: Young players training on a grass pitch
-  eyebrow: Academy
-  title: Academy trials open for the 2027 intake
-  href: /news/academy-trials-open
+- id: league-confirmed
+  image: /images/news/pasukan-bertanding.jpeg
+  imageAlt: A green graphic titled "14 Pasukan Liga A1 Semi-Pro 2026/2027" showing the crest and name of all fourteen competing clubs
+  eyebrow: A1 Semi-Pro League
+  title: Fourteen teams confirmed for 2026/27
+  href: /news/a1-semi-pro-league-2026-27-confirmed
   order: 3

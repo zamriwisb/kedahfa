@@ -48,13 +48,27 @@ const total = slides.length;
                 aria-roledescription="slide"
                 aria-label={`${index + 1} of ${total}`}
               >
+                {
+                  /*
+                   * Slide images are cut to 16:9 upstream, so object-position
+                   * is a no-op for them. It exists for the sources that
+                   * cannot be — league-confirmed's poster graphic — where the
+                   * slide box grows proportionally wider with the viewport
+                   * and so crops a portrait hardest at desktop widths:
+                   * centred, the 1600x900 box lands below the poster's own
+                   * title. Scoped to lg because below it the box is tall
+                   * enough relative to its width that the subject already
+                   * fits, and top-anchoring there would instead push the
+                   * subject down out of frame.
+                   */
+                }
                 <img
                   src={slide.image}
                   alt={slide.imageAlt}
                   width="1600"
                   height="900"
                   loading={index === 0 ? 'eager' : 'lazy'}
-                  class="absolute inset-0 -z-10 h-full w-full object-cover"
+                  class="absolute inset-0 -z-10 h-full w-full object-cover lg:object-top"
                 />
                 {
                   /*
