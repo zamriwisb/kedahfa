@@ -233,9 +233,12 @@ describe('the real build rejects bad content', () => {
     () => {
       withMutatedFile(
         'src/data/slides.yaml',
+        // Matches the "image:" key rather than a specific filename: this case
+        // spent months silently passing its mutation over a seed path that no
+        // longer existed, so withMutatedFile's "did not change anything" guard
+        // was all that fired. A key-anchored regex cannot rot that way.
         // Only the first occurrence is replaced, so exactly one slide breaks.
-        (text) =>
-          text.replace('image: /images/news/placeholder.svg', 'image: /images/slides/not-here.jpg'),
+        (text) => text.replace(/^  image: .*$/m, '  image: /images/slides/not-here.jpg'),
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);
@@ -268,8 +271,12 @@ describe('the real build rejects bad content', () => {
     () => {
       withMutatedFile(
         'src/data/slides.yaml',
-        // season-tickets is the only slide carrying both href and cta.
-        (text) => text.replace('  href: /contact\n', ''),
+        // No slide carries a "cta" today, so this cannot be produced by
+        // deleting an href — the old version deleted a "/contact" href that
+        // stopped existing, and the case silently stopped guarding anything.
+        // Swapping the first slide's href FOR a cta creates the invalid
+        // combination directly, whatever the curated slides happen to be.
+        (text) => text.replace(/^  href: .*$/m, '  cta: Buy Tickets'),
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);

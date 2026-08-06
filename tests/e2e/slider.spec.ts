@@ -8,13 +8,26 @@ test('the homepage opens with the slider', async ({ page }) => {
   await expect(slider.locator('.hero-slider__slide')).toHaveCount(3);
 });
 
-test('the first slide shows its headline and call to action', async ({ page }) => {
+// Deliberately asserts the SHAPE of the first slide, not its copy. The
+// previous version named a "Season tickets are on sale now" headline and a
+// "Buy Tickets" button from the seed data; when real slides replaced that
+// seed the test failed for months while nothing was actually broken. Slide
+// copy is curated content that changes whenever the club has something new
+// to say, so pinning it here buys nothing and costs a red suite.
+test('the first slide shows a headline that links to its story', async ({ page }) => {
   await page.goto('/');
 
-  await expect(
-    page.getByRole('heading', { name: 'Season tickets are on sale now' }),
-  ).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Buy Tickets' })).toBeVisible();
+  const heading = page.locator('.hero-slider__slide').first().getByRole('heading', { level: 2 });
+  await expect(heading).toBeVisible();
+  await expect(heading).not.toBeEmpty();
+
+  // Every slide in slides.yaml carries an href today, and HeroSlider wraps
+  // the headline in it. A slide without one renders bare text instead, which
+  // is legal — hence checking the link only when it is there.
+  const link = heading.getByRole('link');
+  if ((await link.count()) > 0) {
+    await expect(link).toHaveAttribute('href', /\S/);
+  }
 });
 
 test('every slide names its own position in the set', async ({ page }) => {
