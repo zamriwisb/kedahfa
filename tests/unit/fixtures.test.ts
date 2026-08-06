@@ -6,6 +6,7 @@ import {
   nextMatch,
   outcomeFor,
   recentResults,
+  sellableMatch,
   upcomingMatches,
   type Match,
 } from '../../src/lib/fixtures';
@@ -241,5 +242,49 @@ describe('groupByMonth', () => {
 
   it('returns an empty array for no matches', () => {
     expect(groupByMonth([])).toEqual([]);
+  });
+});
+
+describe('sellableMatch', () => {
+  const NOW = new Date('2026-07-25T12:00:00+08:00');
+
+  it('accepts an upcoming home fixture', () => {
+    expect(sellableMatch(JDT_HOME, CLUB, NOW)).toBe(true);
+  });
+
+  it('rejects an away fixture: those tickets are the host club to sell', () => {
+    expect(sellableMatch(TERENGGANU_AWAY, CLUB, NOW)).toBe(false);
+  });
+
+  it('rejects a home fixture whose kickoff has passed', () => {
+    expect(sellableMatch(JDT_HOME, CLUB, new Date('2026-08-02T21:00:00+08:00'))).toBe(false);
+  });
+
+  it('rejects a home fixture kicking off exactly now', () => {
+    expect(sellableMatch(JDT_HOME, CLUB, JDT_HOME.date)).toBe(false);
+  });
+
+  it('rejects a finished home match', () => {
+    expect(sellableMatch(SELANGOR_HOME_WIN, CLUB, new Date('2026-07-01T12:00:00+08:00'))).toBe(
+      false,
+    );
+  });
+
+  it('rejects a postponed home match even though its stored date is ahead', () => {
+    expect(sellableMatch(POSTPONED_CUP, CLUB, NOW)).toBe(false);
+  });
+
+  it('rejects a home match still awaiting its result', () => {
+    expect(sellableMatch(OVERDUE_SABAH, CLUB, NOW)).toBe(false);
+  });
+
+  it('does not care whether any URL is set — that is the component job', () => {
+    const withLink = match({
+      id: 'with-link',
+      date: '2026-08-02T20:45:00+08:00',
+      tickets: 'https://example.com/tickets',
+    });
+    expect(sellableMatch(withLink, CLUB, NOW)).toBe(true);
+    expect(sellableMatch(JDT_HOME, CLUB, NOW)).toBe(true);
   });
 });

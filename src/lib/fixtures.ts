@@ -18,6 +18,10 @@ export interface Match {
   status: MatchStatus;
   score?: MatchScore;
   report?: string;
+  /** Where to buy tickets for this match. Rendered only under sellableMatch's rules. */
+  tickets?: string;
+  /** Where to watch the pay-per-view stream. Same rules. */
+  stream?: string;
 }
 
 const byDateAscending = (a: Match, b: Match) => a.date.getTime() - b.date.getTime();
@@ -79,6 +83,27 @@ export function outcomeFor(match: Match, clubSlug: string): 'W' | 'D' | 'L' | nu
   if (scored > conceded) return 'W';
   if (scored < conceded) return 'L';
   return 'D';
+}
+
+/**
+ * Whether a match is one this club can sell to: an upcoming fixture at home.
+ *
+ * The first two conditions are upcomingMatches()' predicate — scheduled, and
+ * kickoff still ahead — so postponed fixtures (stale stored date) and matches
+ * awaiting a result are both excluded for the reasons documented there. The
+ * third is the club's own rule: tickets and the stream for an away match
+ * belong to the host club, so this site does not offer them.
+ *
+ * URL presence is deliberately NOT checked here. Which of the two buttons a
+ * card shows depends on which URL is set, and that belongs to the component
+ * rendering them; this answers only "may this match carry them at all".
+ */
+export function sellableMatch(match: Match, clubSlug: string, now: Date): boolean {
+  return (
+    match.status === 'scheduled' &&
+    match.date.getTime() > now.getTime() &&
+    match.home === clubSlug
+  );
 }
 
 export interface MonthGroup {
