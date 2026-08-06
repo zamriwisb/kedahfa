@@ -230,7 +230,10 @@ const sponsors = defineCollection({
       name: z.string(),
       tier: z.enum(['main', 'official', 'partner']),
       logo: z.string().startsWith('/images/sponsors/'),
-      url: z.url(),
+      // Optional: not every partner has a website, and a sponsor logo that
+      // links somewhere the club did not choose is worse than one that does
+      // not link at all. SponsorGrid drops the anchor when this is absent.
+      url: z.url().optional(),
     })
     .strict(),
 });

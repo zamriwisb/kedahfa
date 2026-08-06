@@ -34,7 +34,7 @@ export interface Sponsor {
   name: string;
   tier: 'main' | 'official' | 'partner';
   logo: string;
-  url: string;
+  url?: string;
 }
 
 export interface Article {

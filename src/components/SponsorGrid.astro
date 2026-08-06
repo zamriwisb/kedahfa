@@ -20,8 +20,7 @@ const tiers = (['main', 'official', 'partner'] as const)
 {/*
   Footer-only: this renders on the white band at the top of SiteFooter and
   nowhere else, so it is styled for that surface directly rather than taking a
-  variant prop. The silhouette filter below is tied to that surface — moving
-  this onto a dark band means flipping the filter with it.
+  variant prop.
 
   The tier captions are sr-only. Visually the tiers read as rows separated by
   hairlines, which is the grouping without the labels; a screen reader still
@@ -32,35 +31,67 @@ const tiers = (['main', 'official', 'partner'] as const)
     tiers.map((group) => (
       <div class="py-8 first:pt-0 last:pb-0">
         <h3 class="sr-only">{TIER_LABELS[group.tier]}</h3>
-        <ul class="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
-          {group.items.map((sponsor) => (
-            <li>
-              <a href={sponsor.url} rel="noopener sponsored" target="_blank">
-                {/*
-                  brightness(0) collapses any source artwork to solid black, so
-                  every logo becomes a black silhouette on the white band
-                  whatever colours the file ships with — one uniform treatment
-                  across sponsors who will supply wildly different artwork.
+        {/*
+          The narrower gap below sm is what lets two logo cells sit side by side
+          inside the page shell on a 360px screen; at gap-x-12 the pair overflows
+          by a few pixels and every tier stacks one-per-row.
+        */}
+        <ul class="flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-12">
+          {group.items.map((sponsor) => {
+            /*
+              Logos ship in full colour. An earlier version put brightness(0)
+              over every logo for one uniform silhouette, which cost each
+              sponsor its brand colours — and the current partners are state
+              bodies (PKNK, MBI Kedah) whose marks carry crest detail that
+              turns to an unreadable blob once flattened to black. Uniformity
+              is not worth an illegible crest, and agency brand guidelines
+              generally do not permit recolouring.
 
-                  The filter direction is bound to the band's surface: on a dark
-                  band this would need `invert` after it to come out white
-                  instead. Black on white is the pairing here.
+              Every logo gets the same fixed cell and is letterboxed into it by
+              object-contain. Sizing on height alone instead would render Anak
+              Sena's 8:1 lockup ~4.7x wider than MBI's near-square mark, which
+              reads as a hierarchy the tiers do not intend.
 
-                  The cost is that a sponsor's brand colours are discarded. The
-                  alternative is a mono variant of every logo, supplied and kept
-                  in sync by the club.
-                */}
-                <img
-                  src={sponsor.logo}
-                  alt={sponsor.name}
-                  width="120"
-                  height="60"
-                  loading="lazy"
-                  class="h-12 w-auto opacity-70 brightness-0 transition-opacity hover:opacity-100"
-                />
-              </a>
-            </li>
-          ))}
+              Both dimensions come from CSS, not from the width/height
+              attributes, so the row reserves its final size before the lazy
+              images arrive — sponsors ship artwork at whatever aspect they
+              like without any of it shifting the footer on load. The
+              attributes stay only as a same-size hint for clients that ignore
+              the stylesheet.
+            */
+            const logo = (
+              <img
+                src={sponsor.logo}
+                alt={sponsor.name}
+                width="176"
+                height="48"
+                loading="lazy"
+                class="h-12 w-36 object-contain sm:w-44"
+              />
+            );
+
+            return (
+              /*
+                A sponsor without a `url` renders as a plain image. Wrapping it
+                in an anchor to nowhere would put a focusable, screen-reader-
+                announced link in the tab order with no destination.
+              */
+              <li>
+                {sponsor.url ? (
+                  <a
+                    href={sponsor.url}
+                    rel="noopener sponsored"
+                    target="_blank"
+                    class="block transition-opacity hover:opacity-70"
+                  >
+                    {logo}
+                  </a>
+                ) : (
+                  logo
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     ))

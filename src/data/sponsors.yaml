@@ -1,20 +1,24 @@
-- id: main-sponsor
-  name: Placeholder Main Sponsor
+# `name` is what a screen reader hears in place of the logo, so it spells the
+# organisation out rather than repeating the initials shown in the artwork.
+#
+# `url` is optional. Anak Sena has no website — omitting the field renders the
+# logo unlinked rather than pointing at a guessed destination.
+- id: pknk
+  name: Perbadanan Kemajuan Negeri Kedah
   tier: main
-  logo: /images/sponsors/placeholder.svg
-  url: https://example.com
-- id: kit-supplier
-  name: Placeholder Kit Supplier
+  logo: /images/sponsors/pknk.png
+  url: https://www.pknk.gov.my/
+- id: mbi-kedah
+  name: Menteri Besar Kedah Incorporated
   tier: official
-  logo: /images/sponsors/placeholder.svg
-  url: https://example.com
-- id: stadium-partner
-  name: Placeholder Stadium Partner
+  logo: /images/sponsors/mbi-kedah.png
+  url: https://mbikedah.com.my/
+- id: mitre
+  name: Mitre — Official Kit Supplier
   tier: official
-  logo: /images/sponsors/placeholder.svg
-  url: https://example.com
-- id: community-partner
-  name: Placeholder Community Partner
+  logo: /images/sponsors/mitre-official-kit.png
+  url: https://mitre.com/
+- id: anak-sena
+  name: Anak Sena
   tier: partner
-  logo: /images/sponsors/placeholder.svg
-  url: https://example.com
+  logo: /images/sponsors/anak-sena.png
