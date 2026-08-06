@@ -95,6 +95,27 @@ function dateOnly(fieldLabel: string) {
   });
 }
 
+// A URL an editor supplies for a link that leaves the card: either
+// site-relative ("/tickets") or an explicit https:// URL, because club
+// promotions legitimately point at ticketing and streaming partners. The two
+// rejected forms both leave the site while passing a naive startsWith('/')
+// check: "//example.com" is protocol-relative, and a browser normalises the
+// backslash in "/\example.com" into the authority position.
+//
+// The label and example are parameters rather than one generic message so
+// each field names itself in the build error — a fixture with a bad stream
+// URL should not report itself as a slide problem.
+function siteOrHttpsUrl(fieldLabel: string, example: string) {
+  return z.string().refine(
+    (value) =>
+      (value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\')) ||
+      value.startsWith('https://'),
+    {
+      message: `A ${fieldLabel} must be a site-relative path like "${example}" or an absolute https:// URL.`,
+    },
+  );
+}
+
 // Every collection here is file()- or glob()-loaded, and in both loaders the
 // object handed to the schema is exactly the raw parsed entry — Astro does
 // not merge in "id" or any other key of its own before schema.safeParseAsync
@@ -166,6 +187,12 @@ const fixtures = defineCollection({
         })
         .optional(),
       report: reference('news').optional(),
+      // Optional, and only meaningful on an upcoming home fixture — see
+      // sellableMatch() in src/lib/fixtures.ts for the render rule, and
+      // assertTicketLinksAreHomeOnly() in src/lib/validate.ts for the
+      // build-time guard that an away fixture never carries these.
+      tickets: siteOrHttpsUrl('fixture tickets URL', '/tickets').optional(),
+      stream: siteOrHttpsUrl('fixture stream URL', '/watch').optional(),
     })
     .strict()
     .refine((m) => (m.status === 'finished' ? m.score !== undefined : m.score === undefined), {
@@ -253,24 +280,8 @@ const slides = defineCollection({
       imageAlt: z.string().min(1),
       eyebrow: z.string().optional(),
       title: z.string().min(1),
-      // A slide's href is either site-relative or an explicit https:// URL —
-      // club promotions legitimately point at ticketing partners. The two
-      // rejected forms both leave the site while passing a naive
-      // startsWith('/') check: "//example.com" is protocol-relative, and a
-      // browser normalises the backslash in "/\example.com" into the
-      // authority position.
-      href: z
-        .string()
-        .refine(
-          (value) =>
-            (value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\')) ||
-            value.startsWith('https://'),
-          {
-            message:
-              'A slide href must be a site-relative path like "/news/slug" or an absolute https:// URL.',
-          },
-        )
-        .optional(),
+      // See siteOrHttpsUrl() above for what counts as valid and why.
+      href: siteOrHttpsUrl('slide href', '/news/slug').optional(),
       cta: z.string().optional(),
       order: z.number().int().optional(),
     })

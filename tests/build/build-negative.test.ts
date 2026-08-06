@@ -267,4 +267,50 @@ describe('the real build rejects bad content', () => {
     },
     BUILD_TIMEOUT_MS,
   );
+
+  it(
+    'fails a fixture tickets URL that is protocol-relative rather than site-relative or https',
+    () => {
+      withMutatedFile(
+        'src/data/fixtures.yaml',
+        withFixtureEntry(
+          SCHEDULED_FIXTURE.replace(
+            '  status: scheduled\n',
+            '  status: scheduled\n  tickets: //evil.com\n',
+          ),
+        ),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(
+            /A fixture tickets URL must be a site-relative path like "\/tickets" or an absolute https:\/\/ URL\./,
+          );
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
+
+  it(
+    'fails a fixture stream URL that hides its authority behind a backslash',
+    () => {
+      withMutatedFile(
+        'src/data/fixtures.yaml',
+        withFixtureEntry(
+          SCHEDULED_FIXTURE.replace(
+            '  status: scheduled\n',
+            '  status: scheduled\n  stream: /\\evil.com\n',
+          ),
+        ),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(
+            /A fixture stream URL must be a site-relative path like "\/watch" or an absolute https:\/\/ URL\./,
+          );
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
 });

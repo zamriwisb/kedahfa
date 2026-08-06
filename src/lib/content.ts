@@ -156,6 +156,8 @@ async function build(): Promise<SiteData> {
     status: e.data.status,
     score: e.data.score,
     report: e.data.report?.id,
+    tickets: e.data.tickets,
+    stream: e.data.stream,
   }));
 
   const teamsBySlug = new Map(teams.map((t) => [t.id, t]));
