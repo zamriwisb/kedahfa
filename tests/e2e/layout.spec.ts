@@ -92,6 +92,35 @@ test('a card with ticket actions keeps its crests level with one without', async
   expect(Math.abs(a!.y - b!.y)).toBeLessThan(1);
 });
 
+test('the bottom stack stays pinned to the card bottom on a shorter neighbouring card', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  // The carousel row stretches every card to the height of its tallest
+  // neighbour. A card with no action bar is shorter content than one with —
+  // exactly the case `mt-auto` on the venue row exists for. Neither of the
+  // two tests above would catch its removal: with the card as `flex-col` and
+  // default `justify-content: flex-start`, the header and crest row already
+  // fully determine crest y regardless of what `mt-auto` does further down.
+  const cards = page.locator('.card-carousel__track [data-competition]');
+  const withoutActions = cards.filter({ hasNot: page.locator('[data-match-actions]') }).first();
+
+  const cardBox = await withoutActions.boundingBox();
+  const lastChildBox = await withoutActions.locator(':scope > *').last().boundingBox();
+  expect(cardBox).not.toBeNull();
+  expect(lastChildBox).not.toBeNull();
+
+  const cardBottom = cardBox!.y + cardBox!.height;
+  const lastChildBottom = lastChildBox!.y + lastChildBox!.height;
+
+  // Without `mt-auto`, the venue row (this card's last child — it has no
+  // action bar to sit below it) would end right under the crest row,
+  // leaving dead space beneath it the height of a neighbouring card's action
+  // bar. With `mt-auto`, the venue row is flush with the card's own bottom.
+  expect(Math.abs(cardBottom - lastChildBottom)).toBeLessThan(1);
+});
+
 test('the fixture cards do not widen the document on mobile', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'layout-viewport check is mobile-only');
   await page.goto('/');

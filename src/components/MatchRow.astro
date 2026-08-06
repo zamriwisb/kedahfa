@@ -40,11 +40,13 @@ const OUTCOME_LABELS: Record<string, string> = { W: 'Win', D: 'Draw', L: 'Loss' 
     class:list={[
       // A highlighted card had no header border at all, which made its
       // header — and so its crest row below — 1px shorter than every other
-      // card's. Give it a border matching its own fill so the box height
-      // stays identical while the border reads as invisible.
+      // card's. Reserve the same 1px with a transparent border: borders
+      // paint over the background (background-clip defaults to border-box),
+      // so this stays invisible without hard-coding it to match whatever
+      // colour the highlighted header happens to use today.
       'flex items-center justify-between gap-2 px-4 py-2 text-xs font-display tracking-wide border-b',
       highlight
-        ? 'border-(--color-brand) bg-(--color-brand) text-(--color-text-invert)'
+        ? 'border-transparent bg-(--color-brand) text-(--color-text-invert)'
         : 'border-(--color-line) text-(--color-text-muted)',
     ]}
   >
