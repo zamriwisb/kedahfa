@@ -47,7 +47,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
               <h3 class="mb-3 text-lg text-(--color-text-muted)">{group.heading}</h3>
               <div class="grid gap-4 sm:grid-cols-2">
                 {group.matches.map((match) => (
-                  <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+                  <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} now={now} />
                 ))}
               </div>
             </div>
@@ -64,7 +64,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
           <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">Awaiting Result</h2>
           <div class="grid gap-4 sm:grid-cols-2">
             {awaiting.map((match) => (
-              <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+              <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} now={now} />
             ))}
           </div>
         </section>
@@ -77,7 +77,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
           <h2 class="mb-4 text-sm tracking-[0.3em] text-(--color-brand)">Postponed</h2>
           <div class="grid gap-4 sm:grid-cols-2">
             {postponed.map((match) => (
-              <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+              <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} now={now} />
             ))}
           </div>
         </section>
@@ -93,7 +93,7 @@ const competitions = [...new Set(matches.map((m) => m.competition))].map((compet
               <h3 class="mb-3 text-lg text-(--color-text-muted)">{group.heading}</h3>
               <div class="grid gap-4 sm:grid-cols-2">
                 {group.matches.map((match) => (
-                  <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} />
+                  <MatchRow match={match} teamsBySlug={teamsBySlug} clubSlug={CLUB_SLUG} now={now} />
                 ))}
               </div>
             </div>

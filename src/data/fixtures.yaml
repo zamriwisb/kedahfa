@@ -24,6 +24,17 @@
 #   away: imigresen-ii
 #   status: scheduled              # scheduled | finished | postponed
 #
+# An upcoming HOME fixture may also offer actions. Both are optional, and both
+# are a site-relative path or an https:// URL. They render only while the
+# match is still ahead, and never on an away fixture — an away one carrying
+# either fails the build:
+#
+#   tickets: https://tickets.example.com/kedah-imigresen
+#   stream: https://ppv.example.com/kedah-imigresen
+#
+# !! The two fixtures below currently carry https://example.com placeholders.
+# !! Replace them with the club's real ticketing and PPV URLs before launch.
+#
 # Finished matches carry a score. Scheduled and postponed matches must not:
 #
 #   status: finished
@@ -40,6 +51,8 @@
   home: kedah
   away: imigresen-ii
   status: scheduled
+  tickets: https://example.com/tickets/kedah-imigresen
+  stream: https://example.com/ppv/kedah-imigresen
 
 - id: 2026-09-06-negeri-sembilan-ii-a
   competition: A1 Semi-Pro League
@@ -58,6 +71,8 @@
   home: kedah
   away: armed-forces
   status: scheduled
+  tickets: https://example.com/tickets/kedah-armed-forces
+  stream: https://example.com/ppv/kedah-armed-forces
 
 - id: 2026-09-25-kelantan-city-a
   competition: A1 Semi-Pro League

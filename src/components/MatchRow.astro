@@ -2,16 +2,19 @@
 import type { Team } from '../lib/content';
 import { outcomeFor, type Match } from '../lib/fixtures';
 import { formatKickoffTime, formatMatchDate } from '../lib/dates';
+import MatchActions from './MatchActions.astro';
 
 interface Props {
   match: Match;
   teamsBySlug: Map<string, Team>;
   clubSlug: string;
+  /** Build time, used to decide whether this match can still be sold to. */
+  now: Date;
   /** The next upcoming match is inverted to the brand green, per the reference. */
   highlight?: boolean;
 }
 
-const { match, teamsBySlug, clubSlug, highlight = false } = Astro.props;
+const { match, teamsBySlug, clubSlug, now, highlight = false } = Astro.props;
 
 const home = teamsBySlug.get(match.home);
 const away = teamsBySlug.get(match.away);
@@ -138,4 +141,6 @@ const OUTCOME_LABELS: Record<string, string> = { W: 'Win', D: 'Draw', L: 'Loss' 
       )
     }
   </div>
+
+  <MatchActions match={match} clubSlug={clubSlug} now={now} highlight={highlight} />
 </div>

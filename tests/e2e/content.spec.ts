@@ -83,3 +83,27 @@ test('the RSS feed is served and lists articles', async ({ request }) => {
   expect(response.status()).toBe(200);
   expect(await response.text()).toContain('<item>');
 });
+
+test('an upcoming home fixture offers tickets and the PPV stream', async ({ page }) => {
+  await page.goto('/');
+
+  const tickets = page.getByRole('link', { name: /^Buy Ticket/ }).first();
+  await expect(tickets).toBeVisible();
+  // The seeded links are off-site, so they must open in a new tab and say so.
+  await expect(tickets).toHaveAttribute('target', '_blank');
+  await expect(tickets).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(tickets).toHaveAccessibleName(/opens in a new tab/);
+
+  await expect(page.getByRole('link', { name: /^Watch Online/ }).first()).toBeVisible();
+});
+
+test('an away fixture offers no ticket or stream actions', async ({ page }) => {
+  await page.goto('/fixtures');
+
+  // The first away fixture of the season, at Stadium Tampin. Its card is
+  // rendered by the same component as the home ones, so this is the assertion
+  // that proves the home-only rule reaches the page and not just the tests.
+  const away = page.locator('[data-competition]').filter({ hasText: 'Stadium Tampin' }).first();
+  await expect(away).toBeVisible();
+  await expect(away.locator('[data-match-actions]')).toHaveCount(0);
+});

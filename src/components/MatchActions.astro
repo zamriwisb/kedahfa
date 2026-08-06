@@ -1,0 +1,75 @@
+---
+import { sellableMatch, type Match } from '../lib/fixtures';
+
+interface Props {
+  match: Match;
+  clubSlug: string;
+  now: Date;
+  /** The next-match card inverts to brand green; the outlined button follows it. */
+  highlight?: boolean;
+}
+
+const { match, clubSlug, now, highlight = false } = Astro.props;
+
+interface Action {
+  key: 'tickets' | 'stream';
+  href: string;
+  label: string;
+}
+
+// Two independent conditions, deliberately kept apart. sellableMatch answers
+// "may this match carry actions at all" (upcoming, at home); the URLs answer
+// "is there anywhere to send someone". A match that passes the first and
+// fails the second renders nothing at all rather than an empty bar.
+const candidates: { key: Action['key']; href: string | undefined; label: string }[] = [
+  { key: 'tickets', href: match.tickets, label: 'Buy Ticket' },
+  { key: 'stream', href: match.stream, label: 'Watch Online (PPV)' },
+];
+
+const actions: Action[] = sellableMatch(match, clubSlug, now)
+  ? candidates.filter((c): c is Action => c.href !== undefined)
+  : [];
+
+// The schema guarantees only two shapes reach here: a site-relative path or
+// an https:// URL. Only the second leaves the site, so only it opens a tab.
+const isExternal = (href: string) => href.startsWith('https://');
+
+const PRIMARY = 'bg-(--color-action) text-(--color-text-invert) hover:bg-(--color-action-deep)';
+
+// The outlined button has to read against two surfaces. On white,
+// --color-action is 6.66:1 as text and comfortably clears the 3:1 WCAG 1.4.11
+// asks of the border. On the inverted green card it would not, so the
+// invert-white pair CardCarousel already uses on green takes over there.
+const SECONDARY = highlight
+  ? 'border border-(--color-text-invert)/60 text-(--color-text-invert) hover:bg-(--color-text-invert) hover:text-(--color-brand-panel)'
+  : 'border border-(--color-action) text-(--color-action) hover:bg-(--color-action) hover:text-(--color-text-invert)';
+---
+
+{
+  actions.length > 0 && (
+    <div
+      class:list={[
+        'grid gap-2 px-4 py-3',
+        actions.length > 1 ? 'grid-cols-2' : 'grid-cols-1',
+        highlight ? 'bg-(--color-brand-deep)' : 'bg-(--color-surface)',
+      ]}
+      data-match-actions
+    >
+      {actions.map((action) => (
+        <a
+          href={action.href}
+          data-action={action.key}
+          target={isExternal(action.href) ? '_blank' : undefined}
+          rel={isExternal(action.href) ? 'noopener noreferrer' : undefined}
+          class:list={[
+            'inline-flex min-h-11 items-center justify-center rounded-(--radius-card) px-3 py-2 text-center font-display text-xs leading-tight tracking-[0.08em] transition-colors',
+            action.key === 'tickets' ? PRIMARY : SECONDARY,
+          ]}
+        >
+          {action.label}
+          {isExternal(action.href) && <span class="sr-only"> (opens in a new tab)</span>}
+        </a>
+      ))}
+    </div>
+  )
+}

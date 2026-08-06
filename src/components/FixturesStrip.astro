@@ -65,6 +65,7 @@ const strip: Match[] = [...past.slice().reverse(), ...upcoming.slice(0, 4)];
                 match={match}
                 teamsBySlug={teamsBySlug}
                 clubSlug={clubSlug}
+                now={now}
                 highlight={next?.id === match.id}
               />
             </li>
