@@ -10,6 +10,7 @@ import {
   assertNoDuplicateNewsIds,
   assertPublicAssetsExist,
   assertReferencesResolve,
+  assertTicketLinksAreHomeOnly,
   assertUniqueSquadNumbers,
 } from './validate';
 
@@ -221,6 +222,7 @@ async function build(): Promise<SiteData> {
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 
   assertUniqueSquadNumbers(squad);
+  assertTicketLinksAreHomeOnly(matches, CLUB_SLUG);
 
   // Astro's reference() does not check existence, so do it here — this is the
   // only place that holds every collection at once.

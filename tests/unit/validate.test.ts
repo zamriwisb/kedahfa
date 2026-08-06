@@ -7,6 +7,7 @@ import {
   assertNoDuplicateNewsIds,
   assertPublicAssetsExist,
   assertReferencesResolve,
+  assertTicketLinksAreHomeOnly,
   assertUniqueSquadNumbers,
 } from '../../src/lib/validate';
 
@@ -214,5 +215,67 @@ describe('assertNoDuplicateNewsIds', () => {
     writeArticle(dir, 'transfer-window-closes.md');
     writeArticle(dir, 'stadium-redevelopment.md');
     expect(() => assertNoDuplicateNewsIds(dir)).not.toThrow();
+  });
+});
+
+describe('assertTicketLinksAreHomeOnly', () => {
+  it('accepts a home fixture carrying both links', () => {
+    expect(() =>
+      assertTicketLinksAreHomeOnly(
+        [
+          {
+            id: '2026-08-29-imigresen-ii-h',
+            home: 'kedah',
+            tickets: 'https://example.com/tickets',
+            stream: 'https://example.com/ppv',
+          },
+        ],
+        'kedah',
+      ),
+    ).not.toThrow();
+  });
+
+  it('accepts an away fixture carrying neither', () => {
+    expect(() =>
+      assertTicketLinksAreHomeOnly([{ id: '2026-09-06-ns-a', home: 'negeri-sembilan-ii' }], 'kedah'),
+    ).not.toThrow();
+  });
+
+  it('throws naming the fixture and the tickets field for an away fixture', () => {
+    expect(() =>
+      assertTicketLinksAreHomeOnly(
+        [{ id: '2026-09-06-ns-a', home: 'negeri-sembilan-ii', tickets: '/tickets' }],
+        'kedah',
+      ),
+    ).toThrow(/2026-09-06-ns-a: tickets/);
+  });
+
+  it('throws naming the stream field for an away fixture', () => {
+    expect(() =>
+      assertTicketLinksAreHomeOnly(
+        [{ id: '2026-09-06-ns-a', home: 'negeri-sembilan-ii', stream: '/watch' }],
+        'kedah',
+      ),
+    ).toThrow(/2026-09-06-ns-a: stream/);
+  });
+
+  it('names both fields when an away fixture carries both', () => {
+    expect(() =>
+      assertTicketLinksAreHomeOnly(
+        [
+          {
+            id: '2026-09-06-ns-a',
+            home: 'negeri-sembilan-ii',
+            tickets: '/tickets',
+            stream: '/watch',
+          },
+        ],
+        'kedah',
+      ),
+    ).toThrow(/2026-09-06-ns-a: tickets, stream/);
+  });
+
+  it('accepts an empty schedule', () => {
+    expect(() => assertTicketLinksAreHomeOnly([], 'kedah')).not.toThrow();
   });
 });

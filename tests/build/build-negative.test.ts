@@ -62,6 +62,18 @@ function withFixtureEntry(entry: string): (text: string) => string {
         text.replace(/\n*$/, '\n') + entry;
 }
 
+/** An away fixture, for the guard that only home matches may sell tickets. */
+const AWAY_FIXTURE = [
+  '- id: 2026-08-09-jdt-ii-a',
+  '  competition: A1 Semi-Pro League',
+  '  date: 2026-08-09T20:45:00+08:00',
+  '  venue: Sultan Ibrahim Stadium',
+  '  home: jdt-ii',
+  '  away: kedah',
+  '  status: scheduled',
+  '',
+].join('\n');
+
 interface BuildResult {
   status: number;
   output: string;
@@ -308,6 +320,28 @@ describe('the real build rejects bad content', () => {
           expect(output).toMatch(
             /A fixture stream URL must be a site-relative path like "\/watch" or an absolute https:\/\/ URL\./,
           );
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
+
+  it(
+    'fails an away fixture that carries a tickets link',
+    () => {
+      withMutatedFile(
+        'src/data/fixtures.yaml',
+        withFixtureEntry(
+          AWAY_FIXTURE.replace(
+            '  status: scheduled\n',
+            '  status: scheduled\n  tickets: https://example.com/tickets\n',
+          ),
+        ),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(/only sold for home matches/);
+          expect(output).toMatch(/2026-08-09-jdt-ii-a: tickets/);
         },
       );
     },

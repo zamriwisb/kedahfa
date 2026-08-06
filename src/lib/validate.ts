@@ -148,3 +148,38 @@ export function assertReferencesResolve(
       `Known ${label}: ${[...knownIds].sort().join(', ')}`,
   );
 }
+
+export interface TicketLink {
+  id: string;
+  /** The home team's slug. */
+  home: string;
+  tickets?: string;
+  stream?: string;
+}
+
+/**
+ * Tickets and the pay-per-view stream for an away match are the host club's to
+ * sell, so MatchActions never renders them on one. Silently dropping a URL an
+ * editor deliberately pasted is the confusing failure mode — this turns it
+ * into a build error naming the fixture and the field.
+ *
+ * This lives here rather than in the fixtures Zod schema because the schema
+ * validates one entry at a time and has no business knowing which club the
+ * site belongs to. CLUB_SLUG lives in content.ts, which is what calls this.
+ */
+export function assertTicketLinksAreHomeOnly(matches: TicketLink[], clubSlug: string): void {
+  const offenders: string[] = [];
+  for (const match of matches) {
+    if (match.home === clubSlug) continue;
+    const fields: string[] = [];
+    if (match.tickets !== undefined) fields.push('tickets');
+    if (match.stream !== undefined) fields.push('stream');
+    if (fields.length > 0) offenders.push(`  ${match.id}: ${fields.join(', ')}`);
+  }
+
+  if (offenders.length === 0) return;
+  throw new Error(
+    `Tickets and streams are only sold for home matches, but these away fixtures ` +
+      `in src/data/fixtures.yaml carry them:\n${offenders.join('\n')}`,
+  );
+}
