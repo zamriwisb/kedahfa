@@ -43,6 +43,12 @@ const socialImage = image ? new URL(image, Astro.site) : undefined;
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {/* Declared rather than left to the browser's implicit /favicon.ico probe,
+        so the Apple icon is found at all. Both are the club crest, but the
+        Apple one is drawn on white: iOS composites a touch icon onto black,
+        which would swallow the crest's dark green shield. */}
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="alternate" type="application/rss+xml" title={`${club.name} news`} href="/rss.xml" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
