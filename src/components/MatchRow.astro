@@ -100,7 +100,12 @@ const OUTCOME_LABELS: Record<string, string> = { W: 'Win', D: 'Draw', L: 'Loss' 
         outcome && (
           <span
             class:list={[
-              'flex h-5 w-5 items-center justify-center rounded-full text-[0.6rem] text-white',
+              // `relative` gives the sr-only span below a containing block
+              // here rather than the initial containing block — see
+              // MatchActions.astro's comment on its button anchor for why
+              // that matters inside this same horizontally-scrolled
+              // fixtures track. Do not drop this class.
+              'relative flex h-5 w-5 items-center justify-center rounded-full text-[0.6rem] text-white',
               OUTCOME_STYLES[outcome],
             ]}
           >
