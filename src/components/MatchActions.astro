@@ -62,7 +62,16 @@ const SECONDARY = highlight
           target={isExternal(action.href) ? '_blank' : undefined}
           rel={isExternal(action.href) ? 'noopener noreferrer' : undefined}
           class:list={[
-            'inline-flex min-h-11 items-center justify-center rounded-(--radius-card) px-3 py-2 text-center font-display text-xs leading-tight tracking-[0.08em] transition-colors',
+            // `relative` makes this anchor the containing block for the
+            // sr-only "(opens in a new tab)" span below, which Tailwind
+            // positions absolutely. Without it, the span's containing block
+            // is the initial containing block, not this button — and inside
+            // the horizontally-scrolled fixtures track, an off-screen card's
+            // absolutely-positioned descendant is clipped by nothing on its
+            // containing-block chain (the track's overflow-x: auto does not
+            // apply to it). That widened the document and made mobile Chrome
+            // shrink-to-fit the whole page. Do not drop this class.
+            'relative inline-flex min-h-11 items-center justify-center rounded-(--radius-card) px-3 py-2 text-center font-display text-xs leading-tight tracking-[0.08em] transition-colors',
             action.key === 'tickets' ? PRIMARY : SECONDARY,
           ]}
         >

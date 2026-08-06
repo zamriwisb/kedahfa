@@ -29,3 +29,16 @@ test.describe('the content column aligns with the header', () => {
     });
   }
 });
+
+test('the fixture cards do not widen the document on mobile', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'layout-viewport check is mobile-only');
+  await page.goto('/');
+  // An absolutely-positioned descendant whose containing block escapes the
+  // carousel's overflow clip would widen the document and make Chrome
+  // shrink-to-fit the whole page — see MatchActions' `relative`.
+  const { inner, client } = await page.evaluate(() => ({
+    inner: window.innerWidth,
+    client: document.documentElement.clientWidth,
+  }));
+  expect(inner).toBe(client);
+});
