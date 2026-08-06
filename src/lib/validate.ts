@@ -10,9 +10,9 @@ import { load } from 'js-yaml';
 // "slug" is set (astro/dist/content/loaders/glob.js's generateIdDefault).
 // Importing the same function Astro uses, rather than reimplementing
 // slugification, is what keeps this check's ids identical to Astro's —
-// verified against the three real articles in src/content/news/: this
-// produces "academy-trials-open", "kedah-edge-selangor" and
-// "new-signing-announced", exactly the routes `astro build` emits.
+// verified against the real articles in src/content/news/: this produces
+// "akmal-rizal-named-head-coach", "ibrahima-barry-joins-kedah" and the rest,
+// exactly the routes `astro build` emits.
 import { slug as githubSlug } from 'github-slugger';
 
 /**

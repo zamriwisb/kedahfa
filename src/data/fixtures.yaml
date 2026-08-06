@@ -28,7 +28,7 @@
 #
 #   status: finished
 #   score: { home: 3, away: 2 }
-#   report: kedah-edge-selangor    # optional, a slug from src/content/news/
+#   report: kedah-edge-imigresen   # optional, a slug from src/content/news/
 
 # --- First round -------------------------------------------------------
 

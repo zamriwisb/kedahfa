@@ -186,8 +186,8 @@ describe('the real build rejects bad content', () => {
     'fails a news article date with a time component',
     () => {
       withMutatedFile(
-        'src/content/news/kedah-edge-selangor.md',
-        (text) => text.replace('date: 2026-07-19', 'date: 2026-07-19T23:30:00'),
+        'src/content/news/ibrahima-barry-joins-kedah.md',
+        (text) => text.replace('date: 2026-08-05', 'date: 2026-08-05T23:30:00'),
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);
@@ -240,7 +240,7 @@ describe('the real build rejects bad content', () => {
     () => {
       withMutatedFile(
         'src/data/slides.yaml',
-        (text) => text.replace('href: /news/academy-trials-open', 'href: //evil.com'),
+        (text) => text.replace('href: /news/ibrahima-barry-joins-kedah', 'href: //evil.com'),
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);
