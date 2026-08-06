@@ -31,8 +31,8 @@ const teams = readYaml<TeamRow>('src/data/teams.yaml');
 const standings = readYaml<StandingsRow>('src/data/standings.yaml');
 
 describe('src/data/teams.yaml', () => {
-  it('lists the twelve A1 Semi-Pro 2026/27 clubs', () => {
-    expect(teams).toHaveLength(12);
+  it('lists the fourteen A1 Semi-Pro 2026/27 clubs', () => {
+    expect(teams).toHaveLength(14);
   });
 
   it('keeps Kedah on the slug the club pages and homepage table key off', () => {

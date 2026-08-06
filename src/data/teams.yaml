@@ -1,11 +1,11 @@
-# The twelve clubs of the A1 Semi-Pro League 2026/27.
+# The fourteen clubs of the A1 Semi-Pro League 2026/27.
 #
 # Crests are monogram placeholders except Kedah's. To swap in a real logo,
 # drop the file into public/images/teams/ and update the crest path below —
 # the build fails if the file is missing.
 #
 # shortName is capped at four characters by the schema, which is why the
-# reserve sides read JDT2/SEL2/NS2 rather than the broadcast "JDT II".
+# reserve sides read JDT2/SEL2/NS2/IMG2 rather than the broadcast "JDT II".
 - id: jdt-ii
   name: Johor Darul Ta'zim II
   shortName: JDT2
@@ -58,3 +58,11 @@
   name: Bunga Raya FC
   shortName: BRFC
   crest: /images/teams/bunga-raya.svg
+- id: aak-unisel
+  name: AAK Unisel FC
+  shortName: AAKU
+  crest: /images/teams/aak-unisel.svg
+- id: imigresen-ii
+  name: Imigresen FC II
+  shortName: IMG2
+  crest: /images/teams/imigresen-ii.svg

@@ -16,11 +16,11 @@ test('the standings table highlights the club row', async ({ page }) => {
   await expect(page.getByRole('rowheader', { name: /Kedah/ })).toBeVisible();
 });
 
-test('the standings table lists all twelve clubs, zeroed for the pre-season', async ({ page }) => {
+test('the standings table lists all fourteen clubs, zeroed for the pre-season', async ({ page }) => {
   await page.goto('/standings');
 
   // One rowheader per club; the header row contributes none.
-  await expect(page.getByRole('rowheader')).toHaveCount(12);
+  await expect(page.getByRole('rowheader')).toHaveCount(14);
 
   // Last cell of a row is its points total.
   // "Kedah FA" is the teams.yaml name, which is what the table renders.
