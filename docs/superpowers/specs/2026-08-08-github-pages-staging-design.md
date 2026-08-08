@@ -57,12 +57,19 @@ a source of inbound links to the pages it references.
 ### The staging flag lives in `src/lib/site.ts`
 
 ```ts
-export const isStaging = process.env.SITE_ENV === 'staging';
+export function isStaging(): boolean {
+  return process.env.SITE_ENV === 'staging';
+}
 ```
 
 One named export rather than an inline `process.env` read in the layout: it
 gives the flag a single definition, a place for the comment explaining why it
 exists, and something a unit test can import directly.
+
+A function rather than a `const`: a const captures `process.env` once at module
+load, so testing both branches would need `vi.resetModules()` and a dynamic
+re-import for every case. A function reads the variable when called, which
+makes the test a plain assignment and assertion.
 
 `process.env` rather than `import.meta.env`: this module is imported only from
 `BaseLayout.astro`'s frontmatter, which for `output: 'static'` runs in Node at
