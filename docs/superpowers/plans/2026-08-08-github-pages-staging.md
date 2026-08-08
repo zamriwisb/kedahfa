@@ -144,12 +144,11 @@ import { beforeAll, describe, expect, it } from 'vitest';
  */
 
 const ROOT = process.cwd();
-const BUILD_TIMEOUT_MS = 120_000;
-// Both builds run inside one beforeAll, so the hook needs room for both.
+// Both builds run inside one beforeAll, so the hook needs room for both. The
+// individual cases only read snapshots and need no timeout of their own.
 const SETUP_TIMEOUT_MS = 240_000;
 
 interface Snapshot {
-  status: number;
   indexHtml: string;
   cname: string | null;
 }
@@ -179,10 +178,15 @@ function buildWith(overrides: Record<string, string>): Snapshot {
 
   const cnamePath = join(ROOT, 'dist', 'CNAME');
   return {
-    status,
     indexHtml: readFileSync(join(ROOT, 'dist', 'index.html'), 'utf-8'),
     cname: existsSync(cnamePath) ? readFileSync(cnamePath, 'utf-8').trim() : null,
   };
+}
+
+/** '' when the build emits no robots.txt, so the assertion always runs. */
+function robotsTxt(): string {
+  const path = join(ROOT, 'dist', 'robots.txt');
+  return existsSync(path) ? readFileSync(path, 'utf-8') : '';
 }
 
 const STAGING_HOST = 'kedahfa.dev-aplikasiniaga.com';
@@ -199,34 +203,23 @@ describe('the build responds to its deploy environment', () => {
     production = buildWith({});
   }, SETUP_TIMEOUT_MS);
 
-  it(
-    'de-indexes a staging build',
-    () => {
-      expect(staging.indexHtml).toMatch(/<meta\s+name="robots"\s+content="noindex, nofollow"\s*\/?>/);
-    },
-    BUILD_TIMEOUT_MS,
-  );
+  it('de-indexes a staging build', () => {
+    expect(staging.indexHtml).toMatch(/<meta\s+name="robots"\s+content="noindex, nofollow"\s*\/?>/);
+  });
 
-  it(
-    'leaves a default build indexable',
-    () => {
-      expect(production.indexHtml).not.toMatch(/noindex/);
-    },
-    BUILD_TIMEOUT_MS,
-  );
+  it('leaves a default build indexable', () => {
+    expect(production.indexHtml).not.toMatch(/noindex/);
+  });
 
   // The mistake this guards: adding robots.txt with `Disallow: /` alongside
   // the meta tag. Disallow stops the crawl that would deliver the noindex, so
   // the two cancel out and the URL can still be indexed as a bare entry.
-  it(
-    'ships no robots.txt that would block the crawl the noindex depends on',
-    () => {
-      const robots = join(ROOT, 'dist', 'robots.txt');
-      if (!existsSync(robots)) return;
-      expect(readFileSync(robots, 'utf-8')).not.toMatch(/Disallow:\s*\/\s*$/m);
-    },
-    BUILD_TIMEOUT_MS,
-  );
+  //
+  // robotsTxt() returns '' rather than the case early-returning when the file
+  // is absent, so this asserts on every run instead of silently passing.
+  it('ships no robots.txt that would block the crawl the noindex depends on', () => {
+    expect(robotsTxt()).not.toMatch(/Disallow:\s*\/\s*$/m);
+  });
 });
 ```
 
@@ -296,27 +289,19 @@ git commit -m "feat: de-index staging builds"
 Add these two cases inside the existing `describe` block in `tests/build/build-env.test.ts`, after the robots.txt case:
 
 ```ts
-  it(
-    'points canonical and og:url at the host actually being served',
-    () => {
-      expect(staging.indexHtml).toMatch(
-        new RegExp(`<link rel="canonical" href="https://${STAGING_HOST}/"`),
-      );
-      expect(staging.indexHtml).toMatch(
-        new RegExp(`property="og:url" content="https://${STAGING_HOST}/"`),
-      );
-    },
-    BUILD_TIMEOUT_MS,
-  );
+  it('points canonical and og:url at the host actually being served', () => {
+    expect(staging.indexHtml).toMatch(
+      new RegExp(`<link rel="canonical" href="https://${STAGING_HOST}/"`),
+    );
+    expect(staging.indexHtml).toMatch(
+      new RegExp(`property="og:url" content="https://${STAGING_HOST}/"`),
+    );
+  });
 
-  it(
-    'falls back to the production domain when SITE_URL is unset',
-    () => {
-      expect(production.indexHtml).toMatch(/<link rel="canonical" href="https:\/\/kedahfa\.com\//);
-      expect(production.indexHtml).not.toMatch(new RegExp(STAGING_HOST));
-    },
-    BUILD_TIMEOUT_MS,
-  );
+  it('falls back to the production domain when SITE_URL is unset', () => {
+    expect(production.indexHtml).toMatch(/<link rel="canonical" href="https:\/\/kedahfa\.com\//);
+    expect(production.indexHtml).not.toMatch(new RegExp(STAGING_HOST));
+  });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -358,7 +343,7 @@ git commit -m "feat: drive the site URL from SITE_URL, defaulting to production"
 - Modify: `tests/build/build-env.test.ts` (add one case)
 
 **Interfaces:**
-- Consumes: `staging`, `STAGING_HOST` from Task 2. The `cname` field on `Snapshot` already exists from Task 2 and is unused until now.
+- Consumes: `staging`, `STAGING_HOST`, and the `cname` field on `Snapshot` — all defined in Task 2, where `cname` is populated but not yet asserted on.
 - Produces: nothing new.
 
 **Context:** GitHub Pages reads `CNAME` from the published artifact to bind a custom domain. Astro copies `public/` verbatim into `dist/`. Holding it in the repo rather than only in the Settings UI keeps the binding version-controlled and able to survive a Settings reset.
@@ -371,13 +356,9 @@ Add this case inside the existing `describe` block in `tests/build/build-env.tes
   // Pages reads this file out of the published artifact to bind the custom
   // domain. In public/ it is copied verbatim into dist/; anywhere else and the
   // domain silently reverts to zamriwisb.github.io on the next deploy.
-  it(
-    'publishes the custom domain binding into dist',
-    () => {
-      expect(staging.cname).toBe(STAGING_HOST);
-    },
-    BUILD_TIMEOUT_MS,
-  );
+  it('publishes the custom domain binding into dist', () => {
+    expect(staging.cname).toBe(STAGING_HOST);
+  });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
