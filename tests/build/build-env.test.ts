@@ -102,10 +102,10 @@ describe('the build responds to its deploy environment', () => {
 
   it('points canonical and og:url at the host actually being served', () => {
     expect(staging.indexHtml).toMatch(
-      new RegExp(`<link rel="canonical" href="https://${STAGING_HOST}/"`),
+      new RegExp(`<link rel="canonical" href="https://${STAGING_HOST.replace(/\./g, '\\.')}/"`),
     );
     expect(staging.indexHtml).toMatch(
-      new RegExp(`property="og:url" content="https://${STAGING_HOST}/"`),
+      new RegExp(`property="og:url" content="https://${STAGING_HOST.replace(/\./g, '\\.')}/"`),
     );
   });
 
