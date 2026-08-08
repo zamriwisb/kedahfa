@@ -200,6 +200,7 @@ async function build(): Promise<SiteData> {
       id: e.id,
       image: e.data.image,
       imageAlt: e.data.imageAlt,
+      objectPosition: e.data.objectPosition,
       eyebrow: e.data.eyebrow,
       title: e.data.title,
       href: e.data.href,

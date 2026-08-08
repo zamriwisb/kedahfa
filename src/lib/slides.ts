@@ -4,6 +4,15 @@ export interface Slide {
   image: string;
   /** Describes the photo, not the headline. Never optional. */
   imageAlt: string;
+  /**
+   * Where `object-cover` anchors the crop when the hero box and the source
+   * disagree on aspect — which they always do below `xl`, where the box is
+   * taller than it is wide. Omit it for a centred subject; set it for an
+   * image composed off-centre, such as an announcement graphic whose player
+   * stands to one side. A closed set rather than a free CSS string: the value
+   * lands in a style attribute, so the schema's enum is the injection guard.
+   */
+  objectPosition?: 'top' | 'right' | 'bottom' | 'left' | 'center';
   /** Short line above the headline — a date or a label. */
   eyebrow?: string;
   title: string;

@@ -4,9 +4,14 @@
 # The hero crops to 16:9 (1600x900, object-cover in HeroSlider.astro), so a
 # slide image belongs in /images/slides/ already cut to that ratio rather
 # than pointing straight at a portrait article photo — centred in a 16:9 box,
-# a portrait subject loses their head. league-confirmed is the exception: its
-# source is a poster graphic whose own layout cannot survive a crop, so it
-# still points at the article image and leans on the hero's lg:object-top.
+# a portrait subject loses their head. Every slide below now holds to that;
+# league-confirmed used to be the exception, pointing at its portrait article
+# poster, and was given a 16:9 cut of its own instead.
+#
+# Ratio is not the whole story: a source cut to 16:9 can still be composed
+# off-centre, and below `xl` the hero box is TALLER than it is wide, so
+# object-cover shows only the middle band of it. Set `objectPosition` on a
+# slide whose subject does not sit in the middle.
 - id: top-three-target
   image: /images/slides/akmal-rizal-targets-top-three.jpg
   imageAlt: Akmal Rizal in a red Kedah training shirt and cap directing a session, with a member of his coaching staff alongside him
@@ -16,16 +21,21 @@
   order: 1
 
 - id: new-signing
-  image: /images/slides/ibrahima-barry-signing.jpg
-  imageAlt: Ibrahima Barry smiling in the yellow Kedah home shirt against a yellow backdrop
+  image: /images/slides/ibrahima-barry-signing.webp
+  imageAlt: A Kedah FA announcement graphic headed "Welcome New Blood", with the club crest and the squad number 80, showing Ibrahima Barry smiling in the yellow and green home shirt and pointing at the crest on his chest
+  # An announcement graphic, not a portrait: Barry stands about 72% across,
+  # so a centred crop cuts him at the frame edge on a phone. Anchoring right
+  # keeps the player and his squad number; what it gives up is the wordmark,
+  # which the headline underneath already says in words.
+  objectPosition: right
   eyebrow: Transfer news
   title: Ibrahima Barry joins from Brothers Union
   href: /news/ibrahima-barry-joins-kedah
   order: 2
 
 - id: league-confirmed
-  image: /images/news/pasukan-bertanding.jpeg
-  imageAlt: A green graphic titled "14 Pasukan Liga A1 Semi-Pro 2026/2027" showing the crest and name of all fourteen competing clubs
+  image: /images/slides/14-pasukan-bertanding.webp
+  imageAlt: A green graphic headed "14 Pasukan Liga A1 Semi-Pro 2026/2027" beside the Liga A1 Semi-Pro logo, laying out the crest and name of all fourteen competing clubs in a grid
   eyebrow: A1 Semi-Pro League
   title: Fourteen teams confirmed for 2026/27
   href: /news/a1-semi-pro-league-2026-27-confirmed

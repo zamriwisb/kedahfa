@@ -3,8 +3,8 @@ title: Ibrahima Barry joins from Brothers Union
 date: 2026-08-05
 category: transfer
 excerpt: The Guinean centre-back arrives on a free transfer from Bangladeshi side Brothers Union ahead of the season opener.
-image: /images/news/brahim-new-signing.jpeg
-imageAlt: Ibrahima Barry smiling in the yellow Kedah home shirt against a yellow backdrop
+image: /images/news/ibrahima-barry-signing.webp
+imageAlt: A Kedah FA announcement graphic headed "Welcome New Blood", with the club crest and the squad number 80, showing Ibrahima Barry smiling in the yellow and green home shirt and pointing at the crest on his chest
 author: Media Team
 ---
 

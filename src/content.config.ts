@@ -278,6 +278,10 @@ const slides = defineCollection({
       image: z.string().startsWith('/images/'),
       // Required, not optional: accessibility must not be droppable by omission.
       imageAlt: z.string().min(1),
+      // An enum and not z.string(): HeroSlider interpolates this into a style
+      // attribute, so a closed set is what keeps a YAML typo from becoming
+      // arbitrary CSS. See Slide.objectPosition for when a slide needs one.
+      objectPosition: z.enum(['top', 'right', 'bottom', 'left', 'center']).optional(),
       eyebrow: z.string().optional(),
       title: z.string().min(1),
       // See siteOrHttpsUrl() above for what counts as valid and why.

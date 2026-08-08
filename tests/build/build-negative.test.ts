@@ -288,6 +288,30 @@ describe('the real build rejects bad content', () => {
   );
 
   it(
+    'fails a slide objectPosition that is not one of the anchors CSS understands',
+    () => {
+      withMutatedFile(
+        'src/data/slides.yaml',
+        // objectPosition is interpolated into a style attribute, so the schema
+        // is the only thing standing between a YAML typo and arbitrary CSS on
+        // the page. An enum, not a free string, is what makes that safe — this
+        // case is what proves the enum is still there.
+        (text) => text.replace('objectPosition: right', 'objectPosition: diagonal'),
+        () => {
+          const { status, output } = runBuild();
+          expect(status).not.toBe(0);
+          expect(output).toMatch(/objectPosition/);
+          // Zod names the permitted set rather than echoing the bad value, so
+          // the anchors are what this asserts on. That is the stronger check
+          // anyway: it fails if anyone widens the enum back to a bare string.
+          expect(output).toMatch(/"top"\|"right"\|"bottom"\|"left"\|"center"/);
+        },
+      );
+    },
+    BUILD_TIMEOUT_MS,
+  );
+
+  it(
     'fails a fixture tickets URL that is protocol-relative rather than site-relative or https',
     () => {
       withMutatedFile(

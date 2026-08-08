@@ -44,62 +44,102 @@ const total = slides.length;
 
             return (
               <li
-                class="hero-slider__slide relative flex min-h-[420px] w-full shrink-0 snap-start flex-col justify-end overflow-hidden sm:min-h-[540px] lg:min-h-[620px]"
+                class="hero-slider__slide relative flex min-h-[420px] w-full shrink-0 snap-start flex-col justify-end overflow-hidden sm:min-h-[540px] lg:min-h-[620px] xl:chevron-texture xl:grid xl:min-h-[max(440px,calc(100vw/3.5))] xl:bg-(--color-brand-deep)"
                 aria-roledescription="slide"
                 aria-label={`${index + 1} of ${total}`}
               >
                 {
                   /*
-                   * Slide images are cut to 16:9 upstream, so object-position
-                   * is a no-op for them. It exists for the sources that
-                   * cannot be — league-confirmed's poster graphic — where the
-                   * slide box grows proportionally wider with the viewport
-                   * and so crops a portrait hardest at desktop widths:
-                   * centred, the 1600x900 box lands below the poster's own
-                   * title. Scoped to lg because below it the box is tall
-                   * enough relative to its width that the subject already
-                   * fits, and top-anchoring there would instead push the
-                   * subject down out of frame.
+                   * Below `xl` the photo lies under the copy and the scrims
+                   * make it legible. At `xl` it stops being a backdrop and
+                   * becomes the third grid column, so it needs no scrim at
+                   * all — and `static` is what releases it from `inset-0`
+                   * without having to unset four offsets.
                    */
                 }
-                <img
-                  src={slide.image}
-                  alt={slide.imageAlt}
-                  width="1600"
-                  height="900"
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  class="absolute inset-0 -z-10 h-full w-full object-cover lg:object-top"
-                />
+                <div class="absolute inset-0 -z-10 xl:relative xl:inset-auto xl:z-auto xl:col-start-3 xl:row-start-1">
+                  {
+                    /*
+                     * `object-top` exists for the one source that cannot be
+                     * cut to 16:9 — league-confirmed's poster is 1350x1688,
+                     * portrait — where a wide box centred on the image lands
+                     * below the poster's own title. It stops at `xl`: the
+                     * split column is ~1.8:1, close enough to the 16:9 the
+                     * other slides are cut to that centring is right again
+                     * and top-anchoring would push subjects out of frame.
+                     *
+                     * A slide that sets `objectPosition` overrides both, at
+                     * every width, because it is inline. That is the intent:
+                     * the field exists for a source whose subject is not in
+                     * the middle, and such a source is off-centre at 390px
+                     * and at 2560px alike. It stays off the other slides —
+                     * absent the field there is no style attribute at all,
+                     * so the classes above keep describing them.
+                     */
+                  }
+                  <img
+                    src={slide.image}
+                    alt={slide.imageAlt}
+                    width="1600"
+                    height="900"
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    class="h-full w-full object-cover lg:object-top xl:absolute xl:inset-0 xl:object-center"
+                    style={slide.objectPosition ? `object-position: ${slide.objectPosition}` : undefined}
+                  />
+                  {
+                    /*
+                     * Two stacked layers, not one gradient: the ramp alone
+                     * left the headline sitting where the scrim was only
+                     * ~76% opaque, measuring ~3.2:1 for white text against a
+                     * bright daytime stadium photo — a WCAG 1.4.3 failure.
+                     * The flat 40% layer puts a floor of darkening across the
+                     * whole photo regardless of what is bright in it, and the
+                     * steeper ramp on top of that floor is what keeps the
+                     * text AA-legible. axe cannot verify this: it resolves a
+                     * text node's effective background from the nearest
+                     * ancestor's CSS background-color, never from a photo or
+                     * a gradient, so this pair has to be checked by eye
+                     * against real photography.
+                     *
+                     * Both go at `xl`, where the copy moves onto solid
+                     * brand-deep and darkening the photo would only mute it.
+                     */
+                  }
+                  <div
+                    aria-hidden="true"
+                    class="absolute inset-0 bg-(--color-brand-ink)/40 xl:hidden"
+                  />
+                  <div
+                    aria-hidden="true"
+                    class="absolute inset-0 bg-gradient-to-t from-(--color-brand-ink) via-(--color-brand-ink)/80 to-transparent xl:hidden"
+                  />
+                </div>
+
                 {
                   /*
-                   * Two stacked layers, not one gradient: the ramp alone (as
-                   * before) left the headline sitting where the scrim was
-                   * only ~76% opaque, measuring ~3.2:1 for white text against
-                   * a bright daytime stadium photo — a WCAG 1.4.3 failure.
-                   * The flat 40%-opacity layer puts a floor of darkening
-                   * across the whole photo regardless of what is bright in
-                   * it, and the steeper ramp on top of that floor is what
-                   * keeps the text AA-legible. axe cannot verify this: it
-                   * resolves a text node's effective background from the
-                   * nearest ancestor's CSS background-color, never from an
-                   * absolutely-positioned photo or gradient, so this pair has
-                   * to be checked by eye against real photography.
+                   * `page-shell` spelled out rather than used: at `xl` this
+                   * sits in grid column 2, and column 1 is exactly the shell's
+                   * own left inset — so the copy keeps the page's left edge
+                   * while the panel itself runs to the viewport edge. Wearing
+                   * the class here would also make this the first
+                   * `main .page-shell` on the homepage at a width the shell
+                   * no longer describes.
                    */
                 }
-                <div aria-hidden="true" class="absolute inset-0 -z-10 bg-(--color-brand-ink)/40" />
-                <div
-                  aria-hidden="true"
-                  class="absolute inset-0 -z-10 bg-gradient-to-t from-(--color-brand-ink) via-(--color-brand-ink)/80 to-transparent"
-                />
-
-                <div class="page-shell relative pb-20 pt-24">
+                <div class="relative mx-auto w-full max-w-(--container-6xl) px-(--spacing-gutter) pb-20 pt-24 xl:col-start-2 xl:row-start-1 xl:mx-0 xl:max-w-none xl:self-center xl:px-0 xl:py-14">
                   {slide.eyebrow && (
                     <p class="text-sm tracking-widest text-(--color-text-invert) font-display">
                       {slide.eyebrow}
                     </p>
                   )}
 
-                  <h2 class="mt-2 max-w-3xl text-4xl leading-[0.95] text-(--color-text-invert) sm:text-6xl lg:text-7xl">
+                  {/*
+                    The measure stops growing at `xl` — it is a fixed 30rem
+                    column from there up — so the headline stops growing with
+                    it. Stepping to 6xl at 2xl only put more type in the same
+                    width and stranded "TOP-" at the end of a line.
+                  */}
+                  <h2 class="mt-2 max-w-3xl text-balance text-4xl leading-[0.95] text-(--color-text-invert) sm:text-6xl lg:text-7xl xl:text-5xl">
                     {slide.href ? (
                       <a
                         href={slide.href}
@@ -131,7 +171,8 @@ const total = slides.length;
 
       {total > 1 && (
         <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10">
-          <div class="page-shell flex justify-end pb-4">
+          {/* Right of the copy below `xl`, under it once the copy has a panel. */}
+          <div class="page-shell flex justify-end pb-4 xl:justify-start">
             <div class="pointer-events-auto flex items-center gap-4" role="group" aria-label="Slideshow controls">
               {
                 /*
@@ -185,6 +226,39 @@ const total = slides.length;
 }
 
 <style>
+  /*
+   * The desktop split, and the only rule here that carries real geometry.
+   *
+   * A fixed height fights a fixed source. The slide box used to stay 620px
+   * tall however wide the viewport got, so a 16:9 photo met a 2.06:1 slot at
+   * 1280 and a 3.10:1 slot at 1920 — `object-cover` answered by throwing away
+   * 43% of the image's height, meaning the bigger the monitor, the harsher the
+   * crop. The three columns below undo that:
+   *
+   *   1  the page shell's own left inset, so the copy keeps the page's left
+   *      edge without the panel having to stop at the shell's right one;
+   *   2  a fixed 30rem measure, so the headline never reflows with viewport;
+   *   3  everything left over, which is where the photo goes.
+   *
+   * Column 3 therefore absorbs all the extra width while `aspect-ratio` grows
+   * the height alongside it, holding the photo box between 1.63:1 and 1.89:1
+   * from 1280 through 2560 against a 16:9 source — a worst case of ~9%, down
+   * from 43%. `min-height` floors it at the narrow end, where the ratio alone
+   * would give a 366px-tall hero.
+   *
+   * `100%` resolves against the grid container, which is the same box
+   * `.page-shell` centres in — using `100vw` would include the scrollbar and
+   * put the copy ~7px off the crest above it.
+   */
+  @media (width >= 80rem) {
+    .hero-slider__slide {
+      grid-template-columns:
+        max(var(--spacing-gutter), calc((100% - var(--container-6xl)) / 2 + var(--spacing-gutter)))
+        minmax(0, 30rem)
+        minmax(0, 1fr);
+    }
+  }
+
   /*
    * Two things Tailwind utilities cannot express cleanly, kept together here:
    * hiding the track's scrollbar (the dashes are the affordance) and styling
