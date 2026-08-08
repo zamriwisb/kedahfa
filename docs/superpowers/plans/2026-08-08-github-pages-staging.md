@@ -151,6 +151,7 @@ const SETUP_TIMEOUT_MS = 240_000;
 interface Snapshot {
   indexHtml: string;
   cname: string | null;
+  robotsTxt: string;
 }
 
 function buildWith(overrides: Record<string, string>): Snapshot {
@@ -179,11 +180,19 @@ function buildWith(overrides: Record<string, string>): Snapshot {
   const cnamePath = join(ROOT, 'dist', 'CNAME');
   return {
     indexHtml: readFileSync(join(ROOT, 'dist', 'index.html'), 'utf-8'),
+    // Captured here, not asserted until Task 4.
     cname: existsSync(cnamePath) ? readFileSync(cnamePath, 'utf-8').trim() : null,
+    robotsTxt: robotsTxt(),
   };
 }
 
-/** '' when the build emits no robots.txt, so the assertion always runs. */
+/**
+ * '' when the build emits no robots.txt, so the assertion always runs.
+ *
+ * Read per build and stored on the Snapshot rather than read at assertion
+ * time: both builds write the same dist/, so a lazy read would only ever see
+ * whichever ran last and the staging guard would never inspect staging.
+ */
 function robotsTxt(): string {
   const path = join(ROOT, 'dist', 'robots.txt');
   return existsSync(path) ? readFileSync(path, 'utf-8') : '';
@@ -211,14 +220,17 @@ describe('the build responds to its deploy environment', () => {
     expect(production.indexHtml).not.toMatch(/noindex/);
   });
 
-  // The mistake this guards: adding robots.txt with `Disallow: /` alongside
-  // the meta tag. Disallow stops the crawl that would deliver the noindex, so
-  // the two cancel out and the URL can still be indexed as a bare entry.
+  // The mistake this guards: making src/pages/robots.txt.ts conditional on
+  // isStaging() and emitting `Disallow: /` there, alongside the meta tag.
+  // Disallow stops the crawl that would deliver the noindex, so the two cancel
+  // out and the URL can still be indexed as a bare entry.
   //
-  // robotsTxt() returns '' rather than the case early-returning when the file
-  // is absent, so this asserts on every run instead of silently passing.
+  // Asserts on BOTH snapshots. The regression it guards would be staging-only,
+  // and both builds write the same dist/ — so checking a single lazily-read
+  // dist/robots.txt would only ever see production, the build that ran last.
   it('ships no robots.txt that would block the crawl the noindex depends on', () => {
-    expect(robotsTxt()).not.toMatch(/Disallow:\s*\/\s*$/m);
+    expect(staging.robotsTxt).not.toMatch(/Disallow:\s*\/\s*$/m);
+    expect(production.robotsTxt).not.toMatch(/Disallow:\s*\/\s*$/m);
   });
 });
 ```

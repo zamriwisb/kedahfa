@@ -42,7 +42,12 @@ generated URLs honest.
 <meta name="robots" content="noindex, nofollow" />
 ```
 
-There is no `robots.txt` with `Disallow: /`, and adding one would be a mistake.
+The site already serves a `robots.txt` from the generated route
+`src/pages/robots.txt.ts`, which emits `Allow: /` plus a `Sitemap:` line and is
+environment-independent. That stays exactly as it is. What must never be added
+is a `Disallow: /`, and the reason is worth stating because the instinct runs
+the other way.
+
 `Disallow` stops a crawler from **fetching** the page, which means it never
 reads the `noindex` tag. A URL that is disallowed but linked from somewhere
 else can still be indexed as a bare entry with no title or description, and
