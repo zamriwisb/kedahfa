@@ -182,7 +182,14 @@ describe('the real build rejects bad content', () => {
       // the regression is invisible to this suite.
       withMutatedFile(
         'src/data/squad.yaml',
-        (text) => text.replace('dateOfBirth: 1995-03-11', 'dateOfBirth: 11/03/1995'),
+        // Matches the "dateOfBirth:" key rather than a specific player's
+        // value: every player currently carries the same placeholder
+        // 2000-01-01 (see the file's header comment), and pinning a literal
+        // value here failed on withMutatedFile's "did not change anything"
+        // guard the moment the real squad replaced the seed data that used
+        // to hold a distinct value. A key-anchored regex survives that.
+        // Only the first occurrence is replaced, so exactly one player breaks.
+        (text) => text.replace(/^  dateOfBirth: .*$/m, '  dateOfBirth: 11/03/1995'),
         () => {
           const { status, output } = runBuild();
           expect(status).not.toBe(0);
