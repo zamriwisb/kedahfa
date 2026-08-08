@@ -1,74 +1,207 @@
-# PLACEHOLDER SQUAD. Names are fictional; replace with the real squad before launch.
-- id: arif-hakimi
-  name: Arif Hakimi
-  number: 1
+# Real 2026/27 squad: names, shirt numbers and positions are taken from the
+# club's official squad graphic.
+#
+# PLACEHOLDER DATA — dateOfBirth, heightCm and joined were NOT on that graphic.
+# Every player below carries the same filler values (2000-01-01 / 175 cm /
+# joined 2026) deliberately, so they read as unfilled rather than researched.
+# They currently render as fact on /squad/<player>; replace them per player
+# before launch. `nationality` is set to MY for everyone pending confirmation
+# of which players are imports. `stats` is omitted rather than invented.
+- id: rajendran
+  name: Rajendran
+  number: 16
   position: Goalkeeper
   nationality: MY
-  dateOfBirth: 1995-03-11
-  heightCm: 188
+  dateOfBirth: 2000-01-01
+  heightCm: 175
   photo: /images/squad/placeholder.svg
-  joined: 2022
-  bio: Shot-stopper who came through the state youth system and took the gloves in 2022.
-  stats: { appearances: 11, goals: 0, assists: 0 }
-- id: danial-syafiq
-  name: Danial Syafiq
-  number: 4
+  joined: 2026
+- id: muhamad-norfahmi
+  name: Muhamad Norfahmi
+  number: 25
+  position: Goalkeeper
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: muhammad-safwan
+  name: Muhammad Safwan
+  number: 2
   position: Defender
   nationality: MY
-  dateOfBirth: 1997-09-02
-  heightCm: 183
+  dateOfBirth: 2000-01-01
+  heightCm: 175
   photo: /images/squad/placeholder.svg
-  joined: 2023
-  stats: { appearances: 11, goals: 1, assists: 0 }
-- id: lucas-ferreira
-  name: Lucas Ferreira
-  number: 5
+  joined: 2026
+- id: muhamad-kamil-akmal
+  name: Muhamad Kamil Akmal
+  number: 6
   position: Defender
-  nationality: BR
-  dateOfBirth: 1994-01-22
-  heightCm: 190
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
   photo: /images/squad/placeholder.svg
-  joined: 2025
-  stats: { appearances: 10, goals: 2, assists: 1 }
-- id: haziq-nadzri
-  name: Haziq Nadzri
+  joined: 2026
+- id: muhammad-afzal
+  name: Muhammad Afzal
+  number: 11
+  position: Defender
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: muhamad-aiman-farhan
+  name: Muhamad Aiman Farhan
+  number: 13
+  position: Defender
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: muhammad-akmal-hakim
+  name: Muhammad Akmal Hakim
+  number: 18
+  position: Defender
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: muhammad-ammar
+  name: Muhammad Ammar
+  number: 20
+  position: Defender
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: aizat-najmie
+  name: Aizat Najmie
+  number: 28
+  position: Defender
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: muhammad-aqil-irfanuddin
+  name: Muhammad Aqil Irfanuddin
+  number: 32
+  position: Defender
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: asnan
+  name: Asnan
+  number: 4
+  position: Midfielder
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: muhammad-azim
+  name: Muhammad Azim
   number: 8
   position: Midfielder
   nationality: MY
-  dateOfBirth: 1999-06-30
+  dateOfBirth: 2000-01-01
   heightCm: 175
   photo: /images/squad/placeholder.svg
-  joined: 2021
-  bio: Academy graduate and the side's metronome in midfield.
-  stats: { appearances: 11, goals: 3, assists: 5 }
-- id: kenji-watanabe
-  name: Kenji Watanabe
-  number: 10
+  joined: 2026
+- id: barathkumar
+  name: Barathkumar
+  number: 12
   position: Midfielder
-  nationality: JP
-  dateOfBirth: 1996-11-14
-  heightCm: 172
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
   photo: /images/squad/placeholder.svg
-  joined: 2024
-  stats: { appearances: 11, goals: 4, assists: 6 }
-- id: firdaus-rahman
-  name: Firdaus Rahman
-  number: 9
+  joined: 2026
+- id: muhammad-afif-dinie
+  name: Muhammad Afif Dinie
+  number: 14
+  position: Midfielder
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: mohd-aiman-afif
+  name: Mohd Aiman Afif
+  number: 19
+  position: Midfielder
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: muhammad-danial
+  name: Muhammad Danial
+  number: 21
+  position: Midfielder
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: mohammad-rahmat
+  name: Mohammad Rahmat
+  number: 22
+  position: Midfielder
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: jasmir
+  name: Jasmir
+  number: 23
+  position: Midfielder
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: muhammad-zhafir
+  name: Muhammad Zhafir
+  number: 49
+  position: Midfielder
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026
+- id: shahmeer
+  name: Shahmeer
+  number: 17
   position: Forward
   nationality: MY
-  dateOfBirth: 1998-04-12
-  heightCm: 182
+  dateOfBirth: 2000-01-01
+  heightCm: 175
   photo: /images/squad/placeholder.svg
-  joined: 2024
-  bio: Top scorer in each of his first two seasons at Darul Aman.
-  stats: { appearances: 11, goals: 7, assists: 3 }
-- id: samuel-osei
-  name: Samuel Osei
-  number: 11
+  joined: 2026
+- id: mohammad-afeeq-iqmal
+  name: Mohammad Afeeq Iqmal
+  number: 29
   position: Forward
-  nationality: GH
-  dateOfBirth: 1997-02-08
-  heightCm: 186
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
   photo: /images/squad/placeholder.svg
-  joined: 2025
-  stats: { appearances: 9, goals: 2, assists: 2 }
+  joined: 2026
+- id: mohamad-nabil
+  name: Mohamad Nabil
+  number: 30
+  position: Forward
+  nationality: MY
+  dateOfBirth: 2000-01-01
+  heightCm: 175
+  photo: /images/squad/placeholder.svg
+  joined: 2026

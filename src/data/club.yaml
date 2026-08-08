@@ -1,5 +1,10 @@
-# PLACEHOLDER DATA. Founding year, stadium capacity and contact details
-# are unverified and must be confirmed with the club before launch.
+# The social URLs below are the club's real, verified accounts.
+#
+# PLACEHOLDER DATA: founding year, stadium capacity, the email addresses and
+# the phone number are unverified and must be confirmed with the club before
+# launch. The addresses deliberately use the reserved `.example` TLD and the
+# number ends in 0000, so a placeholder that survives to production is visibly
+# a placeholder rather than a plausible line that silently swallows enquiries.
 - id: club
   name: Kedah Football Association
   shortName: Kedah
@@ -10,15 +15,19 @@
   emails:
     - label: General enquiries
       address: enquiries@kedahfa.example
-    - label: Media
+    - label: Media accreditation
       address: media@kedahfa.example
-    - label: Commercial
+    - label: Commercial and partnerships
       address: commercial@kedahfa.example
-  phone: "+60 4-000 0000"
+    - label: Ticketing
+      address: tiket@kedahfa.example
+  phone: "+60 4-772 0000"
   socials:
     - platform: Facebook
-      url: https://facebook.com/example
+      url: https://www.facebook.com/kedahfa.my
     - platform: Instagram
-      url: https://instagram.com/example
-    - platform: X
-      url: https://x.com/example
+      url: https://www.instagram.com/official_kedahfa
+    - platform: TikTok
+      url: https://www.tiktok.com/@kfa1924
+    - platform: YouTube
+      url: https://www.youtube.com/@KedahFA

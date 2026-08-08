@@ -72,9 +72,9 @@ test('a news article opens from the listing and renders its content', async ({ p
 
 test('a player profile shows the squad number and details', async ({ page }) => {
   await page.goto('/squad');
-  await page.getByRole('link', { name: /Firdaus Rahman/ }).click();
+  await page.getByRole('link', { name: /Rajendran/ }).click();
 
-  await expect(page.getByRole('heading', { name: 'Firdaus Rahman' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Rajendran' })).toBeVisible();
   await expect(page.getByText('Squad number')).toBeVisible();
 });
 

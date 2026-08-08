@@ -5,7 +5,7 @@ const ROUTES = [
   '/',
   '/news',
   '/squad',
-  '/squad/firdaus-rahman',
+  '/squad/rajendran',
   '/fixtures',
   '/standings',
   '/club',
