@@ -15,6 +15,7 @@ import barlowLatin700 from '@fontsource/barlow-condensed/files/barlow-condensed-
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { loadSiteData } from '../lib/content';
+import { isStaging } from '../lib/site';
 
 interface Props {
   title: string;
@@ -29,6 +30,7 @@ const { club } = await loadSiteData();
 const pageTitle = `${title} | ${club.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const socialImage = image ? new URL(image, Astro.site) : undefined;
+const staging = isStaging();
 ---
 
 <!doctype html>
@@ -43,6 +45,17 @@ const socialImage = image ? new URL(image, Astro.site) : undefined;
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {/*
+      Staging only. The site is served from a review subdomain that must never
+      compete with the production domain for the club's own name.
+
+      Note there is deliberately no robots.txt with `Disallow: /` to go with
+      this. Disallow stops a crawler fetching the page, so it never reads this
+      tag — and a disallowed URL linked from anywhere can still be indexed as a
+      bare title-less entry that can then never be withdrawn. Inviting the crawl
+      and answering it with noindex is what actually removes the page.
+    */}
+    {staging && <meta name="robots" content="noindex, nofollow" />}
     {/* Declared rather than left to the browser's implicit /favicon.ico probe,
         so the Apple icon is found at all. Both are the club crest, but the
         Apple one is drawn on white: iOS composites a touch icon onto black,
