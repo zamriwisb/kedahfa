@@ -61,18 +61,34 @@ const columns = [
     )
   }
 
+  {/*
+    Column gap beats row rhythm, in both directions. Stacked, the 48px gap-y
+    separates the three lists more than the rows inside them; side by side, the
+    40px gap-x does the same job. Get that ordering backwards and the headings
+    stop owning the links beneath them.
+  */}
   <div class="bg-(--color-brand-deep)">
-    <nav aria-label="Footer" class="page-shell grid gap-10 py-14 text-center sm:grid-cols-3">
+    <nav
+      aria-label="Footer"
+      class="page-shell grid gap-x-10 gap-y-12 py-14 text-center sm:grid-cols-3"
+    >
       {
         columns.map((column) => (
           <div>
             <h2 class="text-sm tracking-[0.2em] text-(--color-accent)">{column.heading}</h2>
-            <ul class="mt-2">
+            {/*
+              The global 44px tap target is right for a thumb and far too loose
+              for a list of eight secondary links: it wraps 17px of text in a
+              44px box, so the rows drifted further apart than the columns did.
+              Fine pointers get a 2rem row instead — still clear of the 24px
+              WCAG 2.5.8 floor — and anything coarse keeps the full 44px.
+            */}
+            <ul class="mt-3">
               {column.links.map((link) => (
                 <li>
                   <a
                     href={link.href}
-                    class="text-sm text-(--color-text-invert) transition-colors hover:text-(--color-accent)"
+                    class="text-sm text-(--color-text-invert) transition-colors pointer-fine:min-h-8 hover:text-(--color-accent)"
                   >
                     {link.label}
                   </a>
