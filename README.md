@@ -1,6 +1,6 @@
 # Kedah FA Website
 
-Official club website. Static site built with Astro, deployed to Cloudflare Pages.
+Official club website. Static site built with Astro, deployed to GitHub Pages.
 
 ## Requirements
 
@@ -23,9 +23,13 @@ longer than the rest. Run it before pushing anything that touches
 `src/content.config.ts`, `src/lib/validate.ts`, or the shape of `src/data/*`.
 CI runs it on every push regardless.
 
+`npm run test:e2e` is **not** run by CI — it is yours to run locally. It covers
+navigation, the sliders, the footer and axe accessibility, so run it before
+pushing anything that touches layout, and always before a production cutover.
+
 ## Updating content
 
-All content lives in the repository. Edit, commit, push — Cloudflare rebuilds
+All content lives in the repository. Edit, commit, push — GitHub Actions rebuilds
 and deploys automatically.
 
 | To update | Edit |
@@ -63,12 +67,43 @@ placeholder, not official club branding.
 
 ## Deployment
 
-Cloudflare Pages, building from `main`:
+GitHub Pages, via `.github/workflows/deploy.yml`, on every push to `main`.
+Settings → Pages → Source must be **GitHub Actions**.
 
-- Build command: `npm run build`
-- Output directory: `dist`
-- Node version: `22`
+The deploy runs independently of CI — it does not wait for the test suite. That
+is deliberate, and narrower than it sounds: the job runs `npm run build`, which
+is `astro check && astro build`, so a type error or a content-schema violation
+still fails the deploy. What can reach the site is a commit that builds cleanly
+but fails a test.
 
-Because the site is static, "next match" is fixed at build time. A daily
-scheduled deploy is configured so the homepage advances past a played fixture
-even if nobody commits.
+### Staging
+
+The site currently deploys as **staging**, at
+`https://kedahfa.dev-aplikasiniaga.com`. `https://kedahfa.com` remains the
+intended production home and is not served yet.
+
+Two environment variables in the workflow control this:
+
+| Variable | Value | Effect |
+|---|---|---|
+| `SITE_URL` | `https://kedahfa.dev-aplikasiniaga.com` | Astro's `site` — canonical, `og:url`, sitemap, RSS |
+| `SITE_ENV` | `staging` | Adds `<meta name="robots" content="noindex, nofollow">` |
+
+Both default to production behaviour when unset, so a local build and CI emit
+exactly what they always did. Going live on `kedahfa.com` is a matter of
+changing `SITE_URL` and dropping `SITE_ENV` — plus DNS — not a code change.
+
+The `noindex` is what stops staging competing with the production domain in
+search. Note there is deliberately **no** `robots.txt` with `Disallow: /`:
+`Disallow` blocks the crawl that would deliver the `noindex`, so the two
+directives cancel out and a linked URL can still be indexed as a bare entry
+that can never then be withdrawn. `src/pages/robots.txt.ts` emits `Allow: /`
+on purpose.
+
+`public/CNAME` binds the custom domain. It ships inside `dist/`, which is what
+GitHub Pages reads — the copy at the repository root is only how the Settings
+UI records the domain.
+
+Because the site is static, "next match" is fixed at build time. Nothing
+currently rebuilds on a schedule, so the homepage will not advance past a
+played fixture until someone pushes.
