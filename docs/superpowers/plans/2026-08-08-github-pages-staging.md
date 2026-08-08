@@ -331,7 +331,13 @@ In `astro.config.mjs`, replace the `site:` line:
   // staging host so that canonical, og:url, sitemap-index.xml and rss.xml all
   // describe the host actually being served — otherwise a reviewer clicking a
   // feed item lands on a domain that is not live yet.
-  site: process.env.SITE_URL ?? 'https://kedahfa.com',
+  // Falsy, not nullish: `??` would let a set-but-empty SITE_URL= through as
+  // site: '', which fails Astro's URL validation and hard-fails the build
+  // instead of defaulting here. GitHub Actions substitutes an empty string
+  // rather than omitting the variable when an expression names something
+  // unconfigured, so that is the realistic shape of the mistake. An empty
+  // string is never a valid site URL.
+  site: process.env.SITE_URL || 'https://kedahfa.com',
 ```
 
 - [ ] **Step 4: Run test to verify it passes**

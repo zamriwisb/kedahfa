@@ -19,12 +19,20 @@ results.
 `astro.config.mjs` becomes:
 
 ```js
-site: process.env.SITE_URL ?? 'https://kedahfa.com',
+site: process.env.SITE_URL || 'https://kedahfa.com',
 ```
 
 The default is unchanged, so a local `npm run build` and the existing CI job
 keep producing exactly the URLs they produce today. The deploy workflow sets
 `SITE_URL=https://kedahfa.dev-aplikasiniaga.com`.
+
+The check is falsy rather than nullish deliberately. `??` would let a
+set-but-empty `SITE_URL=` through as `site: ''`, which fails Astro's URL
+validation and hard-fails the build rather than falling back here. GitHub
+Actions substitutes an empty string, rather than omitting the variable, when an
+expression like `${{ vars.STAGING_URL }}` names something unconfigured — so
+that is the realistic shape of the mistake. An empty string is never a valid
+site URL, so `??`'s stricter behaviour buys nothing.
 
 `Astro.site` feeds four things: the `<link rel="canonical">` and `og:url` in
 `BaseLayout.astro`, absolute `og:image` URLs, `sitemap-index.xml` from
