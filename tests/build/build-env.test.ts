@@ -113,4 +113,11 @@ describe('the build responds to its deploy environment', () => {
     expect(production.indexHtml).toMatch(/<link rel="canonical" href="https:\/\/kedahfa\.com\//);
     expect(production.indexHtml).not.toMatch(new RegExp(STAGING_HOST));
   });
+
+  // Pages reads this file out of the published artifact to bind the custom
+  // domain. In public/ it is copied verbatim into dist/; anywhere else and the
+  // domain silently reverts to zamriwisb.github.io on the next deploy.
+  it('publishes the custom domain binding into dist', () => {
+    expect(staging.cname).toBe(STAGING_HOST);
+  });
 });
