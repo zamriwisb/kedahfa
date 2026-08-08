@@ -1,0 +1,63 @@
+name: Deploy staging
+
+# Independent of ci.yml on purpose: no `needs`, no `workflow_run`. A commit can
+# therefore deploy while its own test run is red — but `npm run build` below is
+# `astro check && astro build`, so type errors and content-schema violations
+# still fail the deploy on its own build step.
+on:
+  push:
+    branches: [main]
+  # Re-run a deploy without an empty commit — needed when only DNS or the Pages
+  # settings changed and the artifact itself is fine.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Queue overlapping pushes rather than cancelling. cancel-in-progress would
+# abort a deploy mid-upload and can leave the Pages site on a partial artifact.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/configure-pages@v5
+
+      - name: Build for staging
+        env:
+          # Feeds astro.config.mjs `site`, so canonical, og:url, the sitemap
+          # and the RSS feed all describe the host being served.
+          SITE_URL: https://kedahfa.dev-aplikasiniaga.com
+          # Feeds src/lib/site.ts, which adds the noindex meta tag. Separate
+          # from SITE_URL because a production Pages deploy would want the URL
+          # without the de-indexing.
+          SITE_ENV: staging
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
