@@ -99,4 +99,18 @@ describe('the build responds to its deploy environment', () => {
     expect(staging.robotsTxt).not.toMatch(/Disallow:\s*\/\s*$/m);
     expect(production.robotsTxt).not.toMatch(/Disallow:\s*\/\s*$/m);
   });
+
+  it('points canonical and og:url at the host actually being served', () => {
+    expect(staging.indexHtml).toMatch(
+      new RegExp(`<link rel="canonical" href="https://${STAGING_HOST}/"`),
+    );
+    expect(staging.indexHtml).toMatch(
+      new RegExp(`property="og:url" content="https://${STAGING_HOST}/"`),
+    );
+  });
+
+  it('falls back to the production domain when SITE_URL is unset', () => {
+    expect(production.indexHtml).toMatch(/<link rel="canonical" href="https:\/\/kedahfa\.com\//);
+    expect(production.indexHtml).not.toMatch(new RegExp(STAGING_HOST));
+  });
 });
