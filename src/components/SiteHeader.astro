@@ -7,6 +7,11 @@ import { loadSiteData } from '../lib/content';
 const { club } = await loadSiteData();
 const currentPath = Astro.url.pathname;
 
+const isCurrent = (href: string) => currentPath === href || currentPath.startsWith(`${href}/`);
+
+// Resolved once and handed to both navs. The mobile panel is the only
+// navigation below `md`, so it needs the same you-are-here mark the desktop
+// bar has — computing it in one place is what keeps the two from drifting.
 const links = [
   { href: '/news', label: 'News' },
   { href: '/squad', label: 'Squad' },
@@ -14,21 +19,73 @@ const links = [
   { href: '/standings', label: 'Standings' },
   { href: '/club', label: 'Club' },
   { href: '/contact', label: 'Contact' },
-];
-
-const isCurrent = (href: string) => currentPath === href || currentPath.startsWith(`${href}/`);
+].map((link) => ({ ...link, current: isCurrent(link.href) }));
 ---
 
+{/*
+  Two headers share this markup, and `md` is the seam.
+
+  Below it the club gets one bar: crest, wordmark, menu. The two-tier version
+  spent 128px of a 393px-wide viewport on chrome that navigated nowhere — a
+  crest so large its motto was unreadable, socials that already sit in the
+  footer, and a red Contact button louder than the menu trigger despite Contact
+  already being the last row of that menu. Everything that only repeated itself
+  is gone, and the crest comes inline at a size where it reads as a mark.
+
+  At `md` and up the second tier appears and the crest lifts out of the flow to
+  hang across both bars, which is the design's signature. Nothing above the
+  seam changed.
+*/}
 <header class="relative bg-(--color-brand)">
   <div class="page-shell relative">
     <div class="flex items-center justify-between gap-4 py-3">
-      <a href="/" class="flex items-center gap-4 pl-28 sm:gap-5 sm:pl-32 lg:pl-36" aria-label={`${club.name} home`}>
-        <span class="font-display text-xl leading-none text-(--color-text-invert) sm:text-2xl lg:text-3xl">
-          {club.shortName} FA
-        </span>
+      {/*
+        One home link, not two. The crest and the wordmark used to be separate
+        anchors pointing at `/` with the same label, which is a duplicate stop
+        for anyone tabbing or swiping through. Nesting the crest inside the
+        wordmark link makes it one target, so both images carry `alt=""` and
+        let the anchor's own label do the announcing.
+      */}
+      <a
+        href="/"
+        class="flex items-center gap-3 sm:gap-4 md:pl-32 lg:pl-36"
+        aria-label={`${club.name} home`}
+      >
+        <img
+          src="/images/teams/kedah.png"
+          alt=""
+          width="793"
+          height="853"
+          class="h-10 w-auto shrink-0 md:absolute md:left-(--spacing-gutter) md:top-2 md:z-20 md:h-28 md:drop-shadow-md lg:h-36"
+        />
+        {/*
+          The drawn wordmark replaces the "Kedah FA" text that used to sit
+          here. It is white-on-transparent artwork, so it only works against
+          `--color-brand`; anything lighter behind this bar and it disappears.
+
+          It is sized taller than the type it replaced rather than matched to
+          it. "KEDAH FOOTBALL ASSOCIATION" occupies the bottom 9% of the
+          file, so at the old 20px cap height that line rendered under 3px and
+          read as a smudge. These heights still do not make it legible beside
+          an inline crest — that needs roughly 77px of image — but they stop
+          it looking like dirt on the artwork. Below `md` the crest is inline
+          and shares the bar, which is what caps the mobile size.
+        */}
+        <img
+          src="/images/brand/kfa-wordmark.png"
+          alt=""
+          width="831"
+          height="418"
+          class="h-9 w-auto shrink-0 sm:h-10 md:h-14 lg:h-16"
+        />
       </a>
 
-      <ul class="flex items-center gap-4">
+      {/*
+        Header socials are desktop-only. On a phone they are a row of taps that
+        leave the site, sitting above the navigation that keeps people on it —
+        and the footer already carries the same set.
+      */}
+      <ul class="hidden items-center gap-4 md:flex">
         {
           club.socials.map((social) => (
             <li>
@@ -44,40 +101,35 @@ const isCurrent = (href: string) => currentPath === href || currentPath.startsWi
           ))
         }
       </ul>
-    </div>
 
-    {/* The crest hangs below both bars, overlapping the top and nav tiers. */}
-    <a
-      href="/"
-      aria-label={`${club.name} home`}
-      class="absolute left-(--spacing-gutter) top-2 z-20 block"
-    >
-      <img
-        src="/images/teams/kedah.png"
-        alt={`${club.name} crest`}
-        width="793"
-        height="853"
-        class="h-24 w-auto drop-shadow-md sm:h-28 lg:h-36"
-      />
-    </a>
+      {/*
+        The panel is `top-full` against this `.page-shell`, not against the
+        header. That lands in the same place only because the tier below is
+        `display: none` at these widths, which makes the shell the header's
+        full height — restore the second tier on mobile and the panel would
+        open across it.
+      */}
+      <MobileNav links={links} />
+    </div>
   </div>
 
-  <div class="bg-(--color-brand-deep)">
+  <div class="hidden bg-(--color-brand-deep) md:block">
     <div class="page-shell flex items-center justify-between gap-4">
       <div class="flex items-center">
-        <div class="hidden shrink-0 sm:block sm:w-28 lg:w-36" aria-hidden="true"></div>
+        {/* Holds the nav clear of the crest hanging into this tier. */}
+        <div class="w-28 shrink-0 lg:w-36" aria-hidden="true"></div>
 
-        <nav aria-label="Main navigation" class="hidden md:block">
+        <nav aria-label="Main navigation">
           <ul class="flex items-center gap-1">
             {
               links.map((link) => (
                 <li>
                   <a
                     href={link.href}
-                    aria-current={isCurrent(link.href) ? 'page' : undefined}
+                    aria-current={link.current ? 'page' : undefined}
                     class:list={[
                       'inline-flex border-b-2 px-3 text-sm tracking-wider font-display',
-                      isCurrent(link.href)
+                      link.current
                         ? 'border-(--color-accent) text-(--color-accent)'
                         : 'border-transparent text-(--color-text-invert)',
                     ]}
@@ -93,7 +145,6 @@ const isCurrent = (href: string) => currentPath === href || currentPath.startsWi
 
       <div class="flex items-center gap-3 py-2">
         <CtaButton href="/contact" label="Contact" />
-        <MobileNav links={links} />
       </div>
     </div>
   </div>

@@ -1,18 +1,45 @@
 ---
 interface Props {
-  links: { href: string; label: string }[];
+  links: { href: string; label: string; current: boolean }[];
 }
 const { links } = Astro.props;
 ---
 
 <div class="md:hidden">
+  {/*
+    The trigger carries a mark now that it is the only control in the bar — it
+    used to sit beside a solid red button that took every eye in the row. The
+    bars and the cross are one `aria-expanded`-driven swap on the button
+    itself, so the icon can never disagree with the state a screen reader is
+    told; the word stays because it is the button's accessible name.
+  */}
   <button
     type="button"
     id="nav-toggle"
     aria-expanded="false"
     aria-controls="mobile-nav"
-    class="px-3 text-sm tracking-widest font-display text-(--color-text-invert)"
+    class="group gap-2 pl-3 text-sm tracking-widest font-display text-(--color-text-invert)"
   >
+    <svg
+      viewBox="0 0 20 20"
+      class="h-4 w-4 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g class="group-aria-expanded:hidden">
+        <path d="M3 5h14" />
+        <path d="M3 10h14" />
+        <path d="M3 15h14" />
+      </g>
+      <g class="hidden group-aria-expanded:block">
+        <path d="M5 5l10 10" />
+        <path d="M15 5l-10 10" />
+      </g>
+    </svg>
     Menu
   </button>
 
@@ -22,11 +49,28 @@ const { links } = Astro.props;
     aria-label="Main navigation"
     class="absolute inset-x-0 top-full z-50 border-t border-(--color-line-dark) bg-(--color-brand-deep)"
   >
+    {/*
+      The current row is filled, not underlined and not rule-marked: the
+      desktop bar's underline reads as a divider once the links stack, and a
+      coloured leading rule is the same borrowed trick. A lighter green field
+      plus the accent text carries the state on two channels, so it survives
+      being unable to separate the yellow from the white. Yellow on
+      brand-panel measures 6.42:1.
+    */}
     <ul class="flex flex-col p-2">
       {
         links.map((link) => (
           <li>
-            <a href={link.href} class="w-full px-4 py-3 text-base font-display text-(--color-text-invert)">
+            <a
+              href={link.href}
+              aria-current={link.current ? 'page' : undefined}
+              class:list={[
+                'w-full px-4 py-3 text-base font-display',
+                link.current
+                  ? 'bg-(--color-brand-panel) text-(--color-accent)'
+                  : 'text-(--color-text-invert)',
+              ]}
+            >
               {link.label}
             </a>
           </li>
