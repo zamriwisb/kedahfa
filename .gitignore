@@ -34,3 +34,12 @@ pnpm-debug.log*
 
 # design reference export, not part of the site
 www.slaskwroclaw.pl*
+
+# uncompressed originals the shipped /images/ assets were cut from — kept
+# locally so a crop can be redone, too heavy to carry in history
+design-sources/
+
+# working screenshots taken while checking a page. Root-anchored on purpose:
+# every real image lives under public/ or src/, so nothing that ships is at
+# the top level and a blanket *.png would only risk swallowing one.
+/*.png
