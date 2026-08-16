@@ -2,9 +2,9 @@
 #
 # PLACEHOLDER DATA: founding year, stadium capacity, the email addresses and
 # the phone number are unverified and must be confirmed with the club before
-# launch. The addresses deliberately use the reserved `.example` TLD and the
-# number ends in 0000, so a placeholder that survives to production is visibly
-# a placeholder rather than a plausible line that silently swallows enquiries.
+# launch. The addresses now use the real kedahfa.com domain, so they read as
+# plausible: if the mailboxes do not exist, enquiries sent to them are lost
+# silently. The phone number still ends in 0000 to stay visibly a placeholder.
 - id: club
   name: Kedah Football Association
   shortName: Kedah
@@ -14,13 +14,13 @@
   city: Alor Setar
   emails:
     - label: General enquiries
-      address: enquiries@kedahfa.example
+      address: enquiries@kedahfa.com
     - label: Media accreditation
-      address: media@kedahfa.example
+      address: media@kedahfa.com
     - label: Commercial and partnerships
-      address: commercial@kedahfa.example
+      address: commercial@kedahfa.com
     - label: Ticketing
-      address: tiket@kedahfa.example
+      address: tiket@kedahfa.com
   phone: "+60 4-772 0000"
   socials:
     - platform: Facebook
